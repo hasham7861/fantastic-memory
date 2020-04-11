@@ -1,0 +1,27 @@
+{
+  "name": "fantastic-memory",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "node setup.js",
+    "build": "next build",
+    "start": "NODE_ENV=Production node setup.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hasham7861/fantastic-memory.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hasham7861/fantastic-memory/issues"
+  },
+  "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "next": "^9.3.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
