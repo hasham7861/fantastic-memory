@@ -1,4 +1,4 @@
-import DrawingBoard from './components/drawing-board/drawing-board';
+import DrawingBoard from './components/drawing-board';
 
 export default function () {
 
