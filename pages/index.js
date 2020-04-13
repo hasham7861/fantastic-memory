@@ -1,48 +1,22 @@
-
-import CanvasDraw from 'react-canvas-draw';
-import { useRef, useState } from 'react';
+import DrawingBoard from './components/drawing-board/drawing-board';
 
 export default function () {
 
-    let drawingCanvas = useRef(null);
-
-    const [canvasOptions, setCanvasOptions] = useState({
-        onChange: null,
-        loadTimeOffset: 5,
-        lazyRadius: 1,
-        brushRadius: 5,
-        brushColor: "#444",
-        catenaryColor: "#0a0302",
-        gridColor: "rgba(150,150,150,0.17)",
-        hideGrid: false,
-        canvasWidth: 400,
-        canvasHeight: 400,
-        disabled: false,
-        imgSrc: "",
-        saveData: null,
-        immediateLoading: false,
-        hideInterface: false
-
-    })
-
-    return <div>
-
-        <CanvasDraw
-            ref={canvasDraw => (drawingCanvas = canvasDraw)}
-            {...canvasOptions}
-        />
-        <button onClick={() => drawingCanvas.clear()}> Clear </button>
-        <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
-        <button onClick={() => {
-            setCanvasOptions(
-                {
-                    ...canvasOptions,
-                    saveData: localStorage.getItem('savedDrawing') 
-                }
-            )
-        }}
-
-        > Load</button>
-    </div>
+    const style = {
+        width:'100%',
+        height:'600px',
+        display:'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection:'Column',
+        marginTop:'50px'
+    }
+    return (
+        <div style={style}>
+            <h1>Fantastic Memory</h1>
+            <DrawingBoard/>
+        </div>
+    )
+   
 }
 
