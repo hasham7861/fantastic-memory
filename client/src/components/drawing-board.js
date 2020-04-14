@@ -1,5 +1,6 @@
 import CanvasDraw from 'react-canvas-draw';
 import { useRef, useState } from 'react';
+import React from 'react';
 
 
 export default function DrawingBoard() {
