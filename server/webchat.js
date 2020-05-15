@@ -4,7 +4,7 @@ module.exports = function intializeWSEvents(io) {
     };
 
     io.on("connection", socket => {
-        console.log("new user connected: " + socket.id);
+        console.log(`user: ${socket.id} joined`);
     })
 
     // TODO: client sends in a game id, and add them into current games map
@@ -19,6 +19,11 @@ module.exports = function intializeWSEvents(io) {
 
     // TODO: share text messages with all all the users in the same game
     io.on("send-message", socket => {
+
+    })
+
+    // TODO: clean up game map once user leaves, if host leaves then delete the entire gameid
+    io.on("remove-user-from-game", socket => {
 
     })
 }
