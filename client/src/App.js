@@ -7,6 +7,7 @@ export default function () {
 
     useEffect(() => {
         const mySocket = io('http://localhost:5000')
+        
         mySocket.on('connect', function () { });
 
         mySocket.on('event', function (data) { });
