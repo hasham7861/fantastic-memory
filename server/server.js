@@ -12,7 +12,7 @@ server.use(express.json());
 const http = require('http').createServer(server);
 const io = require('socket.io')(http);
 
-// intialize all the WS events
+// // intialize all the WS events
 intializeWSEvents(io);
 
 
@@ -23,11 +23,12 @@ const allowedOrigins = ['http://localhost:3000',
 server.use((req, res, next) => {
   allowedOrigins.forEach(origin =>
     res.header("Access-Control-Allow-Origin", origin))
-
+  next()
 });
 
-// make use of all the
+// // make use of all the
 server.use(app);
+
 
 server.use((req, res) => {
   res.status(404).send({
