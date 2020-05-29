@@ -7,6 +7,16 @@ module.exports = function intializeWSEvents(io) {
         console.log(`user: ${socket.id} joined`);
     })
 
+    io.on("intiate-game-lobby", socket =>{
+        let gameId = socket.data;
+        if(gameId in currentGamesMap){
+            console.log('gameId already exists, send me a different game id token')
+        }else{
+            currentGamesMap[gameId] = [socket.id];
+        }
+        console.log(currentGamesMap)
+    })
+
     // TODO: client sends in a game id, and add them into current games map
     io.on("match-making", socket => {
 

@@ -17,13 +17,19 @@ intializeWSEvents(io);
 
 
 // Settings for the entire server
-const allowedOrigins = ['http://localhost:3000',
-  'http://localhost:5000'];
 
 server.use((req, res, next) => {
-  allowedOrigins.forEach(origin =>
-    res.header("Access-Control-Allow-Origin", origin))
-  next()
+  let allowedOrigins =  ['http://localhost:3000',
+  'http://localhost:5000'];
+  let origin = req.headers.origin;
+  if(allowedOrigins.indexOf(origin) > -1){
+       res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // res.header('Access-Control-Allow-Credentials', true);
+  return next();
 });
 
 // // make use of all the

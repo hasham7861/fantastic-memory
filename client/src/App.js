@@ -1,33 +1,25 @@
-import React, { useEffect } from 'react';
-import io from 'socket.io-client';
+import React from 'react';
+import Index from './components';
+import Host from './components/options/host';
+import Guest from './components/options/guest';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 
-import DrawingBoard from './components/drawing-board';
 
+// App Component
 export default function () {
 
-    useEffect(() => {
-        const mySocket = io('http://localhost:5000')
-        
-        mySocket.on('connect', function () { });
-
-        mySocket.on('event', function (data) { });
-        mySocket.on('disconnect', function () { });
-    })
-
-    const style = {
-        width: '100%',
-        height: '600px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'Column',
-        marginTop: '50px'
-    }
     return (
-        <div style={style}>
-            <h1>Fantastic Memory</h1>
-            <DrawingBoard />
-        </div>
+
+        <Router>
+            <Switch>
+                <Route path="/" exact component={Index} />
+                <Route path="/host-game" exact component={Host} />
+                <Route path="/join-game" exact component={Guest} />
+            </Switch>
+
+        </Router>
+
+
     )
 
 }
