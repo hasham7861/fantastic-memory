@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom'
+import { initiateGameSockets } from '../services/game-sockets';
+
+initiateGameSockets.then(data=>console.log(data));
 
 export default function () {
+    
     const style = {
         width: '100%',
         height: '300px',

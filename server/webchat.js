@@ -1,20 +1,24 @@
 module.exports = function intializeWSEvents(io) {
-    const currentGamesMap = {
-        // 'rand_game_id': ["id1", "id2", "id3"]
-    };
+    // const currentGamesMap = {
+    //     // 'rand_game_id': ["id1", "id2", "id3"]
+    // };
 
     io.on("connection", socket => {
         console.log(`user: ${socket.id} joined`);
     })
 
-    io.on("intiate-game-lobby", socket =>{
-        let gameId = socket.data;
-        if(gameId in currentGamesMap){
-            console.log('gameId already exists, send me a different game id token')
-        }else{
-            currentGamesMap[gameId] = [socket.id];
-        }
-        console.log(currentGamesMap)
+    // Host uses this event to intiate a namespace
+    io.on("initiate-game-lobby", socket =>{
+        // let gameId = socket.data;
+        // if(gameId in currentGamesMap){
+        //     console.log('gameId already exists, send me a different game id token')
+        // }else{
+        //     currentGamesMap[gameId] = [socket.id];
+        // }
+        // console.log(currentGamesMap)
+        console.log('hey')
+        console.log(socket); 
+        // let nsp = io.of('s')
     })
 
     // TODO: client sends in a game id, and add them into current games map
