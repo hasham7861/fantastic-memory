@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import { initiateGameSockets } from '../services/game-sockets';
 
-initiateGameSockets.then(data=>console.log(data));
+
 
 export default function () {
-    
+    useEffect(()=>{
+        initiateGameSockets.then(data=>console.log(data));
+    })    
     const style = {
         width: '100%',
         height: '300px',
