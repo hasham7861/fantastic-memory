@@ -1,14 +1,23 @@
-import React from 'react';
-import { isServerUp, envUri } from '../../util/server';
-
-import DrawingBoard from './drawing-board';
-
-const getGameToken = async () => {
-    return axios.get(envUri + "/game/generate_game_id").then(data => data).catch(err => {
-        return null
-    });
-};
+import React, { useState, useEffect } from 'react';
+import {getGameToken } from '../../services/rest';
+import { initiateGameSockets } from '../../services/game-sockets';
 
 export default function () {
-    return (<div>Host</div>)
+    const [gameId, setGameId] = useState("");
+    initiateGameSockets.then(data=>console.log(data));
+    
+    useEffect(() => {
+        if (!gameId) {
+            getGameToken().then(data => {
+                console.log(data.data.gameId);
+                setGameId(data.data.gameId)
+            })
+        }
+        
+    })
+
+    return (
+    <div>Hey there Host, share the following gameid: <b>{gameId}</b> with your guests
+    </div>
+    )
 }

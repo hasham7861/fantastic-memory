@@ -1,35 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom'
-import { isServerUp, envUri } from '../util/server';
 
-import DrawingBoard from './drawing-board';
-
-
-const getGameToken = async () => {
-    return axios.get(envUri + "/game/generate_game_id").then(data => data).catch(err => {
-        return null
-    });
-};
-
-const initiateGameSockets = () => {
-    const mySocket = io(envUri)
-    mySocket.on('connect', function () { });
-    mySocket.on('event', function (data) { });
-    mySocket.on('disconnect', function () { });
-    return "intiated all socket"
-}
 export default function () {
-    const [gameId, setGameId] = useState("");
-    useEffect(() => {
-        isServerUp(initiateGameSockets)
-        if (!gameId) {
-            isServerUp(getGameToken).then(data => {
-                console.log(data.data.gameId);
-                setGameId(data.data.gameId)
-            })
-        }
-    })
-
     const style = {
         width: '100%',
         height: '300px',
