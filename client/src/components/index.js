@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
-import io from 'socket.io-client';
-import axios from 'axios';
-
+import { isServerUp, envUri } from '../util/server';
 
 import DrawingBoard from './drawing-board';
 
-const devUri = "http://localhost:5000";
-const envUri = devUri;
 
-const isServerUp = async (cb) => {
-    return axios.get(envUri + "/api").then(data => cb()).catch(err => console.log("server_status: down"))
-}
 const getGameToken = async () => {
     return axios.get(envUri + "/game/generate_game_id").then(data => data).catch(err => {
         return null
@@ -47,8 +40,8 @@ export default function () {
         color: "blue"
     }
     const optionsContainer = {
-        display:"flex",
-        flexDirection:"Row"
+        display: "flex",
+        flexDirection: "Row"
     }
     const btnStyle = {
         border: '1px solid blue',
