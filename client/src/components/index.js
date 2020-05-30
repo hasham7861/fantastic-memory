@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { initiateGameSockets } from '../services/game-sockets';
 
 
+initiateGameSockets.then(data=>data);
 
 export default function () {
     useEffect(()=>{
-        initiateGameSockets.then(data=>console.log(data));
+        
     })    
     const style = {
         width: '100%',

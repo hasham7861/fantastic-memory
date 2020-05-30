@@ -2,32 +2,31 @@ import io from 'socket.io-client';
 import { envUri } from './environment';
 import { isServerUp } from './rest';
 
-const mySocket = io(envUri);
+const mySocket = io(envUri + "/game-nsp");
 
 const initiateGameSockets = isServerUp(() => {
     mySocket.on('connect', function () {
-        console.log("connected")
         return "intiated all socket"
-     });
-    // mySocket.on('initiate-game-lobby', function (data) { });
-    mySocket.on('disconnect', function () { });
+    });
+    mySocket.on('game-id', function (msg) { console.log(msg)});
    
 })
 
-// const getListOfAllGuestFromGame = (gameId) => {
-//     // mySocket.io
-// }
+const getListOfAllPlayers = async (gameId) => {
+    mySocket.emit("players-in-game",gameId,(listOfPlayers)=>{
+        console.log(listOfPlayers);
+        return listOfPlayers
+    });
+
+}
 
 const createGame = (gameId) => {
     console.log('got there')
-    // mySocket.emit("initiate-game-lobby", gameId,
-    //     data => {
-    //         console.log(data)
-    //     });
+    mySocket.emit("initiate-game-lobby", { gameId });
 }
 
 export {
     initiateGameSockets,
-    // getMySockId,
+    getListOfAllPlayers,
     createGame
 }

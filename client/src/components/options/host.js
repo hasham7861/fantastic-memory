@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getGameToken } from '../../services/rest';
-import { createGame } from '../../services/game-sockets'
+import { createGame, getListOfAllPlayers } from '../../services/game-sockets'
 
 export default function () {
     const [gameId, setGameId] = useState("");
@@ -8,9 +8,16 @@ export default function () {
     useEffect(() => {
         if (!gameId) {
             getGameToken().then(data => {
-                console.log(data.data.gameId);
-                setGameId(data.data.gameId);
-                createGame(data.data.gameId)
+                const gameId = data.data.gameId
+                if(!gameId)
+                    return;
+                console.log(gameId);
+                setGameId(gameId);
+                createGame(gameId);
+                // TODO list of players not being retrieved
+                getListOfAllPlayers(gameId).then(listOfPlayers=>{
+                    console.log(listOfPlayers)
+                })
             })
             
         }
