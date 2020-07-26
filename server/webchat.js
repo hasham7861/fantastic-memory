@@ -10,7 +10,8 @@ module.exports = function intializeWSEvents(io) {
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
         //send the id back to user to know who they are
-        gameNSP.to(socket.id).emit("game-id", socket.id);
+        gameNSP.to(socket.id).emit("player-id", "player-id" +socket.id);
+        
         // Host uses this event to intiate a namespace
         socket.on("initiate-game-lobby", data => {
             const gameId = data.gameId;
@@ -22,9 +23,10 @@ module.exports = function intializeWSEvents(io) {
             console.log(currentGamesMap);
         })
         // return list of players within the same game
-        socket.on("players-in-game",gameId=>{
+        socket.on("find-players-list",gameId=>{
             const listOfPlayers =  gameId in currentGamesMap ? currentGamesMap[gameId] : []
-            gameNSP.to(socket.id).emit("player-in-game",listOfPlayers);
+            // console.log(listOfPlayers)
+            gameNSP.to(socket.id).emit("players-list",listOfPlayers);
         })
 
         // TODO: client sends in a game id, and add them into current games map

@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "node server",
+    "dev": "nodemon server",
     "docker-install": "docker build -t fantastic-server .",
     "docker-start": "docker run -it -p 9000:5000 fantastic-server"
   },
