@@ -12,16 +12,27 @@ module.exports = function intializeWSEvents(io) {
         //send the id back to user to know who they are
         gameNSP.to(socket.id).emit("player-id", "player-id" +socket.id);
         
+        socket.on("get-id",msg=>{
+            gameNSP.to(socket.id).emit("recieve-host-id",socket.id);
+        })
         // Host uses this event to intiate a namespace
-        socket.on("initiate-game-lobby", data => {
+        socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
-            if (!(gameId in currentGamesMap)) {
+            console.log(gameId)
+            if (!currentGamesMap.hasOwnProperty(gameId)) {
                 currentGamesMap[gameId] = [socket.id];
                 userToGameMap[socket.id] = gameId;
+            }else{
+                // only add the person with same socket once
+                let alreadyJoinedGame = currentGamesMap[gameId].includes(socket.id)
+                if(!alreadyJoinedGame)
+                    currentGamesMap[gameId].push(socket.id)
             }
 
             console.log(currentGamesMap);
         })
+
+        
         // return list of players within the same game
         socket.on("find-players-list",gameId=>{
             const listOfPlayers =  gameId in currentGamesMap ? currentGamesMap[gameId] : []

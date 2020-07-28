@@ -8,30 +8,17 @@ const initiateGameSockets = isServerUp(() => {
     mySocket.on('connect', function () {
         return "intiated all socket"
     });
-    mySocket.on('player-id', function (msg) { console.log(msg)});
-   
+    mySocket.on('player-id', function (msg) { console.log(msg) });
+
 })
 
-const getListOfAllPlayers = async (gameId) => {
-    
-    mySocket.emit("find-players-list",gameId);
-
-    let players = []
-    mySocket.on("players-list", function(listOfPlayers){
-        players = [...listOfPlayers]
-    })
-    console.log(players)
-    
-   
+const joinGame = (gameId) => {
+    mySocket.emit("join-game-lobby", { gameId });
 }
 
 
-const createGame = (gameId) => {
-    mySocket.emit("initiate-game-lobby", { gameId });
-}
 
 export {
     initiateGameSockets,
-    getListOfAllPlayers,
-    createGame, mySocket
+    joinGame, mySocket
 }
