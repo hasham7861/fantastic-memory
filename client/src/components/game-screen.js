@@ -1,8 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import DrawingBoard from './drawing-board.js'
+import {withRouter} from 'react-router-dom'
 
 function GameScreen(props) {
+    if(!props.location.state){
+        props.history.push("/")
+    }
+    
     return (
         <div>
             <DrawingBoard></DrawingBoard>
@@ -14,5 +19,5 @@ GameScreen.propTypes = {
 
 }
 
-export default GameScreen;
+export default withRouter(GameScreen);
 
