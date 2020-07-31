@@ -16,9 +16,11 @@ const joinGame = (gameId) => {
     mySocket.emit("join-game-lobby", { gameId });
 }
 
+const closeGame = (gameId) => {
+    mySocket.emit("close-game", gameId )
+}
 
 
 export {
-    initiateGameSockets,
-    joinGame, mySocket
+    initiateGameSockets, joinGame, closeGame, mySocket
 }

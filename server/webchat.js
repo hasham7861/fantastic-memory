@@ -1,7 +1,12 @@
+
 module.exports = function intializeWSEvents(io) {
     const currentGamesMap = {
-        // 'rand_game_id': ["id1", "id2", "id3"]
-    };
+        // '096ef6e3': {
+        //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
+        //   '/game-nsp#vIzy3GqOlps3GUqRAAAB': { status: 'closed', host: false },
+        //   '/game-nsp#mZOGYqfjFUcNhu1DAAAF': { status: 'active', host: false }
+        // }
+    }
 
     const userToGameMap = {
         //userId:gameId
@@ -10,34 +15,41 @@ module.exports = function intializeWSEvents(io) {
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
         //send the id back to user to know who they are
-        gameNSP.to(socket.id).emit("player-id", "player-id" +socket.id);
-        
-        socket.on("get-id",msg=>{
-            gameNSP.to(socket.id).emit("recieve-host-id",socket.id);
+        gameNSP.to(socket.id).emit("player-id", "player-id" + socket.id);
+
+        socket.on("get-id", msg => {
+            gameNSP.to(socket.id).emit("recieve-host-id", socket.id);
         })
         // Host uses this event to intiate a namespace
         socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
             console.log(gameId)
             if (!currentGamesMap.hasOwnProperty(gameId)) {
-                currentGamesMap[gameId] = [socket.id];
+                currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true } }
                 userToGameMap[socket.id] = gameId;
-            }else{
+            } else {
                 // only add the person with same socket once
-                let alreadyJoinedGame = currentGamesMap[gameId].includes(socket.id)
-                if(!alreadyJoinedGame)
-                    currentGamesMap[gameId].push(socket.id)
+                let alreadyJoinedGame = socket.id in currentGamesMap[gameId]
+                if (!alreadyJoinedGame) {
+                    currentGamesMap[gameId][socket.id] = { status: 'active', host: false }
+                    userToGameMap[socket.id] = gameId;
+                }
             }
 
             console.log(currentGamesMap);
         })
 
-        
+
         // return list of players within the same game
-        socket.on("find-players-list",gameId=>{
-            const listOfPlayers =  gameId in currentGamesMap ? currentGamesMap[gameId] : []
-            // console.log(listOfPlayers)
-            gameNSP.to(socket.id).emit("players-list",listOfPlayers);
+        socket.on("find-players-list", gameId => {
+            let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId] : []
+            // filter listOfPlayers to return all players that are still in the game
+            for (let playerSocId in listOfPlayers) {
+                if (listOfPlayers[playerSocId].status == "closed")
+                    delete listOfPlayers[playerSocId]
+            }
+
+            gameNSP.to(socket.id).emit("players-list", listOfPlayers);
         })
 
         // TODO: client sends in a game id, and add them into current games map
@@ -55,15 +67,27 @@ module.exports = function intializeWSEvents(io) {
 
         })
 
+        socket.on("close-game", gameId => {
+            let game = currentGamesMap[gameId]
+            // delete tracking of which game player is in currently
+            for(let playerSocID in currentGamesMap){
+                delete userToGameMap[playerSocID]
+            }
+            // delete the entire
+            delete currentGamesMap[gameId]
+
+
+        })
+
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", msg => {
             let game = currentGamesMap[userToGameMap[socket.id]];
-            if (game && game.length <= 1) {
-                delete currentGamesMap[userToGameMap[socket.id]];
-            } else if(game && game.length > 1) {
-                currentGamesMap[userToGameMap[socket.id]] = currentGamesMap[userToGameMap[socket.id]].filter(item => item !== socket.id)
+
+            // auto kick off non host players from the game once they close window
+            if (game && game[socket.id].status == "active" && !game[socket.id].host) {
+                currentGamesMap[userToGameMap[socket.id]][socket.id].status = "closed";
+                delete userToGameMap[socket.id];
             }
-            delete userToGameMap[socket.id];
         })
 
     })

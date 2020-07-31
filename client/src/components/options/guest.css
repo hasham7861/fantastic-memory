@@ -1,0 +1,10 @@
+#guest {
+  margin: 2rem;
+}
+#guest > #title {
+  color: blue;
+  font-weight: bold;
+}
+#guest > button {
+  margin-left: 1rem;
+}
