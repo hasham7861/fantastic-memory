@@ -1,5 +1,5 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 import DrawingBoard from './drawing-board.js'
 import {withRouter} from 'react-router-dom'
 
@@ -15,9 +15,9 @@ function GameScreen(props) {
     )
 }
 
-GameScreen.propTypes = {
+// GameScreen.propTypes = {
 
-}
+// }
 
 export default withRouter(GameScreen);
 
