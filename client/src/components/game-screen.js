@@ -9,6 +9,7 @@ function GameScreen(props) {
     }
     
     return (
+        // show different screen based on who is drawing currently
         <div>
             <DrawingBoard></DrawingBoard>
         </div>

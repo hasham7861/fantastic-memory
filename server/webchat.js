@@ -12,18 +12,30 @@ module.exports = function intializeWSEvents(io) {
         //userId:gameId
     }
 
+    function findHostOfGame(gameId) {
+        for (let playerSocId in currentGamesMap[gameId]) {
+            if (currentGamesMap[gameId][playerSocId].host)
+                return playerSocId
+        }
+    }
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
         //send the id back to user to know who they are
         gameNSP.to(socket.id).emit("player-id", "player-id" + socket.id);
 
-        socket.on("get-id", msg => {
+        socket.on("get-id", _ => {
             gameNSP.to(socket.id).emit("recieve-host-id", socket.id);
+        })
+        socket.on("update-host-id", gameId => {
+            const oldHostSocId = findHostOfGame(gameId);
+            currentGamesMap[gameId] = { [socket.id]: {...currentGamesMap[gameId][oldHostSocId]}}
+            delete currentGamesMap[oldHostSocId]
+            delete userToGameMap[oldHostSocId]
         })
         // Host uses this event to intiate a namespace
         socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
-            console.log(gameId)
+
             if (!currentGamesMap.hasOwnProperty(gameId)) {
                 currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true } }
                 userToGameMap[socket.id] = gameId;
@@ -37,6 +49,9 @@ module.exports = function intializeWSEvents(io) {
             }
 
             console.log(currentGamesMap);
+            let hostSocId = findHostOfGame(gameId)
+            // console.log(hostSocId)
+            gameNSP.to(hostSocId).emit("players-list", currentGamesMap[gameId])
         })
 
 
@@ -70,7 +85,7 @@ module.exports = function intializeWSEvents(io) {
         socket.on("close-game", gameId => {
             let game = currentGamesMap[gameId]
             // delete tracking of which game player is in currently
-            for(let playerSocID in currentGamesMap){
+            for (let playerSocID in currentGamesMap) {
                 delete userToGameMap[playerSocID]
             }
             // delete the entire

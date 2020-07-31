@@ -12,13 +12,25 @@ const Host = function (props) {
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
 
+
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
 
     //============ Handlers ============
     // show all the players in lobby
     const setPlayersJSX = (playersList) => {
-        setPlayersInLobby(Object.keys(playersList).map((p, i) => <li key={i}>{p}</li>))
+
+
+        setPlayersInLobby(
+            Object.keys(playersList).map(
+                (p, i) => {
+                    return <li key={i}>{p}</li>
+                }
+            )
+
+
+        )
+        // props.history.go(0)
     }
 
     // stop game and cleanup garbage
@@ -30,50 +42,50 @@ const Host = function (props) {
     }
 
     const startGame = () => {
-        props.history.push({pathname:"/start-game",state:{gameId}})
+        props.history.push({ pathname: "/start-game", state: { gameId } })
     }
     //============ Hooks ============
     useEffect(() => {
+
+        mySocket.on("recieve-host-id", function (id) {
+            setCookie("hostId", id)
+        })
+
+        // listen to player-list event
         mySocket.on("players-list", function (listOfPlayers) {
+            // only update players if there is new players being added
             setPlayersJSX(listOfPlayers)
         })
+
+
+
         // Player has intiated one game
-        if (!cookies.hasOwnProperty("gameId")) {
+        if (!cookies.hasOwnProperty("gameId") && !cookies.hasOwnProperty("hostId")) {
             // create the game
             getGameToken().then(resp => {
                 setCookie("gameId", resp.data.gameId)
                 mySocket.emit("get-id", {})
                 joinGame(resp.data.gameId)
-                mySocket.on("recieve-host-id", function (id) {
-                    setCookie("hostId", id)
-                    console.log("id" + id)
-                    if (!gameId)
-                        return;
-                    setGameId(gameId);
-
-
-                    // retrieve players list
-                    mySocket.emit("find-players-list", gameId);
-                })
-
+                setGameId(gameId);
             })
             // When player is not in any game
-        } else {
+        } 
+        else if(cookies.hasOwnProperty("hostId")){
             setGameId(cookies.gameId)
-            if (!cookies.hasOwnProperty("hostId")) {
-                joinGame(cookies.gameId);
-
-            }
-            // 
-            // console.log("loading gameId from cookie")
-            // retrieve players list
-            mySocket.emit("find-players-list", cookies.gameId);
-
+            mySocket.emit("update-host-id", cookies.gameId)
+            joinGame(cookies.gameId);
+           
         }
+
+        mySocket.emit("find-players-list", gameId);
+
 
 
 
     }, [gameId, cookies, setCookie])
+
+
+
 
     return (
         <div className="host-css">Hey there Host, share the following gameid: <span>{gameId}</span> with your guests

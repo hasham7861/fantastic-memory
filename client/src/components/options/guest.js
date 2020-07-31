@@ -7,6 +7,7 @@ export default function () {
 
     const joinLobby = () =>{
         joinGame(inputGameId)
+
     }
 
     return (
@@ -17,4 +18,8 @@ export default function () {
             <button onClick={joinLobby}>Join Game</button>
         </div>
     )
+}
+
+const WaitingToJoin = function (){
+    // TODO: listen for the event to 
 }
