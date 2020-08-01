@@ -1,7 +1,7 @@
 #guest {
   margin: 2rem;
 }
-#guest > #title {
+#guest #title {
   color: blue;
   font-weight: bold;
 }
