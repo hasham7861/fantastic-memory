@@ -28,11 +28,14 @@ module.exports = function intializeWSEvents(io) {
         })
         socket.on("update-host-id", gameId => {
             const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId] = { [socket.id]: {...currentGamesMap[gameId][oldHostSocId]}}
-            delete currentGamesMap[oldHostSocId]
-            delete userToGameMap[oldHostSocId]
+            currentGamesMap[gameId][socket.id] = {host:true, status:'active'}
+            
+            // if(oldHostSocId)
+            currentGamesMap[gameId][oldHostSocId].status="closed"
+            currentGamesMap[gameId][oldHostSocId].host="false"
+            
         })
-        // Host uses this event to intiate a namespace
+        // Host uses this event to intiate a namespacetr
         socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
 
