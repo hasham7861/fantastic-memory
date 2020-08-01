@@ -1,4 +1,5 @@
 
+
 module.exports = function intializeWSEvents(io) {
     const currentGamesMap = {
         // '096ef6e3': {
@@ -27,12 +28,11 @@ module.exports = function intializeWSEvents(io) {
             gameNSP.to(socket.id).emit("recieve-host-id", socket.id);
         })
         socket.on("update-host-id", gameId => {
-            const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = {host:true, status:'active'}
-            
-            // if(oldHostSocId)
-            currentGamesMap[gameId][oldHostSocId].status="closed"
-            currentGamesMap[gameId][oldHostSocId].host="false"
+            // const oldHostSocId = findHostOfGame(gameId);
+            currentGamesMap[gameId][socket.id] = {status:'active',host:true}
+            userToGameMap[socket.id] = gameId
+            // currentGamesMap[gameId][oldHostSocId].status="closed"
+            // currentGamesMap[gameId][oldHostSocId].host=false
             
         })
         // Host uses this event to intiate a namespacetr
@@ -99,13 +99,24 @@ module.exports = function intializeWSEvents(io) {
 
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", msg => {
-            let game = currentGamesMap[userToGameMap[socket.id]];
+            if(socket.id in userToGameMap){
+                let player = currentGamesMap[userToGameMap[socket.id]]
+                if(player){
+                    currentGamesMap[userToGameMap[socket.id]][socket.id].status = "closed"
+                    currentGamesMap[userToGameMap[socket.id]][socket.id].host = false;
+                    delete userToGameMap[socket.id]
+                }
+             
+            }
+           
+         
 
             // auto kick off non host players from the game once they close window
-            if (game && game[socket.id].status == "active" && !game[socket.id].host) {
-                currentGamesMap[userToGameMap[socket.id]][socket.id].status = "closed";
-                delete userToGameMap[socket.id];
-            }
+            // if (player.status == "active" ) {
+            //     player.status = "closed";
+            //     player.host= false;
+            //     delete userToGameMap[socket.id];
+            // }
         })
 
     })
