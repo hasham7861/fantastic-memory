@@ -1,16 +1,17 @@
-module.exports = function intializeWSEvents(io) {
-    const currentGamesMap = {
-        // '096ef6e3': {
-        //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
-        //   '/game-nsp#vIzy3GqOlps3GUqRAAAB': { status: 'closed', host: false },
-        //   '/game-nsp#mZOGYqfjFUcNhu1DAAAF': { status: 'active', host: false }
-        // }
-    }
+const currentGamesMap = {
+    // '096ef6e3': {
+    //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
+    //   '/game-nsp#vIzy3GqOlps3GUqRAAAB': { status: 'closed', host: false },
+    //   '/game-nsp#mZOGYqfjFUcNhu1DAAAF': { status: 'active', host: false }
+    // }
+}
 
-    const userToGameMap = {
-        //userId:gameId
-    }
+const userToGameMap = {
+    //userId:gameId
+}
 
+function intializeWSEvents(io) {
+   
     function findHostOfGame(gameId) {
         for (let playerSocId in currentGamesMap[gameId]) {
             if (currentGamesMap[gameId][playerSocId].host)
@@ -49,7 +50,7 @@ module.exports = function intializeWSEvents(io) {
                 }
             }
 
-            console.log(currentGamesMap);
+            // console.log(currentGamesMap);
             let hostSocId = findHostOfGame(gameId)
             // console.log(hostSocId)
             gameNSP.to(hostSocId).emit("players-list", currentGamesMap[gameId])
@@ -125,3 +126,7 @@ module.exports = function intializeWSEvents(io) {
 
 }
 
+module.exports = {
+    currentGamesMap,
+    intializeWSEvents
+}

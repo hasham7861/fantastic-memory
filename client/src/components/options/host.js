@@ -44,14 +44,10 @@ const Host = function (props) {
 
         mySocket.on("recieve-host-id", function (id) {
             setCookie("hostId", id)
-            
+
         })
 
-        // listen to player-list event
-        mySocket.on("players-list", function (listOfPlayers) {
-            // only update players if there is new players being added
-            setPlayersJSX(listOfPlayers)
-        })
+
 
 
         // Player has not hosted any game at the moment
@@ -63,7 +59,7 @@ const Host = function (props) {
                 // make sure to set local host-id
                 mySocket.emit("get-id", {})
                 // refresh the component to refresh the playerlist
-                props.history.go(0)
+                props.history.go('0')
 
             })
             // When player is not in any game
@@ -72,19 +68,27 @@ const Host = function (props) {
             setGameId(cookies.gameId)
             mySocket.emit("update-host-id", cookies.gameId)
             joinGame(cookies.gameId);
+
+             // listen to player-list event
+             mySocket.on("players-list", function (listOfPlayers) {
+                // only update players if there is new players being added
+                setPlayersJSX(listOfPlayers)
+            })
+            
+            mySocket.emit("find-players-list", gameId);
+
+           
         }
 
-        mySocket.emit("find-players-list", gameId);
+
 
 
         //cleanup
-        return (()=>{
-            mySocket.removeEventListener("/recieve-host-id")
-            mySocket.removeEventListener("/players-list")
+        return (() => {
         })
 
 
-    }, [gameId, cookies, setCookie,removeCookie,props])
+    }, [gameId, cookies, setCookie, removeCookie, props])
 
 
 

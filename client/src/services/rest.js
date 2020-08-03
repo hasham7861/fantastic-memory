@@ -11,7 +11,12 @@ const getGameToken = async () => {
     })
 };
 
+const isValidGameId = async (gameId) => {
+    return axios.get(envUri + "/game/is_valid_game_id?inputGameId=" + gameId).then(data => data).catch(err => null)
+}
+
 export {
     isServerUp,
-    getGameToken
+    getGameToken,
+    isValidGameId
 }
