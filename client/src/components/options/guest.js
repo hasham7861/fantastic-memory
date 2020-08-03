@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { joinGame } from '../../services/game-sockets';
+import React, { useState, useEffect, useRef } from 'react';
+import { joinGame, mySocket } from '../../services/game-sockets';
+import {withRouter} from 'react-router-dom' 
 import { isValidGameId } from '../../services/rest'
 import './guest.css'
-export default function () {
+function Guest (props) {
 
     const [inputGameId, setInputGameId] = useState("");
     const joinGameDiv = useRef(null)
@@ -10,9 +11,7 @@ export default function () {
     const invalidGameIdDiv = useRef(null)
 
     const joinLobby = () => {
-    
-       
-        // TODO check if input gameid is valid before sharing the id with other clients
+        // join game if use enters a valid id
         if (inputGameId.length >1 ) {
             isValidGameId(inputGameId).then(resp => {
                 let isGameIdValid = resp.data.game_id_valid
@@ -20,16 +19,24 @@ export default function () {
                     joinGameDiv.current.style.display = "none"
                     waitingDiv.current.style.display = "block"
                     invalidGameIdDiv.current.style.display="none"
+                    joinGame(inputGameId)
                 }else if(isGameIdValid == false){
                     invalidGameIdDiv.current.style.display="block"
-                    joinGame(inputGameId)
+                   
                 }
             })
-           
         }
-        // alert(inputGameId)
 
     }
+
+    useEffect(() => {
+        mySocket.on("start-game",(data)=>{
+            //change the page to start-game with your socid to refer back to and gameId
+            console.log(data)
+            props.history.push({ pathname: "/start-game", state: data })
+        })
+       
+    }, [])
 
     return (
         <div id="guest">
@@ -50,3 +57,4 @@ export default function () {
     )
 }
 
+export default withRouter(Guest)

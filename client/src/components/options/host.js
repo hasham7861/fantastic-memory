@@ -37,7 +37,11 @@ const Host = function (props) {
     }
 
     const startGame = () => {
+        // move to start game push
         props.history.push({ pathname: "/start-game", state: { gameId } })
+
+        // signal to all the other clients in the same socket that game has started
+        mySocket.emit("game-started", gameId)
     }
     //============ Hooks ============
     useEffect(() => {
@@ -69,15 +73,15 @@ const Host = function (props) {
             mySocket.emit("update-host-id", cookies.gameId)
             joinGame(cookies.gameId);
 
-             // listen to player-list event
-             mySocket.on("players-list", function (listOfPlayers) {
+            // listen to player-list event
+            mySocket.on("players-list", function (listOfPlayers) {
                 // only update players if there is new players being added
                 setPlayersJSX(listOfPlayers)
             })
-            
+
             mySocket.emit("find-players-list", gameId);
 
-           
+
         }
 
 

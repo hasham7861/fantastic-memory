@@ -84,6 +84,21 @@ function intializeWSEvents(io) {
 
         })
 
+        socket.on("game-started", gameId =>{
+            // TODO emit game start event to all clients
+            
+            for(let playerId in currentGamesMap[gameId]){
+                if(currentGamesMap[gameId][playerId].status==="active" 
+                        && !currentGamesMap[gameId][playerId].host){
+
+                            gameNSP.to(playerId).emit("start-game",{gameId,playerId})
+
+                        }
+                 
+            }
+
+        })
+
         socket.on("close-game", gameId => {
             let game = currentGamesMap[gameId]
             // delete tracking of which game player is in currently
