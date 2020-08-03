@@ -19,18 +19,13 @@ const Host = function (props) {
     //============ Handlers ============
     // show all the players in lobby
     const setPlayersJSX = (playersList) => {
-
-
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
                     return <li key={i}>{p}</li>
                 }
             )
-
-
         )
-        // props.history.go(0)
     }
 
     // stop game and cleanup garbage
@@ -49,6 +44,7 @@ const Host = function (props) {
 
         mySocket.on("recieve-host-id", function (id) {
             setCookie("hostId", id)
+            
         })
 
         // listen to player-list event
@@ -58,31 +54,37 @@ const Host = function (props) {
         })
 
 
-
-        // Player has intiated one game
+        // Player has not hosted any game at the moment
         if (!cookies.hasOwnProperty("gameId") && !cookies.hasOwnProperty("hostId")) {
             // create the game
             getGameToken().then(resp => {
                 setCookie("gameId", resp.data.gameId)
-                mySocket.emit("get-id", {})
                 joinGame(resp.data.gameId)
-                setGameId(gameId);
+                // make sure to set local host-id
+                mySocket.emit("get-id", {})
+                // refresh the component to refresh the playerlist
+                props.history.go(0)
+
             })
             // When player is not in any game
-        } 
-        else if(cookies.hasOwnProperty("hostId")){
+        }
+        else if (cookies.hasOwnProperty("hostId")) {
             setGameId(cookies.gameId)
             mySocket.emit("update-host-id", cookies.gameId)
             joinGame(cookies.gameId);
-           
         }
 
         mySocket.emit("find-players-list", gameId);
 
 
+        //cleanup
+        return (()=>{
+            mySocket.removeEventListener("/recieve-host-id")
+            mySocket.removeEventListener("/players-list")
+        })
 
 
-    }, [gameId, cookies, setCookie])
+    }, [gameId, cookies, setCookie,removeCookie,props])
 
 
 

@@ -1,5 +1,3 @@
-
-
 module.exports = function intializeWSEvents(io) {
     const currentGamesMap = {
         // '096ef6e3': {
