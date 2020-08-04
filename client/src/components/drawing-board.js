@@ -1,9 +1,11 @@
 import CanvasDraw from 'react-canvas-draw';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import React from 'react';
+import { mySocket } from '../services/game-sockets'
 
 
-export default function DrawingBoard() {
+
+export default function DrawingBoard(props) {
 
     // dom references
     let drawingCanvas = useRef(null);
@@ -33,21 +35,21 @@ export default function DrawingBoard() {
     const containerStyle = {
         justifyContent: 'center',
         alignItems: 'center',
-        flexDirection:'Row'
+        flexDirection: 'Row'
     }
 
     const ioMenuStyle = {
         display: "flex",
         justifyContent: 'center',
         alignItems: 'center',
-        flexDirection:'row'
+        flexDirection: 'row'
     }
 
     const paintMenuStyle = {
-        display:"flex",
-        flexDirection:"Column",
-        justifyContent:'center',
-        alignItems:'center'
+        display: "flex",
+        flexDirection: "Column",
+        justifyContent: 'center',
+        alignItems: 'center'
 
     }
     /////// END OF CSS
@@ -63,7 +65,7 @@ export default function DrawingBoard() {
         })
     }
 
-    const brushStrokeSizeChange = (event) =>{
+    const brushStrokeSizeChange = (event) => {
 
         setCanvasOptions({
             ...canvasOptions,
@@ -71,10 +73,26 @@ export default function DrawingBoard() {
         })
     }
     // END OF Handlers
+
+
+    useEffect(() => {
+
+        let gameId = props.gameId;
+
+        let recentDrawnLineByPlayer = drawingCanvas.getSaveData() ? drawingCanvas.getSaveData()[0] : null;
+
+        // TODO listen for new lines being drawn
+        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLineByPlayer} );
+
+        // TODO copy the line that other person drew onto my canvas
+        mySocket.on("draw-on-canvas", () => {
+
+        })
+    })
     return (
         <div style={containerStyle}>
             <div style={ioMenuStyle}>
-                <button onClick={()=>drawingCanvas.undo()}>Undo</button>
+                <button onClick={() => drawingCanvas.undo()}>Undo</button>
                 <button onClick={() => drawingCanvas.clear()}> Clear </button>
                 <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
                 <button onClick={() => {
@@ -92,12 +110,12 @@ export default function DrawingBoard() {
             <CanvasDraw
                 ref={canvasDraw => (drawingCanvas = canvasDraw)}
                 {...canvasOptions}
-                style={{border:'1px solid #ccc', margin:'10px'}}
+                style={{ border: '1px solid #ccc', margin: '10px' }}
             />
 
             <div style={paintMenuStyle}>
                 <label htmlFor="stroke">Brush Stroke</label>
-                <input name="stroke" type="range" id="stroke" min="4" max="10"step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
+                <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
                 <label>Brush Color</label>
                 <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
             </div>

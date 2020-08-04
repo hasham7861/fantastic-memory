@@ -75,8 +75,8 @@ function intializeWSEvents(io) {
         })
 
         // TODO: share drawing with all the users within the same game
-        socket.on("share-drawing", msg => {
-
+        socket.on("share-drawing-with-players", ({gameId,recentDrawnLineByPlayer}) => {
+            console.log(gameId,recentDrawnLineByPlayer)
         })
 
         // TODO: share text messages with all all the users in the same game
