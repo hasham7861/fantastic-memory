@@ -72,23 +72,33 @@ export default function DrawingBoard(props) {
             brushRadius: parseInt(event.target.value)
         })
     }
+
+    const newDrawnLineOnCanvasHandler = _ => {
+        let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
+        let recentDrawnLine = linesDrawnByPlayer.lines[linesDrawnByPlayer.lines.length - 1]
+        // console.log(localStorage.getItem('savedDrawing'))
+        console.log(recentDrawnLine)
+
+
+        let gameId = props.gameId;
+
+        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLine });
+
+    }
     // END OF Handlers
 
 
     useEffect(() => {
 
-        let gameId = props.gameId;
-
-        let recentDrawnLineByPlayer = drawingCanvas.getSaveData() ? drawingCanvas.getSaveData()[0] : null;
-
-        // TODO listen for new lines being drawn
-        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLineByPlayer} );
 
         // TODO copy the line that other person drew onto my canvas
         mySocket.on("draw-on-canvas", () => {
 
         })
     })
+
+
+
     return (
         <div style={containerStyle}>
             <div style={ioMenuStyle}>
@@ -111,6 +121,12 @@ export default function DrawingBoard(props) {
                 ref={canvasDraw => (drawingCanvas = canvasDraw)}
                 {...canvasOptions}
                 style={{ border: '1px solid #ccc', margin: '10px' }}
+                onChange={
+                    () => {
+                        localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())
+                        newDrawnLineOnCanvasHandler()
+                    }
+                }
             />
 
             <div style={paintMenuStyle}>
