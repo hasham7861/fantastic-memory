@@ -1,3 +1,4 @@
+// TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
 const currentGamesMap = {
     // '096ef6e3': {
     //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
@@ -10,22 +11,27 @@ const userToGameMap = {
     //userId:gameId
 }
 
+function findHostOfGame(gameId) {
+    for (let playerSocId in currentGamesMap[gameId]) {
+        if (currentGamesMap[gameId][playerSocId].host)
+            return playerSocId
+    }
+}
+
+
+
 function intializeWSEvents(io) {
    
-    function findHostOfGame(gameId) {
-        for (let playerSocId in currentGamesMap[gameId]) {
-            if (currentGamesMap[gameId][playerSocId].host)
-                return playerSocId
-        }
-    }
+   
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
         //send the id back to user to know who they are
         gameNSP.to(socket.id).emit("player-id", "player-id" + socket.id);
 
         socket.on("get-id", _ => {
-            gameNSP.to(socket.id).emit("recieve-host-id", socket.id);
+            gameNSP.to(socket.id).emit("player-id", socket.id);
         })
+
         socket.on("update-host-id", gameId => {
             // const oldHostSocId = findHostOfGame(gameId);
             currentGamesMap[gameId][socket.id] = {status:'active',host:true}
@@ -75,8 +81,10 @@ function intializeWSEvents(io) {
         })
 
         // TODO: share drawing with all the users within the same game
-        socket.on("share-drawing-with-players", ({gameId,recentDrawnLineByPlayer}) => {
-            console.log(gameId,recentDrawnLineByPlayer)
+        socket.on("share-drawing-with-players", ({gameId,playerId, recentDrawnLine}) => {
+            // forward the recent drawnline to all the other players
+          
+            console.log(gameId,playerId, recentDrawnLine)
         })
 
         // TODO: share text messages with all all the users in the same game

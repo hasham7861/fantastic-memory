@@ -2,13 +2,16 @@ import CanvasDraw from 'react-canvas-draw';
 import { useRef, useState, useEffect } from 'react';
 import React from 'react';
 import { mySocket } from '../services/game-sockets'
-
+import { useCookies } from 'react-cookie';
 
 
 export default function DrawingBoard(props) {
 
     // dom references
     let drawingCanvas = useRef(null);
+
+    // config of react tools
+    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
 
     //// STATES
     const [canvasOptions, setCanvasOptions] = useState({
@@ -81,8 +84,11 @@ export default function DrawingBoard(props) {
 
 
         let gameId = props.gameId;
-
-        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLine });
+        console.log(cookies.playerId)
+        
+        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLine });   
+      
+       
 
     }
     // END OF Handlers
@@ -90,7 +96,7 @@ export default function DrawingBoard(props) {
 
     useEffect(() => {
 
-
+       
         // TODO copy the line that other person drew onto my canvas
         mySocket.on("draw-on-canvas", () => {
 

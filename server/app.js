@@ -1,7 +1,10 @@
 const app = require('express')()
 const crypto = require('crypto')
-const {currentGamesMap} = require('./webchat');
+const { currentGamesMap } = require('./webchat');
 const { query } = require('express');
+const { connectToDB } = require('./db');
+
+connectToDB()
 
 app.get("/api", (req, res) => {
   res.send({
@@ -18,20 +21,20 @@ app.get("/game/generate_game_id", (req, res) => {
   });
 })
 
-app.get("/game/is_valid_game_id", (req,res)=>{
-  if(!req.query.inputGameId) 
+app.get("/game/is_valid_game_id", (req, res) => {
+  if (!req.query.inputGameId)
     return res.status(400).send("valid_game_id: missing inputGameId query param")
-  
-  if(!currentGamesMap)
+
+  if (!currentGamesMap)
     return res.status(403).send("valid_game_id: there isn't any games going on")
-  
-  let inputGameId = req.query.inputGameId.slice(0,8);
-  
-  if(inputGameId in currentGamesMap){  
-    res.send({game_id_valid:true})
-  }else{
-    res.send({game_id_valid:false})
+
+  let inputGameId = req.query.inputGameId.slice(0, 8);
+
+  if (inputGameId in currentGamesMap) {
+    res.send({ game_id_valid: true })
+  } else {
+    res.send({ game_id_valid: false })
   }
-  
-  })
+
+})
 module.exports = app;

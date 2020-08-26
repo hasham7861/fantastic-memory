@@ -46,9 +46,8 @@ const Host = function (props) {
     //============ Hooks ============
     useEffect(() => {
 
-        mySocket.on("recieve-host-id", function (id) {
+        mySocket.on("player-id", function (id) {
             setCookie("hostId", id)
-
         })
 
 
