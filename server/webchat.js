@@ -1,4 +1,5 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
+const { connectToDB } = require('./db');
 const currentGamesMap = {
     // '096ef6e3': {
     //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },

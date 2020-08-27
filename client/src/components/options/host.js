@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import { withRouter } from 'react-router-dom';
 import { getGameToken } from '../../services/rest';
 import { joinGame, closeGame, mySocket } from '../../services/game-sockets';
 import { useCookies } from 'react-cookie';
 
 import './host.css'
+// import { AppContext } from '../../Store';
 
 const Host = function (props) {
 
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-
+   
 
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
@@ -45,11 +46,12 @@ const Host = function (props) {
     }
     //============ Hooks ============
     useEffect(() => {
-
+      
         mySocket.on("player-id", function (id) {
             setCookie("hostId", id)
         })
 
+       
 
 
 

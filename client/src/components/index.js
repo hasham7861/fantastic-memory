@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import { initiateGameSockets } from '../services/game-sockets';
+import Store from '../Store'
 
-
-initiateGameSockets.then(data=>data);
+initiateGameSockets.then(data => data);
 
 export default function () {
-    useEffect(()=>{
-        
-    })    
+    useEffect(() => {
+
+    })
     const style = {
         width: '100%',
         height: '300px',
@@ -32,12 +32,14 @@ export default function () {
 
     }
     return (
-        <div style={style}>
-            <h1>Fantastic Memory</h1>
-            <div style={optionsContainer}>
-                <Link style={btnStyle} to="/host-game">Host Game</Link>
-                <Link style={btnStyle} to="/join-game">Join Game</Link>
+        <Store>
+            <div style={style}>
+                <h1>Fantastic Memory</h1>
+                <div style={optionsContainer}>
+                    <Link style={btnStyle} to="/host-game">Host Game</Link>
+                    <Link style={btnStyle} to="/join-game">Join Game</Link>
+                </div>
             </div>
-        </div>
+        </Store>
     )
 }

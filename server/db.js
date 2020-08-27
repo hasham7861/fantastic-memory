@@ -6,13 +6,16 @@ function connectToDB() {
     mongoose.connect(DBURI, { useNewUrlParser: true, useUnifiedTopology: true })
 }
 
-function getGameMap(){
-    gamemap_col.find({},(data)=>{
+async function getGameMap() {
+    gamemap_col.find({}, (err, data) => {
+        if (err)
+            console.log("db-error:", err)
+
         console.log(data)
     })
 }
-connectToDB()
-getGameMap()
+
 module.exports = {
-   connectToDB
+    connectToDB,
+    getGameMap
 }
