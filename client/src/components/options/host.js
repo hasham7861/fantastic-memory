@@ -5,14 +5,14 @@ import { joinGame, closeGame, mySocket } from '../../services/game-sockets';
 import { useCookies } from 'react-cookie';
 
 import './host.css'
-// import { AppContext } from '../../Store';
+import { AppContext } from '../../App'
 
 const Host = function (props) {
 
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-   
+    const {playerId,setPlayerId} = useContext(AppContext)
 
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
@@ -47,10 +47,14 @@ const Host = function (props) {
     //============ Hooks ============
     useEffect(() => {
       
-        mySocket.on("player-id", function (id) {
+        mySocket.on("player-id", function (id) {  
             setCookie("hostId", id)
+              // save playerId into context
+            setPlayerId(id)
         })
 
+      
+      
        
 
 

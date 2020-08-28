@@ -4,15 +4,15 @@ import { withRouter } from 'react-router-dom'
 import { isValidGameId } from '../../services/rest'
 import './guest.css'
 
-import { AppContext } from '../../Store'
+import { AppContext } from '../../App'
 function Guest(props) {
 
     const [inputGameId, setInputGameId] = useState("");
     const joinGameDiv = useRef(null)
     const waitingDiv = useRef(null)
     const invalidGameIdDiv = useRef(null)
-    
-    const [appState, setAppState] = useContext(AppContext)
+
+    const { playerId,setPlayerId } = useContext(AppContext)
 
     const joinLobby = () => {
         // join game if use enters a valid id
@@ -34,8 +34,11 @@ function Guest(props) {
     }
 
     useEffect(() => {
+        mySocket.emit("get-id")
+        mySocket.on("player-id", function (id) {
+            setPlayerId(id)
+        })
 
-        console.log(appState)
         mySocket.on("start-game", (data) => {
             //change the page to start-game with your socid to refer back to and gameId
             console.log(data)
@@ -59,7 +62,7 @@ function Guest(props) {
             <div ref={waitingDiv} style={{ display: "none" }}>
                 <p >Waiting on host to start the game</p>
             </div>
-            {appState}
+            {/* {appContext} */}
         </div>
 
     )

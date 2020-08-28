@@ -1,9 +1,10 @@
 import CanvasDraw from 'react-canvas-draw';
 import { useRef, useState, useEffect } from 'react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { mySocket } from '../services/game-sockets'
 import { useCookies } from 'react-cookie';
 
+import { AppContext } from '../App'
 
 export default function DrawingBoard(props) {
 
@@ -32,6 +33,8 @@ export default function DrawingBoard(props) {
         hideInterface: false
 
     })
+
+    const { playerId } = useContext(AppContext)
     /// END OF STATES
 
     ////// CSS
@@ -78,17 +81,15 @@ export default function DrawingBoard(props) {
 
     const newDrawnLineOnCanvasHandler = _ => {
         let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
-        let recentDrawnLine = linesDrawnByPlayer.lines[linesDrawnByPlayer.lines.length - 1]
-        // console.log(localStorage.getItem('savedDrawing'))
-        console.log(recentDrawnLine)
+
+        mySocket.emit("share-drawing-with-players",
+            {
+                gameId: props.gameId,
+                playerId,
+                recentDrawnLine: linesDrawnByPlayer.lines[linesDrawnByPlayer.lines.length - 1]
+            });
 
 
-        let gameId = props.gameId;
-        console.log(cookies.playerId)
-        
-        mySocket.emit("share-drawing-with-players", { gameId, recentDrawnLine });   
-      
-       
 
     }
     // END OF Handlers
@@ -96,10 +97,13 @@ export default function DrawingBoard(props) {
 
     useEffect(() => {
 
-       
         // TODO copy the line that other person drew onto my canvas
-        mySocket.on("draw-on-canvas", () => {
-
+        mySocket.on("draw-on-canvas", lineObj => {
+            console.log(lineObj)
+            // TODO append lineObj to current canvas page
+            // let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
+            // console.log(linesDrawnByPlayer)
+            // linesDrawnByPlayer.lines.push(lineObj)
         })
     })
 

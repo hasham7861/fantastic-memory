@@ -1,5 +1,6 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
 const { connectToDB } = require('./db');
+
 const currentGamesMap = {
     // '096ef6e3': {
     //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
@@ -19,15 +20,29 @@ function findHostOfGame(gameId) {
     }
 }
 
+function getCurrentNonDrawingPlayers(gameId, playerId) {
+    if (!(gameId in currentGamesMap)) {
+        console.log("getting-non-drawers: unable to find the game")
+        return
+    }
+    console.log(playerId)
+    let players = []
+    for (let currentPlayerId in currentGamesMap[gameId]) {
+        if (playerId != currentPlayerId) {
+            players.push(currentPlayerId)
+        }
+    }
+    return players
+}
 
 
 function intializeWSEvents(io) {
-   
-   
+
+
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
         //send the id back to user to know who they are
-        gameNSP.to(socket.id).emit("player-id", "player-id" + socket.id);
+        gameNSP.to(socket.id).emit("player-id", socket.id);
 
         socket.on("get-id", _ => {
             gameNSP.to(socket.id).emit("player-id", socket.id);
@@ -35,11 +50,11 @@ function intializeWSEvents(io) {
 
         socket.on("update-host-id", gameId => {
             // const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = {status:'active',host:true}
+            currentGamesMap[gameId][socket.id] = { status: 'active', host: true }
             userToGameMap[socket.id] = gameId
             // currentGamesMap[gameId][oldHostSocId].status="closed"
             // currentGamesMap[gameId][oldHostSocId].host=false
-            
+
         })
         // Host uses this event to intiate a namespacetr
         socket.on("join-game-lobby", data => {
@@ -82,10 +97,16 @@ function intializeWSEvents(io) {
         })
 
         // TODO: share drawing with all the users within the same game
-        socket.on("share-drawing-with-players", ({gameId,playerId, recentDrawnLine}) => {
+        socket.on("share-drawing-with-players", ({ gameId, playerId, recentDrawnLine }) => {
             // forward the recent drawnline to all the other players
-          
-            console.log(gameId,playerId, recentDrawnLine)
+
+            let listOfNonDrawers = getCurrentNonDrawingPlayers(gameId, playerId)
+            // share current drawer line with other players
+            for(let currentPlayerId of listOfNonDrawers){
+                gameNSP.to(currentPlayerId).emit("draw-on-canvas",recentDrawnLine)
+            }
+           
+            // console.log(listOfNonDrawers)
         })
 
         // TODO: share text messages with all all the users in the same game
@@ -93,17 +114,17 @@ function intializeWSEvents(io) {
 
         })
 
-        socket.on("game-started", gameId =>{
+        socket.on("game-started", gameId => {
             // TODO emit game start event to all clients
-            
-            for(let playerId in currentGamesMap[gameId]){
-                if(currentGamesMap[gameId][playerId].status==="active" 
-                        && !currentGamesMap[gameId][playerId].host){
 
-                            gameNSP.to(playerId).emit("start-game",{gameId,playerId})
+            for (let playerId in currentGamesMap[gameId]) {
+                if (currentGamesMap[gameId][playerId].status === "active"
+                    && !currentGamesMap[gameId][playerId].host) {
 
-                        }
-                 
+                    gameNSP.to(playerId).emit("start-game", { gameId, playerId })
+
+                }
+
             }
 
         })
@@ -122,17 +143,17 @@ function intializeWSEvents(io) {
 
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", msg => {
-            if(socket.id in userToGameMap){
+            if (socket.id in userToGameMap) {
                 let player = currentGamesMap[userToGameMap[socket.id]]
-                if(player){
+                if (player) {
                     currentGamesMap[userToGameMap[socket.id]][socket.id].status = "closed"
                     currentGamesMap[userToGameMap[socket.id]][socket.id].host = false;
                     delete userToGameMap[socket.id]
                 }
-             
+
             }
-           
-         
+
+
 
             // auto kick off non host players from the game once they close window
             // if (player.status == "active" ) {
