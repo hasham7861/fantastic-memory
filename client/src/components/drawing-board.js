@@ -80,6 +80,7 @@ export default function DrawingBoard(props) {
     }
 
     const newDrawnLineOnCanvasHandler = _ => {
+        console.log(drawingCanvas.getSaveData())
         let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
 
         mySocket.emit("share-drawing-with-players",
@@ -100,6 +101,9 @@ export default function DrawingBoard(props) {
         // TODO copy the line that other person drew onto my canvas
         mySocket.on("draw-on-canvas", lineObj => {
             console.log(lineObj)
+            if(drawingCanvas){
+              console.log(drawingCanvas)
+            }
             // TODO append lineObj to current canvas page
             // let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
             // console.log(linesDrawnByPlayer)
