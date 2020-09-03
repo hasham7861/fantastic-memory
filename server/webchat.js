@@ -102,10 +102,10 @@ function intializeWSEvents(io) {
 
             let listOfNonDrawers = getCurrentNonDrawingPlayers(gameId, playerId)
             // share current drawer line with other players
-            for(let currentPlayerId of listOfNonDrawers){
-                gameNSP.to(currentPlayerId).emit("draw-on-canvas",recentDrawnLine)
+            for (let currentPlayerId of listOfNonDrawers) {
+                gameNSP.to(currentPlayerId).emit("draw-on-canvas", recentDrawnLine)
             }
-           
+
             // console.log(listOfNonDrawers)
         })
 

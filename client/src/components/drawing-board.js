@@ -80,7 +80,7 @@ export default function DrawingBoard(props) {
     }
 
     const newDrawnLineOnCanvasHandler = _ => {
-        console.log(drawingCanvas.getSaveData())
+        // console.log(drawingCanvas.getSaveData())
         let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
 
         mySocket.emit("share-drawing-with-players",
@@ -98,16 +98,44 @@ export default function DrawingBoard(props) {
 
     useEffect(() => {
 
+        function loadDrawing(lineObj) {
+            // drawingCanvas.points = [...drawingCanvas.points, lineObj.points]
+            drawingCanvas.drawPoints(lineObj)
+            // console.log(drawingCanvas.drawPoints)
+
+            drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), false)
+            
+            // set it to null for now
+            lineObj = null
+
+        }
+        // let previous_save_data = JSON.parse(drawingCanvas.getSaveData())
+
         // TODO copy the line that other person drew onto my canvas
         mySocket.on("draw-on-canvas", lineObj => {
-            console.log(lineObj)
-            if(drawingCanvas){
-              console.log(drawingCanvas)
+          
+            if (drawingCanvas && lineObj != null) {
+                // // drawingCanvas.points = [...drawingCanvas.points, lineObj.points]
+                // drawingCanvas.drawPoints(lineObj)
+                // // console.log(drawingCanvas.drawPoints)
+
+                // drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), true)
+                loadDrawing(lineObj)
+                lineObj = null
+                
+
             }
+            // console.log(drawingCanvas.lines)
+            // if(drawingCanvas){
+            //   console.log(drawingCanvas)
+            // }
+            // 
+            // let previous_save_data = JSON.parse(drawingCanvas.getSaveData())
+            // console.log(drawingCanvas)
             // TODO append lineObj to current canvas page
             // let linesDrawnByPlayer = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
             // console.log(linesDrawnByPlayer)
-            // linesDrawnByPlayer.lines.push(lineObj)
+            // linesDrawnByPlayer.l ines.push(lineObj)
         })
     })
 
@@ -120,12 +148,14 @@ export default function DrawingBoard(props) {
                 <button onClick={() => drawingCanvas.clear()}> Clear </button>
                 <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
                 <button onClick={() => {
-                    setCanvasOptions(
-                        {
-                            ...canvasOptions,
-                            saveData: localStorage.getItem('savedDrawing')
-                        }
-                    )
+                    // setCanvasOptions(
+                    //     {
+                    //         ...canvasOptions,
+                    //         saveData: localStorage.getItem('savedDrawing')
+                    //     }
+                    // )
+
+                    drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), true)
                 }}
                 > Load</button>
             </div>
