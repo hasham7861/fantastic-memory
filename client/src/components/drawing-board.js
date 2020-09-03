@@ -118,7 +118,6 @@ export default function DrawingBoard(props) {
                 // // drawingCanvas.points = [...drawingCanvas.points, lineObj.points]
                 // drawingCanvas.drawPoints(lineObj)
                 // // console.log(drawingCanvas.drawPoints)
-
                 // drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), true)
                 loadDrawing(lineObj)
                 lineObj = null
