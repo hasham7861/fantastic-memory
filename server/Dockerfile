@@ -1,13 +1,7 @@
 FROM node:12-slim
-
-WORKDIR /app
-
-COPY package.json /app
-
+WORKDIR .
+COPY package.json .
 RUN npm install
-
-COPY . /app
-
-CMD ["npm", "start"]
-
-EXPOSE 8080
+COPY . .
+CMD ["npm", "run", "dev"]
+EXPOSE 5000

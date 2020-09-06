@@ -26,7 +26,7 @@ export default function DrawingBoard(props) {
         hideGrid: true,
         canvasWidth: 600,
         canvasHeight: 400,
-        disabled: false,
+        disabled: false, // TODO: connect this with switch user event
         imgSrc: "",
         saveData: null,
         immediateLoading: false,
@@ -107,6 +107,12 @@ export default function DrawingBoard(props) {
             if (drawingCanvas && canvasData != null) {             
                 loadDrawing(canvasData)// this loads the drawing
             }
+        })
+        
+        // TODO: disable and enable drawing for the player
+        mySocket.on("toggle-drawing", _ => {
+            // toggle canvas options, enable drawing canvas for only some players
+            // let updateCanvasOptionsState = Object.assign(
         })
     })
 
