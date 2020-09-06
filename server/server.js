@@ -3,7 +3,7 @@ const express = require("express");
 
 // load up server and frontend module
 const app = require('./app');
-const {intializeWSEvents} = require('./webchat');
+const { intializeWSEvents } = require('./webchat');
 const PORT = process.env.PORT | "5000";
 
 // server
@@ -19,11 +19,11 @@ intializeWSEvents(io);
 // Settings for the entire server
 
 server.use((req, res, next) => {
-  let allowedOrigins =  ['http://localhost:3000',
-  'http://localhost:5000'];
+  let allowedOrigins = ['http://localhost:3000',
+    'http://localhost:5000'];
   let origin = req.headers.origin;
-  if(allowedOrigins.indexOf(origin) > -1){
-       res.setHeader('Access-Control-Allow-Origin', origin);
+  if (allowedOrigins.indexOf(origin) > -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
 
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
