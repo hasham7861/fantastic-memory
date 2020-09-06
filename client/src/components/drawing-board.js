@@ -103,25 +103,25 @@ export default function DrawingBoard(props) {
             drawingCanvas.drawPoints(lineObj)
             // console.log(drawingCanvas.drawPoints)
 
-            drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), false)
-            
-            // set it to null for now
-            lineObj = null
+            // drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), false)
+
+            // // set it to null for now
+            // lineObj = null
 
         }
         // let previous_save_data = JSON.parse(drawingCanvas.getSaveData())
 
         // TODO copy the line that other person drew onto my canvas
         mySocket.on("draw-on-canvas", lineObj => {
-          
+
             if (drawingCanvas && lineObj != null) {
                 // // drawingCanvas.points = [...drawingCanvas.points, lineObj.points]
                 // drawingCanvas.drawPoints(lineObj)
                 // // console.log(drawingCanvas.drawPoints)
                 // drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), true)
-                loadDrawing(lineObj)
-                lineObj = null
-                
+                loadDrawing(lineObj)// this loads the drawing
+                // lineObj = null
+
 
             }
             // console.log(drawingCanvas.lines)
@@ -147,30 +147,29 @@ export default function DrawingBoard(props) {
                 <button onClick={() => drawingCanvas.clear()}> Clear </button>
                 <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
                 <button onClick={() => {
-                    // setCanvasOptions(
-                    //     {
-                    //         ...canvasOptions,
-                    //         saveData: localStorage.getItem('savedDrawing')
-                    //     }
-                    // )
-
-                    drawingCanvas.loadSaveData(localStorage.getItem('savedDrawing'), true)
+                    setCanvasOptions(
+                        {
+                            ...canvasOptions,
+                            saveData: localStorage.getItem('savedDrawing')
+                        }
+                    )
                 }}
                 > Load</button>
             </div>
 
-
-            <CanvasDraw
-                ref={canvasDraw => (drawingCanvas = canvasDraw)}
-                {...canvasOptions}
-                style={{ border: '1px solid #ccc', margin: '10px' }}
-                onChange={
-                    () => {
-                        localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())
-                        newDrawnLineOnCanvasHandler()
-                    }
-                }
-            />
+            <div onClick={()=>newDrawnLineOnCanvasHandler()}>
+                <CanvasDraw
+                    ref={canvasDraw => (drawingCanvas = canvasDraw)}
+                    {...canvasOptions}
+                    style={{ border: '1px solid #ccc', margin: '10px' }}
+                    // TODO only trigger the following event upon when user stops draawing the line or holding the clicker
+                    // onClick={
+                    //     () => {
+                    //         localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())
+                    //     }
+                    // }
+                />
+            </div>
 
             <div style={paintMenuStyle}>
                 <label htmlFor="stroke">Brush Stroke</label>
