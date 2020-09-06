@@ -96,17 +96,15 @@ function intializeWSEvents(io) {
 
         })
 
-        // TODO: share drawing with all the users within the same game
-        socket.on("share-drawing-with-players", ({ gameId, playerId, recentDrawnLine }) => {
+        // share drawing with all the users within the same game
+        socket.on("share-drawing-with-players", ({ gameId, playerId, canvasData }) => {
             // forward the recent drawnline to all the other players
 
             let listOfNonDrawers = getCurrentNonDrawingPlayers(gameId, playerId)
             // share current drawer line with other players
             for (let currentPlayerId of listOfNonDrawers) {
-                gameNSP.to(currentPlayerId).emit("draw-on-canvas", recentDrawnLine)
+                gameNSP.to(currentPlayerId).emit("draw-on-canvas", canvasData)
             }
-
-            // console.log(listOfNonDrawers)
         })
 
         // TODO: share text messages with all all the users in the same game
