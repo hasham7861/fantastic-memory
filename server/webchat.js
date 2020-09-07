@@ -35,7 +35,7 @@ function intializeWSEvents(io) {
 
         socket.on("update-host-id", gameId => {
             // const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
+            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: false }
             userToGameMap[socket.id] = gameId
             // currentGamesMap[gameId][oldHostSocId].status="closed"
             // currentGamesMap[gameId][oldHostSocId].host=false
@@ -44,6 +44,8 @@ function intializeWSEvents(io) {
         // Host uses this event to intiate a namespace
         socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
+            const playerIndexStart = data.playerIndexStart
+
 
             if (!currentGamesMap.hasOwnProperty(gameId)) {
                 currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true, player_turn: false } }
@@ -57,20 +59,17 @@ function intializeWSEvents(io) {
                 }
             }
 
+            // setting turn of the right player
+            if (Object.keys(currentGamesMap[gameId])[playerIndexStart]) {
+                Object.keys(currentGamesMap[gameId])[playerIndexStart].player_turn = true
+            }
+
             // console.log(currentGamesMap);
             let hostSocId = findHostOfGame(gameId)
             // console.log(hostSocId)
             gameNSP.to(hostSocId).emit("players-list", currentGamesMap[gameId])
 
-            // TODO: remove this once figure out how to swap turns
-            // only enable drawing canvas for whoever turn it is
-            // for (let currentPlayerId in currentGamesMap[gameId]) {
-            //     if (currentGamesMap[gameId][currentPlayerId].player_turn == false) {
-            //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", true)
-            //     } else {
-            //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", false)
-            //     }
-            // }
+
 
         })
 
@@ -107,7 +106,7 @@ function intializeWSEvents(io) {
 
 
 
-        // // enable drawing cavas for the right player
+        // // // enable drawing cavas for the right player
         // socket.on("enable-drawing-canvas", ({ gameId }) => {
 
         //     if (!(gameId in currentGamesMap)) {
@@ -115,13 +114,11 @@ function intializeWSEvents(io) {
         //         return
         //     }
 
+        //     // TODO: remove this once figure out how to swap turns
         //     // only enable drawing canvas for whoever turn it is
         //     for (let currentPlayerId in currentGamesMap[gameId]) {
-        //         if (currentPlayerId.player_turn == false) {
-        //             gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", true)
-        //         } else {
-        //             gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", false)
-        //         }
+        //         let canvasDisabled =  currentGamesMap[gameId][currentPlayerId].player_turn
+        //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled)
         //     }
         // })
 

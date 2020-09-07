@@ -41,11 +41,11 @@ function Guest(props) {
 
         mySocket.on("start-game", (data) => {
             //change the page to start-game with your socid to refer back to and gameId
-            console.log(data)
+          
             props.history.push({ pathname: "/start-game", state: data })
         })
 
-    }, [])
+    }, [props.history, setPlayerId])
 
     return (
 

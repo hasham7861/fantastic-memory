@@ -26,7 +26,7 @@ export default function DrawingBoard(props) {
         hideGrid: true,
         canvasWidth: 600,
         canvasHeight: 400,
-        disabled: false, // TODO: connect this with switch user event
+        disabled: false, // TODO by default it is disabled until the turn of player
         imgSrc: "",
         saveData: null,
         immediateLoading: false,
@@ -83,6 +83,7 @@ export default function DrawingBoard(props) {
         // console.log(drawingCanvas.getSaveData())
         let canvasData = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
 
+        // console.log(canvasData)
         mySocket.emit("share-drawing-with-players",
             {
                 gameId: props.gameId,
@@ -98,27 +99,21 @@ export default function DrawingBoard(props) {
 
     useEffect(() => {
 
-        function loadDrawing(canvasData) {
-            drawingCanvas.loadSaveData(JSON.stringify(canvasData), true)
-        }
-
-        // update the current canvas with other player drawing
-        mySocket.on("draw-on-canvas", canvasData => {
-            if (drawingCanvas && canvasData != null) {
-                loadDrawing(canvasData)// this loads the drawing
+        if (props.gameId) {
+            function loadDrawing(canvasData) {
+                drawingCanvas.loadSaveData(JSON.stringify(canvasData), true)
             }
-        })
 
-        // TODO: disable and enable drawing for the player
-        mySocket.on("toggle-drawing-canvas", canvasDisabled => {
-            // toggle canvas options, enable drawing canvas for only some players
-            let updateCanvasOptionsState = canvasOptions
-            console.log({canvasDisabled:canvasDisabled})
-            updateCanvasOptionsState.disabled = canvasDisabled
-            setCanvasOptions(updateCanvasOptionsState)
-            console.log('board is diabled')
-            console.log(canvasOptions)
-        })
+            // update the current canvas with other player drawing
+            mySocket.on("draw-on-canvas", canvasData => {
+                if (drawingCanvas && canvasData != null) {
+                    loadDrawing(canvasData)// this loads the drawing
+                }
+            })
+
+
+           
+        }
     })
 
 

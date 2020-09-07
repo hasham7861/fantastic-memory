@@ -53,18 +53,12 @@ const Host = function (props) {
             setPlayerId(id)
         })
 
-      
-      
-       
-
-
-
         // Player has not hosted any game at the moment
         if (!cookies.hasOwnProperty("gameId") && !cookies.hasOwnProperty("hostId")) {
             // create the game
             getGameToken().then(resp => {
                 setCookie("gameId", resp.data.gameId)
-                joinGame(resp.data.gameId)
+                joinGame(resp.data.gameId, 0)
                 // make sure to set local host-id
                 mySocket.emit("get-id", {})
                 // refresh the component to refresh the playerlist
@@ -72,6 +66,8 @@ const Host = function (props) {
 
             })
             // When player is not in any game
+
+           
         }
         else if (cookies.hasOwnProperty("hostId")) {
             setGameId(cookies.gameId)
@@ -86,8 +82,24 @@ const Host = function (props) {
 
             mySocket.emit("find-players-list", gameId);
 
+            // mySocket.emit("enable-drawing-canvas", ({ gameId: cookies.gameId }))
+
 
         }
+
+       
+
+        // // TODO: disable and enable drawing for the player
+        // mySocket.on("toggle-drawing-canvas", canvasDisabled => {
+        //     // toggle canvas options, enable drawing canvas for only some players
+
+        //     // update the state once
+        //     console.log(canvasDisabled)
+        //         // setCanvasOptions({...canvasOptions, disabled: canvasDisabled})
+           
+        // })
+
+
 
 
 
@@ -97,7 +109,7 @@ const Host = function (props) {
         })
 
 
-    }, [gameId, cookies, setCookie, removeCookie, props])
+    }, [gameId, cookies, setCookie, removeCookie, props, setPlayerId])
 
 
 

@@ -12,12 +12,12 @@ const initiateGameSockets = isServerUp(() => {
 
 })
 
-const joinGame = (gameId) => {
-    mySocket.emit("join-game-lobby", { gameId });
+const joinGame = (gameId, playerIndexStart) => {
+    mySocket.emit("join-game-lobby", { gameId, playerIndexStart });
 }
 
 const closeGame = (gameId) => {
-    mySocket.emit("close-game", gameId )
+    mySocket.emit("close-game", gameId)
 }
 
 
