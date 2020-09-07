@@ -1,6 +1,22 @@
 version: "3"
 services:
-  client:
+    build_client: 
+        context: ./client
+        dockerfile: Dockerfile
+        options: 
+            - t
+        args:
+            - fantasticmemory:client
+            - ./
+    build_server:
+        context: ./server
+        dockerfile: Dockerfile 
+        options: 
+            - t
+        args:
+            - fantasticmemory:server
+            - ./
+    client:
     container_name: fantasticmemory:client
     restart: always
     build: .
