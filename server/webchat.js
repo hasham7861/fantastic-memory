@@ -3,9 +3,9 @@ const { connectToDB } = require('./db');
 
 const currentGamesMap = {
     // '096ef6e3': {
-    //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true },
-    //   '/game-nsp#vIzy3GqOlps3GUqRAAAB': { status: 'closed', host: false },
-    //   '/game-nsp#mZOGYqfjFUcNhu1DAAAF': { status: 'active', host: false }
+    //   '/game-nsp#xDyy_b7cqqQoqZeLAAAC': { status: 'active', host: true, player_turn: true },
+    //   '/game-nsp#vIzy3GqOlps3GUqRAAAB': { status: 'closed', host: false, player_turn: false},
+    //   '/game-nsp#mZOGYqfjFUcNhu1DAAAF': { status: 'active', host: false, player_turn: false }
     // }
 }
 
@@ -18,21 +18,6 @@ function findHostOfGame(gameId) {
         if (currentGamesMap[gameId][playerSocId].host)
             return playerSocId
     }
-}
-
-function getCurrentNonDrawingPlayers(gameId, playerId) {
-    if (!(gameId in currentGamesMap)) {
-        console.log("getting-non-drawers: unable to find the game")
-        return
-    }
-    console.log(playerId)
-    let players = []
-    for (let currentPlayerId in currentGamesMap[gameId]) {
-        if (playerId != currentPlayerId) {
-            players.push(currentPlayerId)
-        }
-    }
-    return players
 }
 
 
@@ -50,24 +35,24 @@ function intializeWSEvents(io) {
 
         socket.on("update-host-id", gameId => {
             // const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = { status: 'active', host: true }
+            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
             userToGameMap[socket.id] = gameId
             // currentGamesMap[gameId][oldHostSocId].status="closed"
             // currentGamesMap[gameId][oldHostSocId].host=false
 
         })
-        // Host uses this event to intiate a namespacetr
+        // Host uses this event to intiate a namespace
         socket.on("join-game-lobby", data => {
             const gameId = data.gameId;
 
             if (!currentGamesMap.hasOwnProperty(gameId)) {
-                currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true } }
+                currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true, player_turn: false } }
                 userToGameMap[socket.id] = gameId;
             } else {
                 // only add the person with same socket once
                 let alreadyJoinedGame = socket.id in currentGamesMap[gameId]
                 if (!alreadyJoinedGame) {
-                    currentGamesMap[gameId][socket.id] = { status: 'active', host: false }
+                    currentGamesMap[gameId][socket.id] = { status: 'active', host: false, player_turn: false }
                     userToGameMap[socket.id] = gameId;
                 }
             }
@@ -76,6 +61,17 @@ function intializeWSEvents(io) {
             let hostSocId = findHostOfGame(gameId)
             // console.log(hostSocId)
             gameNSP.to(hostSocId).emit("players-list", currentGamesMap[gameId])
+
+            // TODO: remove this once figure out how to swap turns
+            // only enable drawing canvas for whoever turn it is
+            // for (let currentPlayerId in currentGamesMap[gameId]) {
+            //     if (currentGamesMap[gameId][currentPlayerId].player_turn == false) {
+            //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", true)
+            //     } else {
+            //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", false)
+            //     }
+            // }
+
         })
 
 
@@ -91,26 +87,43 @@ function intializeWSEvents(io) {
             gameNSP.to(socket.id).emit("players-list", listOfPlayers);
         })
 
-        // TODO: client sends in a game id, and add them into current games map
-        socket.on("match-making", msg => {
-
-        })
 
         // share drawing with all the users within the same game
         socket.on("share-drawing-with-players", ({ gameId, playerId, canvasData }) => {
             // forward the recent drawnline to all the other players
 
-            let listOfNonDrawers = getCurrentNonDrawingPlayers(gameId, playerId)
+            if (!(gameId in currentGamesMap)) {
+                console.log("getting-non-drawers: unable to find the game")
+                return
+            }
+
             // share current drawer line with other players
-            for (let currentPlayerId of listOfNonDrawers) {
-                gameNSP.to(currentPlayerId).emit("draw-on-canvas", canvasData)
+            for (let currentPlayerId in currentGamesMap[gameId]) {
+                if (playerId != currentPlayerId) {
+                    gameNSP.to(currentPlayerId).emit("draw-on-canvas", canvasData)
+                }
             }
         })
 
-        // TODO: share text messages with all all the users in the same game
-        socket.on("send-message", msg => {
 
-        })
+
+        // // enable drawing cavas for the right player
+        // socket.on("enable-drawing-canvas", ({ gameId }) => {
+
+        //     if (!(gameId in currentGamesMap)) {
+        //         console.log("getting-non-drawers: unable to find the game")
+        //         return
+        //     }
+
+        //     // only enable drawing canvas for whoever turn it is
+        //     for (let currentPlayerId in currentGamesMap[gameId]) {
+        //         if (currentPlayerId.player_turn == false) {
+        //             gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", true)
+        //         } else {
+        //             gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", false)
+        //         }
+        //     }
+        // })
 
         socket.on("game-started", gameId => {
             // TODO emit game start event to all clients

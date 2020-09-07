@@ -101,18 +101,23 @@ export default function DrawingBoard(props) {
         function loadDrawing(canvasData) {
             drawingCanvas.loadSaveData(JSON.stringify(canvasData), true)
         }
-     
+
         // update the current canvas with other player drawing
         mySocket.on("draw-on-canvas", canvasData => {
-            if (drawingCanvas && canvasData != null) {             
+            if (drawingCanvas && canvasData != null) {
                 loadDrawing(canvasData)// this loads the drawing
             }
         })
-        
+
         // TODO: disable and enable drawing for the player
-        mySocket.on("toggle-drawing", _ => {
+        mySocket.on("toggle-drawing-canvas", canvasDisabled => {
             // toggle canvas options, enable drawing canvas for only some players
-            // let updateCanvasOptionsState = Object.assign(
+            let updateCanvasOptionsState = canvasOptions
+            console.log({canvasDisabled:canvasDisabled})
+            updateCanvasOptionsState.disabled = canvasDisabled
+            setCanvasOptions(updateCanvasOptionsState)
+            console.log('board is diabled')
+            console.log(canvasOptions)
         })
     })
 
@@ -137,8 +142,8 @@ export default function DrawingBoard(props) {
 
 
             <div
-             // share drawing once user clicks off drawn line
-             onClick={()=>newDrawnLineOnCanvasHandler()}>
+                // share drawing once user clicks off drawn line
+                onClick={() => newDrawnLineOnCanvasHandler()}>
                 <CanvasDraw
                     ref={canvasDraw => (drawingCanvas = canvasDraw)}
                     {...canvasOptions}
