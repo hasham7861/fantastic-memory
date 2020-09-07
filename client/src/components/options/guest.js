@@ -12,19 +12,19 @@ function Guest(props) {
     const waitingDiv = useRef(null)
     const invalidGameIdDiv = useRef(null)
 
-    const { playerId,setPlayerId } = useContext(AppContext)
+    const { setPlayerId } = useContext(AppContext)
 
     const joinLobby = () => {
         // join game if use enters a valid id
         if (inputGameId.length > 1) {
             isValidGameId(inputGameId).then(resp => {
                 let isGameIdValid = resp.data.game_id_valid
-                if (isGameIdValid == true) {
+                if (isGameIdValid === true) {
                     joinGameDiv.current.style.display = "none"
                     waitingDiv.current.style.display = "block"
                     invalidGameIdDiv.current.style.display = "none"
                     joinGame(inputGameId)
-                } else if (isGameIdValid == false) {
+                } else if (isGameIdValid === false) {
                     invalidGameIdDiv.current.style.display = "block"
 
                 }

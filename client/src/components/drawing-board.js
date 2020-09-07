@@ -2,7 +2,6 @@ import CanvasDraw from 'react-canvas-draw';
 import { useRef, useState, useEffect } from 'react';
 import React, { useContext } from 'react';
 import { mySocket } from '../services/game-sockets'
-import { useCookies } from 'react-cookie';
 
 import { AppContext } from '../App'
 
@@ -10,9 +9,6 @@ export default function DrawingBoard(props) {
 
     // dom references
     let drawingCanvas = useRef(null);
-
-    // config of react tools
-    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
 
     //// STATES
     const [canvasOptions, setCanvasOptions] = useState({

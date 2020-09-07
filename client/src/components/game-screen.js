@@ -14,7 +14,7 @@ function GameScreen(props) {
             
         }
         setGameId(props.history.location.state.gameId)
-    },[])
+    },[props])
     
     return (
         // show different screen based on who is drawing currently

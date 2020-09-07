@@ -12,7 +12,7 @@ const Host = function (props) {
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-    const {playerId,setPlayerId} = useContext(AppContext)
+    const {setPlayerId} = useContext(AppContext)
 
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])

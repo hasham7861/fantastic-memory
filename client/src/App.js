@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Index from './components';
 import Host from './components/options/host';
 import Guest from './components/options/guest';
