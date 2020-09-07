@@ -35,7 +35,7 @@ function intializeWSEvents(io) {
 
         socket.on("update-host-id", gameId => {
             // const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: false }
+            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
             userToGameMap[socket.id] = gameId
             // currentGamesMap[gameId][oldHostSocId].status="closed"
             // currentGamesMap[gameId][oldHostSocId].host=false
@@ -106,21 +106,18 @@ function intializeWSEvents(io) {
 
 
 
-        // // // enable drawing cavas for the right player
-        // socket.on("enable-drawing-canvas", ({ gameId }) => {
+        // omit flag to client if their canvas should be enabled or not
+        socket.on("enable-drawing-canvas", (gameId) => {
 
-        //     if (!(gameId in currentGamesMap)) {
-        //         console.log("getting-non-drawers: unable to find the game")
-        //         return
-        //     }
-
-        //     // TODO: remove this once figure out how to swap turns
-        //     // only enable drawing canvas for whoever turn it is
-        //     for (let currentPlayerId in currentGamesMap[gameId]) {
-        //         let canvasDisabled =  currentGamesMap[gameId][currentPlayerId].player_turn
-        //         gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled)
-        //     }
-        // })
+            if (!(gameId in currentGamesMap)) {
+                console.log("getting-non-drawers: unable to find the game")
+                return
+            }
+            let playerId = socket.id
+            let canvasDisabled = !currentGamesMap[gameId][playerId].player_turn
+            gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled)
+            
+        })
 
         socket.on("game-started", gameId => {
             // TODO emit game start event to all clients

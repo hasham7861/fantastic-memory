@@ -111,8 +111,15 @@ export default function DrawingBoard(props) {
                 }
             })
 
-
-           
+            // omit to enable or disable canvas based on the right player turn
+            mySocket.emit("enable-drawing-canvas", props.gameId)
+            // disable and enable drawing for the player
+            mySocket.on("toggle-drawing-canvas", canvasDisabled => {
+                // only toggle canvas when the state doesn't match
+                if (canvasOptions.disabled !== canvasDisabled) {
+                    setCanvasOptions({ ...canvasOptions, disabled: canvasDisabled })
+                }
+            })
         }
     })
 

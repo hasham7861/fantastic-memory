@@ -1,31 +1,29 @@
-version: "3"
+version: "3.8"
 services:
-    build_client: 
-        context: ./client
-        dockerfile: Dockerfile
-        options: 
-            - t
-        args:
-            - fantasticmemory:client
-            - ./
-    build_server:
-        context: ./server
-        dockerfile: Dockerfile 
-        options: 
-            - t
-        args:
-            - fantasticmemory:server
-            - ./
     client:
-    container_name: fantasticmemory:client
-    restart: always
-    build: .
-    ports: 3000:3000
-    links:
-      - server
-  server:
-    container_name: fantasticmemory:server
-    restart: always
-    ports: 5000:5000
-    links:
-      - client
+        build: 
+            context: ./client
+            dockerfile: Dockerfile
+            args:
+                - -t
+                - fantasticmemory:client
+                - ./
+        container_name: fantasticmemory:client
+        restart: always
+        build: .
+        ports: 
+            - 3000:3000
+        links:
+            - server
+    server:
+        build: 
+            context: ./server
+            dockerfile: Dockerfile 
+            args:
+                - -t
+                - fantasticmemory:server
+                - ./
+        container_name: fantasticmemory:server
+        restart: always
+        ports: 
+            - 5000:5000

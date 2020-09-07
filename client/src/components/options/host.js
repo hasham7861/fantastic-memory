@@ -17,6 +17,8 @@ const Host = function (props) {
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
 
+
+
     //============ Handlers ============
     // show all the players in lobby
     const setPlayersJSX = (playersList) => {
@@ -87,17 +89,6 @@ const Host = function (props) {
 
         }
 
-       
-
-        // // TODO: disable and enable drawing for the player
-        // mySocket.on("toggle-drawing-canvas", canvasDisabled => {
-        //     // toggle canvas options, enable drawing canvas for only some players
-
-        //     // update the state once
-        //     console.log(canvasDisabled)
-        //         // setCanvasOptions({...canvasOptions, disabled: canvasDisabled})
-           
-        // })
 
 
 
