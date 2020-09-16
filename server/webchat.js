@@ -21,6 +21,13 @@ function findHostOfGame(gameId) {
     }
 }
 
+function findCurrentPlayerTurn(gameId){
+    for (let playerSocId in currentGamesMap[gameId]) {
+        if (currentGamesMap[gameId][playerSocId].player_turn)
+            return playerSocId
+    }
+}
+
 function generateWord(){
     let randomNumIndex = Math.floor(Math.random() * words.length-1)
     return words[randomNumIndex]
@@ -109,6 +116,10 @@ function intializeWSEvents(io) {
             }
         })
 
+        socket.on("do-i-get-a-word", (gameId)=>{
+            let playerId = findCurrentPlayerTurn(gameId)
+            gameNSP.to(playerId).emit("get-drawing-word", generateWord())
+        })
 
 
         // omit flag to client if their canvas should be enabled or not
@@ -119,7 +130,7 @@ function intializeWSEvents(io) {
                 return
             }
             let playerId = socket.id
-            if(gameId in currentGamesMap && "player_turn" in currentGamesMap[gameId][playerId])
+            if(gameId in currentGamesMap && playerId in currentGamesMap[gameId] && "player_turn" in currentGamesMap[gameId][playerId])
                 var canvasDisabled = !currentGamesMap[gameId][playerId].player_turn
 
             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled)

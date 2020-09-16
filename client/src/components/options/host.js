@@ -82,7 +82,7 @@ const Host = function (props) {
                 // only update players if there is new players being added
                 if(listOfPlayers.length === 0){
                     removeCookie("hostId")
-                    removeCookie("gameId")
+                    // removeCookie("gameId")
                     removeCookie("connect.sid")
                     removeCookie("io")
                 }

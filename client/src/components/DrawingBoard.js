@@ -48,10 +48,10 @@ export default function DrawingBoard(props) {
     }
 
     const paintMenuStyle = {
-        display: "flex",
-        flexDirection: "Column",
-        justifyContent: 'center',
-        alignItems: 'center'
+        // display: "flex",
+        // flexDirection: "Column",
+        // justifyContent: 'center',
+        // alignItems: 'center'
 
     }
     /////// END OF CSS
