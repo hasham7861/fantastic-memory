@@ -54,7 +54,7 @@ function intializeWSEvents(io) {
 
 
             if (!currentGamesMap.hasOwnProperty(gameId)) {
-                currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true, player_turn: false } }
+                currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true, player_turn: true } }
                 userToGameMap[socket.id] = gameId;
             } else {
                 // only add the person with same socket once
@@ -88,7 +88,6 @@ function intializeWSEvents(io) {
                 if (listOfPlayers[playerSocId].status == "closed")
                     delete listOfPlayers[playerSocId]
             }
-
             gameNSP.to(socket.id).emit("players-list", listOfPlayers);
         })
 
