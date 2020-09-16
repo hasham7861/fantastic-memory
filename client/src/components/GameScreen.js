@@ -1,6 +1,6 @@
 import React,{useState, useEffect} from 'react'
 // import PropTypes from 'prop-types'
-import DrawingBoard from './drawing-board.js'
+import DrawingBoard from './DrawingBoard.js'
 import {withRouter} from 'react-router-dom'
 
 function GameScreen(props) {

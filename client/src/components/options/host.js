@@ -80,7 +80,7 @@ const Host = function (props) {
             mySocket.on("players-list", function (listOfPlayers) {
                 // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
                 // only update players if there is new players being added
-                if(listOfPlayers.length == 0){
+                if(listOfPlayers.length === 0){
                     removeCookie("hostId")
                     removeCookie("gameId")
                     removeCookie("connect.sid")

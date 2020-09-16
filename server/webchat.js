@@ -119,7 +119,9 @@ function intializeWSEvents(io) {
                 return
             }
             let playerId = socket.id
-            let canvasDisabled = !currentGamesMap[gameId][playerId].player_turn
+            if(gameId in currentGamesMap && "player_turn" in currentGamesMap[gameId][playerId])
+                var canvasDisabled = !currentGamesMap[gameId][playerId].player_turn
+
             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled)
             
         })
