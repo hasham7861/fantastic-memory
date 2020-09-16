@@ -1,5 +1,6 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
-const { connectToDB } = require('./db');
+// const { connectToDB } = require('./db');
+const words = require("./assets/category_of_words.json").words
 
 const currentGamesMap = {
     // '096ef6e3': {
@@ -18,6 +19,11 @@ function findHostOfGame(gameId) {
         if (currentGamesMap[gameId][playerSocId].host)
             return playerSocId
     }
+}
+
+function generateWord(){
+    let randomNumIndex = Math.floor(Math.random() * words.length-1)
+    return words[randomNumIndex]
 }
 
 
