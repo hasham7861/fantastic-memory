@@ -78,6 +78,7 @@ const Host = function (props) {
 
             // listen to player-list event
             mySocket.on("players-list", function (listOfPlayers) {
+                // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
                 // only update players if there is new players being added
                 setPlayersJSX(listOfPlayers)
             })

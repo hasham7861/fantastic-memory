@@ -34,11 +34,11 @@ function intializeWSEvents(io) {
         })
 
         socket.on("update-host-id", gameId => {
-            // const oldHostSocId = findHostOfGame(gameId);
-            currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
-            userToGameMap[socket.id] = gameId
-            // currentGamesMap[gameId][oldHostSocId].status="closed"
-            // currentGamesMap[gameId][oldHostSocId].host=false
+           
+            if(gameId in currentGamesMap && socket.id in currentGamesMap[gameId]){
+                currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
+                userToGameMap[socket.id] = gameId       
+            }
 
         })
         // Host uses this event to intiate a namespace
@@ -158,14 +158,6 @@ function intializeWSEvents(io) {
 
             }
 
-
-
-            // auto kick off non host players from the game once they close window
-            // if (player.status == "active" ) {
-            //     player.status = "closed";
-            //     player.host= false;
-            //     delete userToGameMap[socket.id];
-            // }
         })
 
     })
