@@ -22,10 +22,11 @@ const Host = function (props) {
     //============ Handlers ============
     // show all the players in lobby
     const setPlayersJSX = (playersList) => {
+        console.log(playersList)
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
-                    return <li key={i}>{p}</li>
+                    return <li key={i}>{playersList[p].id}</li>
                 }
             )
         )

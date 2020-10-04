@@ -1,7 +1,8 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
 // const { connectToDB } = require('./db');
 const words = require("./database/category_of_words.json").words
-const Game = requrie("./models/Game");
+const Game = require("./models/Game");
+const Player = require("./models/Player");
 
 // stores context of all games
 const currentGamesMap = {
@@ -58,22 +59,25 @@ function intializeWSEvents(io) {
 
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
-        //send the id back to user to know who they are
-        gameNSP.to(socket.id).emit("player-id", socket.id);
 
         let currentPlayerId = socket.id;
 
+        //send the id back to user to know who they are
+        gameNSP.to(socket.id).emit("player-id", currentPlayerId);
+
+       
+
         socket.on("get-id", _ => {
-            gameNSP.to(socket.id).emit("player-id", socket.id);
+            gameNSP.to(socket.id).emit("player-id", currentPlayerId);
         })
 
         socket.on("update-host-id", gameId => {
-            if (gameId in currentGamesMap && currentPlayerId in currentGamesMap[gameId].players) {
+            if (gameId in currentGamesMap && currentGamesMap[gameId].players && currentGamesMap[gameId].players[currentPlayerId]) {
                 currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId, true);
                 currentGamesMap[gameId].hostId = currentPlayerId;
                 currentGamesMap[gameId].playerTurnId = currentPlayerId;
 
-                userToGameMap[socket.id] = gameId
+                userToGameMap[currentPlayerId] = gameId;
             }
             // if (gameId in currentGamesMap && socket.id in currentGamesMap[gameId]) {
             //     currentGamesMap[gameId][socket.id] = { status: 'active', host: true, player_turn: true }
@@ -86,26 +90,27 @@ function intializeWSEvents(io) {
             // there isn't a game already with this gameId
             if (!currentGamesMap.hasOwnProperty(gameId)) {
                 // hostId is the same as the currentPlayer who intiated the game
-                currentGamesMap[gameId] = new Game(gameId, hostId = currentPlayerId,
+                currentGamesMap[gameId] = new Game(gameId, 
+                    currentPlayerId,
                     players = {
-                        currentPlayerId = new Player(id = currentPlayerId)
+                        currentPlayerId: new Player(currentPlayerId)
                     },
-                    playerTurnId = currentPlayerId
+                    currentPlayerId
                 );
 
                 userToGameMap[currentPlayerId] = gameId;
             }
             // currentPlayerId is not in game then add them to gameContext
-            else if (!(currentPlayerId in currentGamesMap[gameId])) {
+            else if (!(currentGamesMap[gameId].players.hasOwnProperty(currentPlayerId))) {
                 // only add the person with same socket once
-                if (!(socket.id in currentGamesMap[gameId])) {
-                    currentGamesMap[gameId].players.push(new Player(id = currentPlayerId));
+                if (!(socket.id in currentGamesMap[gameId]) && currentGamesMap[gameId].players) {
+                    currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId);
                 }
             }
 
             // update list of players for client
             let hostPlayerId = findHostOfGame(gameId);
-            gameNSP(hostPlayerId).emit("players-list", currentGamesMap[gameId])
+            gameNSP.to(hostPlayerId).emit("players-list", currentGamesMap[gameId].players)
 
             // if (!currentGamesMap.hasOwnProperty(gameId)) {
             //     currentGamesMap[gameId] = { [socket.id]: { status: 'active', host: true, player_turn: true } }
@@ -134,13 +139,24 @@ function intializeWSEvents(io) {
 
         // return list of players within the same game
         socket.on("find-players-list", gameId => {
-            let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId].players : []
+            
+            if(!(gameId in currentGamesMap)){
+                console.log("unable to find this gameId")
+                return
+            }
+            console.log(currentGamesMap[gameId].players)
+            let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId].players : {}
+
+            
             // delete players from context of game when they closed out of game
             for (let playerSocId in listOfPlayers) {
                 if (!listOfPlayers[playerSocId].inGame)
                     delete listOfPlayers[playerSocId]
             }
 
+            currentGamesMap[gameId].players = listOfPlayers;
+
+            
             gameNSP.to(currentPlayerId).emit("players-list", listOfPlayers)
 
 
@@ -200,7 +216,7 @@ function intializeWSEvents(io) {
             }
             else {
                 // only enable canvas for players, whose turn it is
-                if (gameId in currentGamesMap &&
+                if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
                     currentPlayerId in currentGamesMap[gameId].players) {
                     if (currentPlayerId == currentGamesMap[gameId].playerTurnId) {
                         // emit event to player whose canvas isn't disabled
@@ -249,12 +265,16 @@ function intializeWSEvents(io) {
 
         socket.on("close-game", gameId => {
 
-            // delete tracking of which game player is in currently
-            for (let player in currentGamesMap[gameId].players) {
-                delete userToGameMap[player.id]
+            if (gameId in currentGamesMap && currentGamesMap[gameId].players) {
+                // delete tracking of which game player is in currently
+                for (let player in currentGamesMap[gameId].players) {
+                    delete userToGameMap[player.id]
+                }
+                // delete the entire
+                delete currentGamesMap[gameId]
             }
-            // delete the entire
-            delete currentGamesMap[gameId]
+
+
 
             // // delete tracking of which game player is in currently
             // for (let playerSocID in currentGamesMap) {
