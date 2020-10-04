@@ -1,8 +1,9 @@
 const game = require('express')();
 const crypto = require('crypto');
 
-const gameEventEmitter = require('events');
+const EventEmitter = require('events');
 
+const gameEventEmitter = new EventEmitter();
 
 const { currentGamesMap } = require('../webchat');
 const { connectToDB } = require('../database/db');
@@ -41,11 +42,30 @@ game.get("/is_valid_game_id", (req, res) => {
 
 })
 
-game.post("/start_game_loop", (req, res) => {
+game.post("/start_game", (req, res) => {
     /** //FIXME
      * when host of the game, clicks starts game,
      * emit event start game-loop, which starts game loop
-     * this should setup the all the players for game to start
+     */
+
+    const gameId = req.body.gameId;
+
+    if (!gameId) {
+        req.status(400).send("you need a gameId to start game")
+    }else{
+        gameEventEmitter.emit("start-game","23")
+    }
+
+})
+
+
+
+gameEventEmitter.once("start-game", async(gameId)=>{
+    //TODO keep track of timer, points, and switch turns here
+    /**
+     * gameloop
+     * this should also emit event to all the other players listening in to start game
+     * generate a word for player, and keep track of it in game.
      * this game loop starts a timer for 30 seconds, then switch turn to another player
      * keep tally of rounds
      * once rounds reach 3 rounds, stop game for all players
@@ -53,18 +73,7 @@ game.post("/start_game_loop", (req, res) => {
      * save score for each person in file somewhere after game is over
      */
 
-    const gameId = req.body.gameId;
 
-    if (!gameId) {
-        req.status(400).send("you need a gameId to start game")
-    }
-
-})
-
-
-
-gameEventEmitter.once("start-game-loop", async(gameId)=>{
-    //TODO keep track of timer, points, and switch turns here
 })
 
 module.exports = game;

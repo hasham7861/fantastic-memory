@@ -1,6 +1,6 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
 // const { connectToDB } = require('./db');
-const words = require("./assets/category_of_words.json").words
+const words = require("./database/category_of_words.json").words
 
 const currentGamesMap = {
     // '096ef6e3': {
@@ -137,6 +137,7 @@ function intializeWSEvents(io) {
             
         })
 
+        // TODO this logic is to be moved to seperate game server
         socket.on("game-started", gameId => {
             // TODO emit game start event to all clients
 
@@ -153,7 +154,7 @@ function intializeWSEvents(io) {
         })
 
         socket.on("close-game", gameId => {
-            let game = currentGamesMap[gameId]
+            
             // delete tracking of which game player is in currently
             for (let playerSocID in currentGamesMap) {
                 delete userToGameMap[playerSocID]
