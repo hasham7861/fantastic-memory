@@ -22,7 +22,6 @@ const Host = function (props) {
     //============ Handlers ============
     // show all the players in lobby
     const setPlayersJSX = (playersList) => {
-        console.log(playersList)
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
@@ -74,7 +73,8 @@ const Host = function (props) {
         }
         else if (cookies.hasOwnProperty("hostId")) {
             setGameId(cookies.gameId)
-            mySocket.emit("update-host-id", cookies.gameId)
+            if (cookies.gameId)
+                mySocket.emit("update-host-id", cookies.gameId)
             joinGame(cookies.gameId);
 
             // listen to player-list event

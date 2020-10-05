@@ -1,3 +1,5 @@
+
+const GameStates = ["MENU","STARTED","CLOSED"]
 module.exports = class Game {
     constructor(id, players, status, hostId, playerTurnId) {
         this.id = id ? id : "";
@@ -5,7 +7,7 @@ module.exports = class Game {
         {
             // playerID:  new Player(playerId1)
         };
-        this.status = status ? status : "not-started";
+        this.status = status ? status : GameStates[0];
         this.hostId = hostId ? hostId : "";
         this.playerTurnId = playerTurnId ? playerTurnId : "";
         this.gameRounds = [

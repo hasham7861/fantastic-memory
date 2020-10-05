@@ -6,9 +6,9 @@ const EventEmitter = require('events');
 const gameEventEmitter = new EventEmitter();
 
 const { currentGamesMap } = require('../webchat');
-const { connectToDB } = require('../database/db');
+// const { connectToDB } = require('../database/db');
 
-connectToDB()
+// connectToDB()
 
 
 
