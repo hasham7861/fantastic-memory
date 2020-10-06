@@ -3,7 +3,7 @@ const express = require("express");
 
 // load up server and frontend module
 const app = require('./apis/app');
-const { intializeWSEvents } = require('./webchat');
+const { intializeWSEvents } = require('./socket-events/webchat');
 const PORT = process.env.PORT | "5000";
 
 // server

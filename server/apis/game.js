@@ -5,17 +5,13 @@ const EventEmitter = require('events');
 
 const gameEventEmitter = new EventEmitter();
 
-const { currentGamesMap } = require('../webchat');
-// const { connectToDB } = require('../database/db');
+const { currentGamesMap, gameNSP } = require('../socket-events/webchat');
+const words = require("../database/category_of_words.json").words
 
-// connectToDB()
-
-
-
-const gameContexts = {
-    // "gameId" : {"status":"not_started",gameRounds: {round1:{playerTurnId:"p1", playerWordToDraw:"pizza", timer:""},"pointsMap"}}
+function generateWord() {
+    let randomNumIndex = Math.floor(Math.random() * words.length - 1)
+    return words[randomNumIndex]
 }
-
 
 game.get("/generate_game_id", (req, res) => {
     crypto.randomBytes(4, function (err, buffer) {
@@ -52,15 +48,15 @@ game.post("/start_game", (req, res) => {
 
     if (!gameId) {
         req.status(400).send("you need a gameId to start game")
-    }else{
-        gameEventEmitter.emit("start-game","23")
+    } else {
+        gameEventEmitter.emit("start-game", "23")
     }
 
 })
 
 
 
-gameEventEmitter.once("start-game", async(gameId)=>{
+gameEventEmitter.once("start-game", async (gameId) => {
     //TODO keep track of timer, points, and switch turns here
     /**
      * gameloop
@@ -72,6 +68,43 @@ gameEventEmitter.once("start-game", async(gameId)=>{
      * show score of game
      * save score for each person in file somewhere after game is over
      */
+
+    if (!gameNSP) {
+        console.log("start-game-event: gameNSP hasn't been intialized yet")
+        return;
+    }
+
+    if (!(gameId in currentGamesMap)) {
+        console.log("start-game-event: unable to start game");
+        return;
+    }
+
+    if (!currentGamesMap[gameId].players) {
+        console.log("start-game-event: unable to find players to start game for");
+        return;
+    }
+
+
+    // emiting event to other users that game has started
+    for (let playerId in currentGamesMap[gameId].players) {
+        let player = currentGamesMap[gameId].players[playerId];
+        if (player.inGame && player.id != currentGamesMap[gameId].hostId) {
+            gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
+        }
+    }
+
+    //  TODO should start rounds loop here
+
+    for (let roundNum of [1, 2, 3]) {
+        // generate random word, and send to correct person
+        let playerId = findCurrentPlayerTurn(gameId);
+        gameNSP.to(playerId).emit("get-drawing-word", generateWord());
+
+        // TODO start timer for 60 seconds, for the person to start drawing, and then switch turns
+
+
+    }
+
 
 
 })
