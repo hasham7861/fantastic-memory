@@ -6,6 +6,7 @@ const EventEmitter = require('events');
 const gameEventEmitter = new EventEmitter();
 
 const { currentGamesMap, gameNSP } = require('../socket-events/webchat');
+const { resolve } = require('path');
 const words = require("../database/category_of_words.json").words
 
 function generateWord() {
@@ -93,20 +94,43 @@ gameEventEmitter.once("start-game", async (gameId) => {
         }
     }
 
-    //  TODO should start rounds loop here
+    //  start rounds loop here
 
     for (let roundNum of [1, 2, 3]) {
-        // generate random word, and send to correct person
+        // generate random word, and send to person who is about to draw
         let playerId = findCurrentPlayerTurn(gameId);
         gameNSP.to(playerId).emit("get-drawing-word", generateWord());
 
-        // TODO start timer for 60 seconds, for the person to start drawing, and then switch turns
+        // toggle the correct person canvas for them to draw
+        if (gameId in currentGamesMap) {
+            // only enable canvas for players, whose turn it is
+            if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
+                currentPlayerId in currentGamesMap[gameId].players) {
+                if (currentPlayerId == currentGamesMap[gameId].playerTurnId) {
+                    // emit event to player whose canvas isn't disabled
+                    gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = false)
+                } else {
+                    // emit event to player whose canvas isn disabled
+                    gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = true)
+                }
+            }
+        }
 
+
+        // start timer for 60 seconds, for the person to start drawing, and then switch turns
+        let roundTimer = await setTimeout((gameId, roundNum) => {
+            console.log(`For game:${gameId} round:${roundNum} has finished`);
+        }, 30000, gameId, roundNum)
+
+
+        // switch the playerId turn to another person.
+        currentGamesMap[gameId].ChangeToDifferentPlayerId();
 
     }
 
-
-
+    
+    return "Game should be over now"
 })
+
 
 module.exports = game;

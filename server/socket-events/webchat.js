@@ -172,6 +172,13 @@ function intializeWSEvents(io) {
 
         })
 
+        // TODO set score of player based on drawing, increase score of player based on the correct guess word
+        socket.on("check-guessed-word", ({gameId, guessedWord})=>{
+
+        })
+      
+       
+
         socket.on("close-game", gameId => {
 
             if (gameId in currentGamesMap && currentGamesMap[gameId].players) {
