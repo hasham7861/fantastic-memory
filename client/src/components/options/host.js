@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { getGameToken } from '../../services/rest';
 import { joinGame, closeGame, mySocket } from '../../services/game-sockets';
@@ -6,13 +6,14 @@ import { useCookies } from 'react-cookie';
 
 import './host.css'
 import { AppContext } from '../../App'
+import { envUri } from '../../services/environment';
 
 const Host = function (props) {
 
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-    const {setPlayerId} = useContext(AppContext)
+    const { setPlayerId } = useContext(AppContext)
 
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
@@ -43,15 +44,22 @@ const Host = function (props) {
         // move to start game push
         props.history.push({ pathname: "/start-game", state: { gameId } })
 
+        fetch(envUri + "/game/start_game",
+            {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ gameId })
+            })
+            .then(data => console.log(data))
         // signal to all the other clients in the same socket that game has started
-        mySocket.emit("game-started", gameId)
+        // mySocket.emit("game-started", gameId)
     }
     //============ Hooks ============
     useEffect(() => {
-      
-        mySocket.on("player-id", function (id) {  
+
+        mySocket.on("player-id", function (id) {
             setCookie("hostId", id)
-              // save playerId into context
+            // save playerId into context
             setPlayerId(id)
         })
 
@@ -69,7 +77,7 @@ const Host = function (props) {
             })
             // When player is not in any game
 
-           
+
         }
         else if (cookies.hasOwnProperty("hostId")) {
             setGameId(cookies.gameId)
@@ -81,7 +89,7 @@ const Host = function (props) {
             mySocket.on("players-list", function (listOfPlayers) {
                 // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
                 // only update players if there is new players being added
-                if(listOfPlayers.length === 0){
+                if (listOfPlayers.length === 0) {
                     removeCookie("hostId")
                     // removeCookie("gameId")
                     removeCookie("connect.sid")

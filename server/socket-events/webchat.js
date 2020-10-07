@@ -1,12 +1,13 @@
 // TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
 // const { connectToDB } = require('./db');
+
 const words = require("../database/category_of_words.json").words
 const Game = require("../models/Game");
 const Player = require("../models/Player");
 
 
 // stores context of all games
-const currentGamesMap = {
+global.currentGamesMap = {
     // '096ef6e3': new Game(...)
 }
 
@@ -37,12 +38,11 @@ function generateWord() {
     return words[randomNumIndex]
 }
 
-// global namespaces
-let gameNSP = null;
+function intializeWSEvents() {
 
-function intializeWSEvents(io) {
+    let io = global.io;
 
-    gameNSP = io.of('/game-nsp');
+    let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
 
         let currentPlayerId = socket.id;
@@ -56,13 +56,13 @@ function intializeWSEvents(io) {
         })
 
         socket.on("update-host-id", gameId => {
-            if (gameId in currentGamesMap && currentGamesMap[gameId].players && currentGamesMap[gameId].players[currentPlayerId]) {
+            if (gameId in currentGamesMap && currentGamesMap[gameId].players && !currentGamesMap[gameId].players[currentPlayerId]) {
                 currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId, true);
                 currentGamesMap[gameId].hostId = currentPlayerId;
                 currentGamesMap[gameId].playerTurnId = currentPlayerId;
                 userToGameMap[currentPlayerId] = gameId;
             }
-
+           
         })
         // Host uses this event to intiate a namespace
         socket.on("join-game-lobby", ({ gameId, playerIndexStart }) => {
@@ -211,12 +211,14 @@ function intializeWSEvents(io) {
     io.on("connection", socket => {
         // generaic io events 
     })
-
+   
+    global.gameNSP = gameNSP;
 }
+
+
 
 module.exports = {
     currentGamesMap,
     intializeWSEvents,
-    findCurrentPlayerTurn,
-    gameNSP
+    findCurrentPlayerTurn
 }

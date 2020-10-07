@@ -2,12 +2,15 @@ const game = require('express')();
 const crypto = require('crypto');
 
 const EventEmitter = require('events');
+const { currentGamesMap } = require('../socket-events/webchat');
 
 const gameEventEmitter = new EventEmitter();
 
-const { currentGamesMap, gameNSP } = require('../socket-events/webchat');
-const { resolve } = require('path');
 const words = require("../database/category_of_words.json").words
+
+// socket events game nsp
+const gameNSP =  io.of("/game-nsp");
+
 
 function generateWord() {
     let randomNumIndex = Math.floor(Math.random() * words.length - 1)
@@ -45,12 +48,13 @@ game.post("/start_game", (req, res) => {
      * emit event start game-loop, which starts game loop
      */
 
+
     const gameId = req.body.gameId;
 
     if (!gameId) {
-        req.status(400).send("you need a gameId to start game")
+        res.status(400).send("you need a gameId to start game")
     } else {
-        gameEventEmitter.emit("start-game", "23")
+        gameEventEmitter.emit("start-game", gameId)
     }
 
 })
@@ -70,6 +74,7 @@ gameEventEmitter.once("start-game", async (gameId) => {
      * save score for each person in file somewhere after game is over
      */
 
+    // console.log(gameNSP)
     if (!gameNSP) {
         console.log("start-game-event: gameNSP hasn't been intialized yet")
         return;
@@ -98,37 +103,41 @@ gameEventEmitter.once("start-game", async (gameId) => {
 
     for (let roundNum of [1, 2, 3]) {
         // generate random word, and send to person who is about to draw
-        let playerId = findCurrentPlayerTurn(gameId);
-        gameNSP.to(playerId).emit("get-drawing-word", generateWord());
+      
+        if(currentGamesMap[gameId].playerTurnId)
+            var playerId = currentGamesMap[gameId].playerTurnId;
 
-        // toggle the correct person canvas for them to draw
-        if (gameId in currentGamesMap) {
-            // only enable canvas for players, whose turn it is
-            if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
-                currentPlayerId in currentGamesMap[gameId].players) {
-                if (currentPlayerId == currentGamesMap[gameId].playerTurnId) {
-                    // emit event to player whose canvas isn't disabled
-                    gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = false)
-                } else {
-                    // emit event to player whose canvas isn disabled
-                    gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = true)
-                }
-            }
-        }
+        // TODO work on this logic 
+        // gameNSP.to(playerId).emit("get-drawing-word", generateWord());
 
-
-        // start timer for 60 seconds, for the person to start drawing, and then switch turns
-        let roundTimer = await setTimeout((gameId, roundNum) => {
-            console.log(`For game:${gameId} round:${roundNum} has finished`);
-        }, 30000, gameId, roundNum)
+        // // toggle the correct person canvas for them to draw
+        // if (gameId in currentGamesMap) {
+        //     // only enable canvas for players, whose turn it is
+        //     if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
+        //         playerId in currentGamesMap[gameId].players) {
+        //         if (playerId == currentGamesMap[gameId].playerTurnId) {
+        //             // emit event to player whose canvas isn't disabled
+        //             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled = false)
+        //         } else {
+        //             // emit event to player whose canvas isn disabled
+        //             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled = true)
+        //         }
+        //     }
+        // }
 
 
-        // switch the playerId turn to another person.
-        currentGamesMap[gameId].ChangeToDifferentPlayerId();
+        // // start timer for 60 seconds, for the person to start drawing, and then switch turns
+        // let roundTimer = await setTimeout((gameId, roundNum) => {
+        //     console.log(`For game:${gameId} round:${roundNum} has finished`);
+        // }, 10000, gameId, roundNum)
+
+
+        // // switch the playerId turn to another person.
+        // currentGamesMap[gameId].ChangeToDifferentPlayerId();
 
     }
 
-    
+
     return "Game should be over now"
 })
 

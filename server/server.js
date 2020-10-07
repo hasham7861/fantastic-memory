@@ -1,8 +1,7 @@
 // node modules
 const express = require("express");
 
-// load up server and frontend module
-const app = require('./apis/app');
+
 const { intializeWSEvents } = require('./socket-events/webchat');
 const PORT = process.env.PORT | "5000";
 
@@ -10,11 +9,14 @@ const PORT = process.env.PORT | "5000";
 const server = express();
 server.use(express.json());
 const http = require('http').createServer(server);
-const io = require('socket.io')(http);
+// set the global app var io
+global.io = require('socket.io')(http);
+
+// load up server and frontend module
+const app = require('./apis/app');
 
 // // intialize all the WS events
-intializeWSEvents(io);
-
+intializeWSEvents();
 
 // Settings for the entire server
 
@@ -32,7 +34,7 @@ server.use((req, res, next) => {
   return next();
 });
 
-// // make use of all the
+// utlize the express app in node app
 server.use(app);
 
 
