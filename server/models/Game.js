@@ -26,7 +26,11 @@ module.exports = class Game {
         } else {
             this.playerTurnIndex = this.playerTurnIndex + 1
         }
-       
+
         this.playerTurnId = Object.keys(this.players)[this.playerTurnIndex];
+    }
+
+    ResetTimeLeft() {
+        this.timeForEachRound = 30000;
     }
 }

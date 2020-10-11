@@ -1,8 +1,8 @@
 import React,{useState, useEffect} from 'react'
 // import PropTypes from 'prop-types'
-import DrawingBoard from './DrawingBoard.js'
+import DrawingBoard from './GameSarted/DrawingBoard/DrawingBoard.js'
 import {withRouter} from 'react-router-dom'
-import { GameDashboard } from './GameDashboard.js';
+import { DrawingDashboard } from './GameSarted/DrawingDashboard/DrawingDashboard.js';
 
 function GameScreen(props) {
 
@@ -20,7 +20,7 @@ function GameScreen(props) {
     return (
         // show different screen based on who is drawing currently
         <div className="GameScreen">
-            <GameDashboard/>
+            <DrawingDashboard/>
             <DrawingBoard gameId={gameId}></DrawingBoard>
             
         </div>

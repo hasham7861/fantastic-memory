@@ -76,7 +76,6 @@ gameEventEmitter.once("start-game", async (gameId) => {
      * save score for each person in file somewhere after game is over
      */
 
-    // console.log(gameNSP)
     if (!gameNSP) {
         console.log("start-game-event: gameNSP hasn't been intialized yet")
         return;
@@ -112,12 +111,20 @@ gameEventEmitter.once("start-game", async (gameId) => {
 
             // generate random word to draw for player is currently turn it is
             let drawingWord = playerId === currentPlayerTurnId ? generateWord() : "";
-            gameNSP.to(playerId).emit("get-drawing-word", drawingWord);
+            gameNSP.to(playerId).emit("drawing-word", drawingWord);
 
         }
 
+        // update timeleft for drawing player
+        let timeLeftInterval = setInterval(() => {
+            currentGamesMap[gameId].timeForEachRound-=1000;
+            gameNSP.to(currentPlayerTurnId).emit("update-time-left", currentGamesMap[gameId].timeForEachRound/1000);
+        },1000)
         // start the timer for each round
         await sleep(currentGamesMap[gameId].timeForEachRound);
+
+        clearInterval(timeLeftInterval);
+        currentGamesMap[gameId].ResetTimeLeft();
 
         // switch the playerId turn to another person.
         currentGamesMap[gameId].ChangeToDifferentPlayerId();
