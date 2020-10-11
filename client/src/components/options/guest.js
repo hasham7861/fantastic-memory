@@ -41,7 +41,6 @@ function Guest(props) {
 
         mySocket.on("start-game", (data) => {
             //change the page to start-game with your socid to refer back to and gameId
-          
             props.history.push({ pathname: "/start-game", state: data })
         })
 

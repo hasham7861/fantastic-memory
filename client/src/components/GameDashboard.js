@@ -9,8 +9,8 @@ export const GameDashboard = () => {
 
     useEffect(() => {
 
-        mySocket.emit("do-i-get-a-word", cookies["gameId"])
-        mySocket.on("get-drawing-word", word => {
+        // mySocket.emit("do-i-get-a-word", cookies["gameId"])
+        mySocket.on("drawing-word", word => {
             if (word && word != drawingWord){
                 setDrawingWord(word)
                 console.log(word)

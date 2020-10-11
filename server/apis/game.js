@@ -1,5 +1,6 @@
 const game = require('express')();
 const crypto = require('crypto');
+const { sleep } = require('../util/reusable');
 
 const EventEmitter = require('events');
 const { currentGamesMap } = require('../socket-events/webchat');
@@ -9,7 +10,7 @@ const gameEventEmitter = new EventEmitter();
 const words = require("../database/category_of_words.json").words
 
 // socket events game nsp
-const gameNSP =  io.of("/game-nsp");
+const gameNSP = io.of("/game-nsp");
 
 
 function generateWord() {
@@ -54,7 +55,8 @@ game.post("/start_game", (req, res) => {
     if (!gameId) {
         res.status(400).send("you need a gameId to start game")
     } else {
-        gameEventEmitter.emit("start-game", gameId)
+        res.send("game has started");
+        gameEventEmitter.emit("start-game", gameId);
     }
 
 })
@@ -94,50 +96,35 @@ gameEventEmitter.once("start-game", async (gameId) => {
     // emiting event to other users that game has started
     for (let playerId in currentGamesMap[gameId].players) {
         let player = currentGamesMap[gameId].players[playerId];
-        if (player.inGame && player.id != currentGamesMap[gameId].hostId) {
-            gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
-        }
+        // emit event to all players that game has started
+        gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
     }
+
 
     //  start rounds loop here
+    for (let roundNum = 1; roundNum <= currentGamesMap[gameId].totalRounds; ++roundNum) {
+        let currentPlayerTurnId = currentGamesMap[gameId].playerTurnId;
 
-    for (let roundNum of [1, 2, 3]) {
-        // generate random word, and send to person who is about to draw
-      
-        if(currentGamesMap[gameId].playerTurnId)
-            var playerId = currentGamesMap[gameId].playerTurnId;
+        // setup the screen for currentPlayerDrawing
+        for (let playerId in currentGamesMap[gameId].players) {
+            let currentPlayerCanvasDisabled = playerId !== currentPlayerTurnId;
+            gameNSP.to(playerId).emit("toggle-drawing-canvas", currentPlayerCanvasDisabled);
 
-        // TODO work on this logic 
-        // gameNSP.to(playerId).emit("get-drawing-word", generateWord());
+            // generate random word to draw for player is currently turn it is
+            let drawingWord = playerId === currentPlayerTurnId ? generateWord() : "";
+            gameNSP.to(playerId).emit("get-drawing-word", drawingWord);
 
-        // // toggle the correct person canvas for them to draw
-        // if (gameId in currentGamesMap) {
-        //     // only enable canvas for players, whose turn it is
-        //     if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
-        //         playerId in currentGamesMap[gameId].players) {
-        //         if (playerId == currentGamesMap[gameId].playerTurnId) {
-        //             // emit event to player whose canvas isn't disabled
-        //             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled = false)
-        //         } else {
-        //             // emit event to player whose canvas isn disabled
-        //             gameNSP.to(playerId).emit("toggle-drawing-canvas", canvasDisabled = true)
-        //         }
-        //     }
-        // }
+        }
 
+        // start the timer for each round
+        await sleep(currentGamesMap[gameId].timeForEachRound);
 
-        // // start timer for 60 seconds, for the person to start drawing, and then switch turns
-        // let roundTimer = await setTimeout((gameId, roundNum) => {
-        //     console.log(`For game:${gameId} round:${roundNum} has finished`);
-        // }, 10000, gameId, roundNum)
+        // switch the playerId turn to another person.
+        currentGamesMap[gameId].ChangeToDifferentPlayerId();
 
-
-        // // switch the playerId turn to another person.
-        // currentGamesMap[gameId].ChangeToDifferentPlayerId();
+        console.log(`Round ${roundNum} is over. Player ${currentGamesMap[gameId].playerTurnId} turn to draw`);
 
     }
-
-
     return "Game should be over now"
 })
 

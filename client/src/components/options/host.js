@@ -42,7 +42,7 @@ const Host = function (props) {
 
     const startGame = () => {
         // move to start game push
-        props.history.push({ pathname: "/start-game", state: { gameId } })
+        // props.history.push({ pathname: "/start-game", state: { gameId } })
 
         fetch(envUri + "/game/start_game",
             {
@@ -56,6 +56,11 @@ const Host = function (props) {
     }
     //============ Hooks ============
     useEffect(() => {
+
+        mySocket.on("start-game", (data) => {
+            //change the page to start-game with your socid to refer back to and gameId
+            props.history.push({ pathname: "/start-game", state: data })
+        })
 
         mySocket.on("player-id", function (id) {
             setCookie("hostId", id)
