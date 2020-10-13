@@ -28,6 +28,8 @@ export const DrawingDashboard = () => {
         <div id="DrawingDashboard">
             <h4 style={{ "display": drawingWord == "" ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
             <h4 style={{ "display": timeLeft == 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
+            <input type="text" name="guess-word-input" placeholder="guess word" />
+            <input type="submit" value="guess word"/>
         </div>
     )
 }

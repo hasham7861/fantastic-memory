@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Index from './components';
-import Host from './components/options/host';
-import Guest from './components/options/guest';
+import Host from './components/GameMenu/Options/host';
+import Guest from './components/GameMenu/Options/guest';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import GameScreen from './components/GameScreen';
 
