@@ -2,7 +2,7 @@
 const express = require("express");
 
 
-const { intializeWSEvents } = require('./socket-events/webchat');
+const { initializeWSEvents } = require('./socket-events/webchat');
 const PORT = process.env.PORT | "5000";
 
 // server
@@ -15,11 +15,10 @@ global.io = require('socket.io')(http);
 // load up server and frontend module
 const app = require('./apis/app');
 
-// // intialize all the WS events
-intializeWSEvents();
+// initialize all the WS events
+initializeWSEvents();
 
 // Settings for the entire server
-
 server.use((req, res, next) => {
   let allowedOrigins = ['http://localhost:3000',
     'http://localhost:5000'];
@@ -34,7 +33,7 @@ server.use((req, res, next) => {
   return next();
 });
 
-// utlize the express app in node app
+// utilize the express app in node app
 server.use(app);
 
 

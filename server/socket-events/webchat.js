@@ -34,7 +34,7 @@ function findCurrentPlayerTurn(gameId) {
 
 
 
-function intializeWSEvents() {
+function initializeWSEvents() {
 
     let io = global.io;
 
@@ -177,6 +177,6 @@ function intializeWSEvents() {
 
 module.exports = {
     currentGamesMap,
-    intializeWSEvents,
+    initializeWSEvents: initializeWSEvents,
     findCurrentPlayerTurn
 }
