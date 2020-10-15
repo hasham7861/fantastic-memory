@@ -1,4 +1,4 @@
-// TODO store all gamesdata into data store like mongo, and for faster access store the data into memache service
+// TODO store all games data into data store like mongo, and for faster access store the data into memache service
 // const { connectToDB } = require('./db');
 
 const words = require("../database/category_of_words.json").words
@@ -33,10 +33,6 @@ function findCurrentPlayerTurn(gameId) {
 }
 
 
-function generateWord() {
-    let randomNumIndex = Math.floor(Math.random() * words.length - 1)
-    return words[randomNumIndex]
-}
 
 function intializeWSEvents() {
 
@@ -62,9 +58,9 @@ function intializeWSEvents() {
                 currentGamesMap[gameId].playerTurnId = currentPlayerId;
                 userToGameMap[currentPlayerId] = gameId;
             }
-           
+
         })
-        // Host uses this event to intiate a namespace
+        // Host uses this event to initiate a namespace
         socket.on("join-game-lobby", ({ gameId, playerIndexStart }) => {
 
             // there isn't a game already with this gameId
@@ -102,7 +98,7 @@ function intializeWSEvents() {
             if (!(currentGamesMap.hasOwnProperty(gameId))) {
                 return
             }
-          
+
             let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId].players : {}
 
             // delete players from context of game when they closed out of game
@@ -120,10 +116,10 @@ function intializeWSEvents() {
 
         // share drawing with all the users within the same game
         socket.on("share-drawing-with-players", ({ gameId, playerId, canvasData }) => {
-    
+
             // share drawing with other players in lobby
             let playersInGame = currentGamesMap[gameId].players
-           
+
             for (let pId in playersInGame) {
                 if (pId != playerId) {
                     gameNSP.to(pId).emit("draw-on-canvas", canvasData)
@@ -132,52 +128,14 @@ function intializeWSEvents() {
 
         })
 
-        // TODO either remove this or put into seperate game logic part
-        socket.on("do-i-get-a-word", (gameId) => {
-            let playerId = findCurrentPlayerTurn(gameId);
-            gameNSP.to(playerId).emit("get-drawing-word", generateWord());
-        })
-
-
-        // TODO remove this from here and have the game obj handle this event on its own
-        // omit flag to client if their canvas should be enabled or not
-        socket.on("enable-drawing-canvas", (gameId) => {
-
-            if (gameId in currentGamesMap){
-                // only enable canvas for players, whose turn it is
-                if (gameId in currentGamesMap && currentGamesMap[gameId].players &&
-                    currentPlayerId in currentGamesMap[gameId].players) {
-                    if (currentPlayerId == currentGamesMap[gameId].playerTurnId) {
-                        // emit event to player whose canvas isn't disabled
-                        gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = false)
-                    } else {
-                        // emit event to player whose canvas isn disabled
-                        gameNSP.to(currentPlayerId).emit("toggle-drawing-canvas", canvasDisabled = true)
-                    }
-                }
-            }
-
-        })
-
-        // TODO this logic is to be moved to seperate game server
-        socket.on("game-started", gameId => {
-            // TODO emit game start event to all clients
-
-            for (let playerId in currentGamesMap[gameId].players) {
-                let player = currentGamesMap[gameId].players[playerId];
-                if (player.inGame && player.id != currentGamesMap[gameId].hostId) {
-                    gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
-                }
-            }
-
-        })
+       
 
         // TODO set score of player based on drawing, increase score of player based on the correct guess word
-        socket.on("check-guessed-word", ({gameId, guessedWord})=>{
+        socket.on("check-guessed-word", ({ gameId, guessedWord }) => {
 
         })
-      
-       
+
+
 
         socket.on("close-game", gameId => {
 
@@ -209,9 +167,9 @@ function intializeWSEvents() {
     })
 
     io.on("connection", socket => {
-        // generaic io events 
+        // generic io events 
     })
-   
+
     global.gameNSP = gameNSP;
 }
 

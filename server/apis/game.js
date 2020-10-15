@@ -92,7 +92,7 @@ gameEventEmitter.once("start-game", async (gameId) => {
     }
 
 
-    // emiting event to other users that game has started
+    // emitting event to other users that game has started
     for (let playerId in currentGamesMap[gameId].players) {
         let player = currentGamesMap[gameId].players[playerId];
         // emit event to all players that game has started
@@ -106,16 +106,18 @@ gameEventEmitter.once("start-game", async (gameId) => {
 
         // setup the screen for currentPlayerDrawing
         for (let playerId in currentGamesMap[gameId].players) {
-            let currentPlayerCanvasDisabled = playerId !== currentPlayerTurnId;
-            gameNSP.to(playerId).emit("toggle-drawing-canvas", currentPlayerCanvasDisabled);
+            let isMyTurn = playerId == currentPlayerTurnId;
+            gameNSP.to(playerId).emit("toggle-drawing-canvas", !isMyTurn);
 
             // generate random word to draw for player is currently turn it is
             let drawingWord = playerId === currentPlayerTurnId ? generateWord() : "";
             gameNSP.to(playerId).emit("drawing-word", drawingWord);
 
+            // emitting to weather or not to enable input for guessing word
+            gameNSP.to(playerId).emit("is-my-turn", isMyTurn);
         }
 
-        // update timeleft for drawing player
+        // update time left for drawing player
         let timeLeftInterval = setInterval(() => {
             currentGamesMap[gameId].timeForEachRound-=1000;
             gameNSP.to(currentPlayerTurnId).emit("update-time-left", currentGamesMap[gameId].timeForEachRound/1000);
