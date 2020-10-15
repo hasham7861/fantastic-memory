@@ -3,6 +3,9 @@
 
 const words = require("../database/category_of_words.json").words
 const Game = require("../models/Game");
+const gameSchema = require("../database/gameSchema");
+const playerToGameSchema = require("../database/playerToGameSchema");
+
 const Player = require("../models/Player");
 
 
@@ -61,26 +64,28 @@ function initializeWSEvents() {
 
         })
         // Host uses this event to initiate a namespace
-        socket.on("join-game-lobby", ({ gameId, playerIndexStart }) => {
+        socket.on("join-game-lobby", async ({ gameId, playerIndexStart }) => {
 
-            // there isn't a game already with this gameId
-            if (!currentGamesMap.hasOwnProperty(gameId)) {
-                // hostId is the same as the currentPlayer who intiated the game
-                currentGamesMap[gameId] = new Game(gameId,
-                    players = {
-                        [currentPlayerId]: new Player(currentPlayerId)
-                    },
-                    "MENU",
-                    currentPlayerId,
-                    currentPlayerId
-                );
+            let gameObj = await gameSchema.fetchGame(gameId);
+            
+            if (!gameObj) {
 
-                userToGameMap[currentPlayerId] = gameId;
+                await gameSchema.createGame(gameId,
+                    new Game(gameId,
+                        players = {
+                            [currentPlayerId]: new Player(currentPlayerId)
+                        },
+                        "MENU",
+                        currentPlayerId,
+                        currentPlayerId
+
+                    )).catch(() => console.log("unable to create game"))
+
+                await playerToGameSchema.createPlayer(currentPlayerId, gameId).catch(() => console.log("unable to create player"))
             }
-            // currentPlayerId is not in game then add them to gameContext
-            else if (!(currentGamesMap[gameId].players.hasOwnProperty(currentPlayerId))) {
-                // only add the person with same socket once
-                if (!(socket.id in currentGamesMap[gameId]) && currentGamesMap[gameId].players) {
+
+            else if (!(gameObj.players.hasOwnProperty(currentPlayerId))) {
+                if (!(currentPlayerId in currentGamesMap[gameId].players) && currentGamesMap[gameId].players) {
                     currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId);
                 }
             }
@@ -88,6 +93,32 @@ function initializeWSEvents() {
             // update list of players for client
             let hostPlayerId = findHostOfGame(gameId);
             gameNSP.to(hostPlayerId).emit("players-list", currentGamesMap[gameId].players)
+
+            // there isn't a game already with this gameId
+            // if (!currentGamesMap.hasOwnProperty(gameId)) {
+            //     // hostId is the same as the currentPlayer who initiated the game
+            //     currentGamesMap[gameId] = new Game(gameId,
+            //         players = {
+            //             [currentPlayerId]: new Player(currentPlayerId)
+            //         },
+            //         "MENU",
+            //         currentPlayerId,
+            //         currentPlayerId
+            //     );
+
+            //     userToGameMap[currentPlayerId] = gameId;
+            // }
+            // // currentPlayerId is not in game then add them to gameContext
+            // else if (!(currentGamesMap[gameId].players.hasOwnProperty(currentPlayerId))) {
+            //     // only add the person with same socket once
+            //     if (!(socket.id in currentGamesMap[gameId]) && currentGamesMap[gameId].players) {
+            //         currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId);
+            //     }
+            // }
+
+            // // update list of players for client
+            // let hostPlayerId = findHostOfGame(gameId);
+            // gameNSP.to(hostPlayerId).emit("players-list", currentGamesMap[gameId].players)
 
         })
 
@@ -128,7 +159,7 @@ function initializeWSEvents() {
 
         })
 
-       
+
 
         // TODO set score of player based on drawing, increase score of player based on the correct guess word
         socket.on("check-guessed-word", ({ gameId, guessedWord }) => {
@@ -177,6 +208,6 @@ function initializeWSEvents() {
 
 module.exports = {
     currentGamesMap,
-    initializeWSEvents: initializeWSEvents,
+    initializeWSEvents,
     findCurrentPlayerTurn
 }

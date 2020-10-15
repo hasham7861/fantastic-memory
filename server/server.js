@@ -1,6 +1,6 @@
 // node modules
 const express = require("express");
-
+const { connectToDB } = require("./database/db");
 
 const { initializeWSEvents } = require('./socket-events/webchat');
 const PORT = process.env.PORT | "5000";
@@ -35,6 +35,9 @@ server.use((req, res, next) => {
 
 // utilize the express app in node app
 server.use(app);
+
+// connect to mongo db
+connectToDB()
 
 
 server.use((req, res) => {

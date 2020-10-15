@@ -1,21 +1,10 @@
 const mongoose = require('mongoose');
-const DBURI = "mongodb://localhost:27017/fantastic-memory"
-const gamemap_col = require("./gamemap_collection");
+const dbUri = "mongodb://localhost:27017/fantastic-memory"
 
 function connectToDB() {
-    mongoose.connect(DBURI, { useNewUrlParser: true, useUnifiedTopology: true })
-}
-
-async function getGameMap() {
-    gamemap_col.find({}, (err, data) => {
-        if (err)
-            console.log("db-error:", err)
-
-        console.log(data)
-    })
+    mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
 }
 
 module.exports = {
-    connectToDB,
-    getGameMap
+    connectToDB
 }
