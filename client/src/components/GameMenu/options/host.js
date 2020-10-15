@@ -63,7 +63,7 @@ const Host = function (props) {
         })
 
         mySocket.on("player-id", function (id) {
-            setCookie("hostId", id)
+            setCookie("hostId", id, { expires: new Date(new Date().getTime() + 60000) })
             // save playerId into context
             setPlayerId(id)
         })
@@ -72,11 +72,11 @@ const Host = function (props) {
         if (!cookies.hasOwnProperty("gameId") && !cookies.hasOwnProperty("hostId")) {
             // create the game
             getGameToken().then(resp => {
-                setCookie("gameId", resp.data.gameId)
+                setCookie("gameId", resp.data.gameId, { expires: new Date(new Date().getTime() + 8.64e+7) /**expire gameId after a day just incase*/ })
                 joinGame(resp.data.gameId, 0)
                 // make sure to set local host-id
                 mySocket.emit("get-id", {})
-                // refresh the component to refresh the playerlist
+                // refresh the component to refresh the player list
                 props.history.go('0')
 
             })
@@ -86,26 +86,27 @@ const Host = function (props) {
         }
         else if (cookies.hasOwnProperty("hostId")) {
             setGameId(cookies.gameId)
-            if (cookies.gameId)
+            if (cookies.gameId) {
                 mySocket.emit("update-host-id", cookies.gameId)
-            joinGame(cookies.gameId);
+                joinGame(cookies.gameId);
 
-            // listen to player-list event
-            mySocket.on("players-list", function (listOfPlayers) {
-                // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
-                // only update players if there is new players being added
-                if (listOfPlayers.length === 0) {
-                    removeCookie("hostId")
-                    // removeCookie("gameId")
-                    removeCookie("connect.sid")
-                    removeCookie("io")
-                }
-                setPlayersJSX(listOfPlayers)
-            })
+                // listen to player-list event
+                mySocket.on("players-list", function (listOfPlayers) {
+                    // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
+                    // only update players if there is new players being added
+                    if (listOfPlayers.length === 0) {
+                        removeCookie("hostId")
+                        // removeCookie("gameId")
+                        removeCookie("connect.sid")
+                        removeCookie("io")
+                    }
+                    setPlayersJSX(listOfPlayers)
+                })
+                mySocket.emit("find-players-list", gameId);
 
-            mySocket.emit("find-players-list", gameId);
+            }
 
-            // mySocket.emit("enable-drawing-canvas", ({ gameId: cookies.gameId }))
+
 
 
         }
