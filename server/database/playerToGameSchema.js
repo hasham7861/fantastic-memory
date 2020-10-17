@@ -6,13 +6,16 @@ const playerToGameSchema = new mongoose.Schema({
     createdAt: { type: Date, default: new Date(), expires: 86400 } // expire document after 1 day
 })
 
-playerToGameSchema.methods.createPlayer = function (playerId, gameId) {
-    mongoose.model('playerToGame').create({ playerId, gameId })
-}
 
-playerToGameSchema.methods.fetchPlayer = function (playerId) {
+playerToGameSchema.static('createPlayer', function (playerId, gameId) {
+    mongoose.model('playerToGame').create({ playerId, gameId })
+})
+
+
+playerToGameSchema.static('fetchPlayer', function (playerId) {
     return mongoose.model('playerToGame').find({ playerId })
-}
+})
+
 
 module.exports = mongoose.model("playerToGame", playerToGameSchema)
 

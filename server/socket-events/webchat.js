@@ -1,12 +1,9 @@
-// TODO store all games data into data store like mongo, and for faster access store the data into memache service
-// const { connectToDB } = require('./db');
-
-const words = require("../database/category_of_words.json").words
 const Game = require("../models/Game");
 const gameSchema = require("../database/gameSchema");
 const playerToGameSchema = require("../database/playerToGameSchema");
 
 const Player = require("../models/Player");
+const game = require("../apis/game");
 
 
 // stores context of all games
@@ -19,13 +16,13 @@ const userToGameMap = {
     //userId:gameId
 }
 
-function findHostOfGame(gameId) {
-    if (gameId && gameId in currentGamesMap) {
-        return currentGamesMap[gameId].hostId;
-    } else {
-        return null;
-    }
-}
+// function findHostOfGame(gameId) {
+//     if (gameId && gameId in currentGamesMap) {
+//         return currentGamesMap[gameId].hostId;
+//     } else {
+//         return null;
+//     }
+// }
 
 function findCurrentPlayerTurn(gameId) {
     if (gameId && gameId in currentGamesMap) {
@@ -39,7 +36,6 @@ function findCurrentPlayerTurn(gameId) {
 
 function initializeWSEvents() {
 
-    let io = global.io;
 
     let gameNSP = io.of('/game-nsp');
     gameNSP.on("connection", socket => {
@@ -54,93 +50,110 @@ function initializeWSEvents() {
             gameNSP.to(socket.id).emit("player-id", currentPlayerId);
         })
 
-        socket.on("update-host-id", gameId => {
-            if (gameId in currentGamesMap && currentGamesMap[gameId].players && !currentGamesMap[gameId].players[currentPlayerId]) {
-                currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId, true);
-                currentGamesMap[gameId].hostId = currentPlayerId;
-                currentGamesMap[gameId].playerTurnId = currentPlayerId;
-                userToGameMap[currentPlayerId] = gameId;
-            }
+        /**
+         * Update host player Id upon refresh of host page 
+         * */
+        socket.on("update-host-id", async gameId => {
 
-        })
-        // Host uses this event to initiate a namespace
-        socket.on("join-game-lobby", async ({ gameId, playerIndexStart }) => {
+            let gameDoc = await gameSchema.fetchGame(gameId);
 
-            let gameObj = await gameSchema.fetchGame(gameId);
-            
-            if (!gameObj) {
+            // check if the game exists
+            if (!gameDoc) { console.log("can't find a game"); return }
 
-                await gameSchema.createGame(gameId,
-                    new Game(gameId,
-                        players = {
-                            [currentPlayerId]: new Player(currentPlayerId)
-                        },
-                        "MENU",
-                        currentPlayerId,
-                        currentPlayerId
+            let currentGame = new Game(gameDoc.game);
+            if (!(gameDoc.game.players.hasOwnProperty(currentPlayerId))) {
+                currentGame.AddPlayerToGame(currentPlayerId);
+                currentGame.hostId = currentPlayerId;
+                currentGame.playerTurnId = currentPlayerId;
 
-                    )).catch(() => console.log("unable to create game"))
+                // update the hostID, playerId, and players list upon update of host ID
+                await gameSchema.findOneAndUpdate({ "gameId": gameId },
+                    { "$set": { "game.hostId": currentGame.hostId, "game.playerTurnId": currentPlayerId, "game.players": currentGame.players } })
+                    .catch((err) => console.log(err))
 
                 await playerToGameSchema.createPlayer(currentPlayerId, gameId).catch(() => console.log("unable to create player"))
             }
 
-            else if (!(gameObj.players.hasOwnProperty(currentPlayerId))) {
-                if (!(currentPlayerId in currentGamesMap[gameId].players) && currentGamesMap[gameId].players) {
-                    currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId);
-                }
+        })
+        /**
+         * Host uses this event to initiate a game 
+         * */
+        socket.on("join-game-lobby", async ({ gameId }) => {
+
+            let gameDoc = await gameSchema.fetchGame(gameId);
+
+            // Game doesn't exist in the store
+            if (!gameDoc) {
+                await gameSchema.createGame(gameId,
+                    new Game({
+                        gameId,
+                        players: {
+                            [currentPlayerId]: new Player(currentPlayerId)
+                        },
+                        status: "MENU",
+                        hostId: currentPlayerId,
+                        playerTurnId: currentPlayerId
+
+                    })).catch(() => console.log("unable to create game"))
+
+                await playerToGameSchema.createPlayer(currentPlayerId, gameId).catch(() => console.log("unable to create player"))
             }
+            // when game exists
+            else if (gameDoc) {
+                let currentGame = new Game(gameDoc.game);
+                if (!(gameDoc.game.players.hasOwnProperty(currentPlayerId))) {
+                    currentGame.AddPlayerToGame(currentPlayerId);
 
-            // update list of players for client
-            let hostPlayerId = findHostOfGame(gameId);
-            gameNSP.to(hostPlayerId).emit("players-list", currentGamesMap[gameId].players)
+                    // update players obj within mongo
+                    await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": currentGame.players } })
+                        .catch((err) => console.log(err))
+                }
 
-            // there isn't a game already with this gameId
-            // if (!currentGamesMap.hasOwnProperty(gameId)) {
-            //     // hostId is the same as the currentPlayer who initiated the game
-            //     currentGamesMap[gameId] = new Game(gameId,
-            //         players = {
-            //             [currentPlayerId]: new Player(currentPlayerId)
-            //         },
-            //         "MENU",
-            //         currentPlayerId,
-            //         currentPlayerId
-            //     );
-
-            //     userToGameMap[currentPlayerId] = gameId;
-            // }
-            // // currentPlayerId is not in game then add them to gameContext
-            // else if (!(currentGamesMap[gameId].players.hasOwnProperty(currentPlayerId))) {
-            //     // only add the person with same socket once
-            //     if (!(socket.id in currentGamesMap[gameId]) && currentGamesMap[gameId].players) {
-            //         currentGamesMap[gameId].players[currentPlayerId] = new Player(currentPlayerId);
-            //     }
-            // }
-
-            // // update list of players for client
-            // let hostPlayerId = findHostOfGame(gameId);
-            // gameNSP.to(hostPlayerId).emit("players-list", currentGamesMap[gameId].players)
+                // update list of players for client
+                gameNSP.to(currentGame.hostId).emit("players-list", gameDoc.game.players)
+            }
 
         })
 
 
         // return list of players within the same game
-        socket.on("find-players-list", gameId => {
+        socket.on("find-players-list", async gameId => {
 
-            if (!(currentGamesMap.hasOwnProperty(gameId))) {
-                return
-            }
+            let gameDoc = await gameSchema.fetchGame(gameId);
 
-            let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId].players : {}
+            // if (!gameDoc) console.log("can't find a game");
 
-            // delete players from context of game when they closed out of game
-            for (let playerSocId in listOfPlayers) {
-                if (!listOfPlayers[playerSocId].inGame)
-                    delete listOfPlayers[playerSocId]
-            }
+            // else if (gameDoc) {
+            //     let gameObj = new Game(gameDoc.game);
 
-            currentGamesMap[gameId].players = listOfPlayers;
+            //     // delete players from context of game when they closed out of game
+            //     for (let playerSocId in gameObj.players) {
+            //         if (!gameObj.players.inGame)
+            //             delete gameObj.players[playerSocId]
+            //     }
 
-            gameNSP.to(currentPlayerId).emit("players-list", listOfPlayers)
+            //     // update list of players in store
+            //     await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": gameObj.players } })
+            //         .catch(() => console.log("unable to update player list"))
+
+            //     gameNSP.to(currentPlayerId).emit("players-list", listOfPlayers)
+            // }
+
+            // if (!(currentGamesMap.hasOwnProperty(gameId))) {
+            //     return
+            // }
+
+            // let listOfPlayers = gameId in currentGamesMap ? currentGamesMap[gameId].players : {}
+
+            // // delete players from context of game when they closed out of game
+            // for (let playerSocId in listOfPlayers) {
+            //     if (!listOfPlayers[playerSocId].inGame)
+            //         delete listOfPlayers[playerSocId]
+            // }
+
+            // currentGamesMap[gameId].players = listOfPlayers;
+
+            // gameNSP.to(currentPlayerId).emit("players-list", listOfPlayers)
 
         })
 

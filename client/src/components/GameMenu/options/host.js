@@ -94,6 +94,7 @@ const Host = function (props) {
                 mySocket.on("players-list", function (listOfPlayers) {
                     // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
                     // only update players if there is new players being added
+                    console.log("fetched player list ")
                     if (listOfPlayers.length === 0) {
                         removeCookie("hostId")
                         // removeCookie("gameId")
@@ -101,9 +102,11 @@ const Host = function (props) {
                         removeCookie("io")
                     }
                     setPlayersJSX(listOfPlayers)
+                   
+
                 })
                 mySocket.emit("find-players-list", gameId);
-
+                
             }
 
 

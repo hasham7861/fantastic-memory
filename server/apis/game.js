@@ -9,6 +9,7 @@ const gameEventEmitter = new EventEmitter();
 
 const words = require("../database/category_of_words.json").words
 
+
 // socket events game nsp
 const gameNSP = io.of("/game-nsp");
 

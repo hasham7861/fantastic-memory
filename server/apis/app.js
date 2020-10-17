@@ -1,5 +1,5 @@
 const app = require('express')()
-const game = require('./game');
+// const game = require('./game');
 
 // main app routes
 app.get("/api", (req, res) => {
@@ -11,7 +11,7 @@ app.get("/api", (req, res) => {
 
 
 // intialize other routes here
-app.use("/game", game)
+// app.use("/game", game)
 
 
 
