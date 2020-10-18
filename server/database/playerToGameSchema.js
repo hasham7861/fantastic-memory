@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const ObjectId = mongoose.ObjectId;
 
 const playerToGameSchema = new mongoose.Schema({
     playerId: { type: String, unique: true, required: true },
@@ -7,14 +8,26 @@ const playerToGameSchema = new mongoose.Schema({
 })
 
 
-playerToGameSchema.static('createPlayer', function (playerId, gameId) {
-    mongoose.model('playerToGame').create({ playerId, gameId })
-})
+playerToGameSchema.statics.createPlayer = function (playerId, gameId) {
+    mongoose.model('playerToGame').create({ playerId, gameId }, function (err) { if (err) console.log(err) });
+}
 
 
-playerToGameSchema.static('fetchPlayer', function (playerId) {
-    return mongoose.model('playerToGame').find({ playerId })
-})
+playerToGameSchema.statics.fetchPlayer = function (playerId) {
+    return mongoose.model('playerToGame').findOne({ "playerId": playerId })
+}
+
+playerToGameSchema.statics.removePlayersFromGame = function (gameId) {
+    mongoose.model('playerToGame').deleteMany({ "gameId": gameId }, function (err) { if (err) console.log(err) });
+}
+
+// returns the playerDoc upon deletion
+playerToGameSchema.statics.removePlayerFromGame = function (playerId) {
+
+    // console.log(playerId)
+    mongoose.model('playerToGame').findOneAndRemove({ "playerId": playerId }, function (err) { if (err) console.log('unable to find player') })
+}
+
 
 
 module.exports = mongoose.model("playerToGame", playerToGameSchema)

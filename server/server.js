@@ -10,13 +10,14 @@ const server = express();
 server.use(express.json());
 const http = require('http').createServer(server);
 // set the global app var io
-global.io = require('socket.io')(http);
+const webSocketIo = require('socket.io')(http);
+// initialize all the WS events
+initializeWSEvents(webSocketIo);
 
 // load up server and frontend module
-const app = require('./apis/app');
+const app = require('./apis/app')(webSocketIo);
 
-// initialize all the WS events
-initializeWSEvents();
+
 
 // Settings for the entire server
 server.use((req, res, next) => {
@@ -26,7 +27,7 @@ server.use((req, res, next) => {
   if (allowedOrigins.indexOf(origin) > -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-
+  // Allowing other apps to make the following http request
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   // res.header('Access-Control-Allow-Credentials', true);

@@ -1,18 +1,18 @@
-const app = require('express')()
-// const game = require('./game');
+const app = require('express')();
 
-// main app routes
-app.get("/api", (req, res) => {
-  res.send({
-    "message": "Api is working",
-    "status": 200
+module.exports = function (webSocketIo) {
+ 
+  // main app routes
+  app.get("/api", (req, res) => {
+    res.send({
+      "message": "Api is working",
+      "status": 200
+    });
   });
-});
 
+  // all other apis here
+  app.use("/game", require('./game')(webSocketIo));
 
-// intialize other routes here
-// app.use("/game", game)
+  return app;
 
-
-
-module.exports = app;
+}

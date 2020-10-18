@@ -32,7 +32,7 @@ module.exports = class Game {
     }
 
     AddPlayerToGame(playerId) {
-        if (!this.players.hasOwnProperty(playerId)) {
+        if (!(playerId in this.players)) {
             this.players[playerId] = new Player(playerId);
         }
     }
