@@ -40,6 +40,10 @@ function initializeWSEvents(webSocketIo) {
             let currentGame = new Game(gameDoc.game);
 
             if (!(gameDoc.game.players.hasOwnProperty(currentPlayerId))) {
+
+                // remove old hostId from list
+                delete currentGame.players[currentGame.hostId];
+
                 currentGame.AddPlayerToGame(currentPlayerId);
                 currentGame.hostId = currentPlayerId;
                 currentGame.playerTurnId = currentPlayerId;
@@ -48,6 +52,8 @@ function initializeWSEvents(webSocketIo) {
                 await gameSchema.findOneAndUpdate({ "gameId": gameId },
                     { "$set": { "game.hostId": currentGame.hostId, "game.playerTurnId": currentPlayerId, "game.players": currentGame.players } })
                     .catch((err) => console.log(err))
+
+              
 
                 await playerToGameSchema.createPlayer(currentPlayerId, gameId)
             }
@@ -59,7 +65,7 @@ function initializeWSEvents(webSocketIo) {
         socket.on("join-game-lobby", async ({ gameId }) => {
 
             let gameDoc = await gameSchema.fetchGame(gameId);
-
+          
             // Game doesn't exist in the store
             if (!gameDoc) {
                 await gameSchema.createGame(gameId,
@@ -103,6 +109,7 @@ function initializeWSEvents(webSocketIo) {
 
                 // TODO move this logic when user closes window
                 // delete players from context of game when they closed out of game
+                // await gameSchema.removePlayersNotInGame(gameId);
                 for (let playerId in gameObj.players) {
                     if (gameObj.players.inGame == false) {
                         delete gameObj.players[playerId];
@@ -151,6 +158,7 @@ function initializeWSEvents(webSocketIo) {
             /**
              *  clear up the game obj and player reference to game from datastore
              */
+
             gameSchema.removeGame(gameId);
             playerToGameSchema.removePlayersFromGame(gameId);
         })
@@ -158,11 +166,15 @@ function initializeWSEvents(webSocketIo) {
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", async () => {
 
+            console.log('client discconect here')
             let playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
-            
-            if(playerDoc){
+
+            if (playerDoc) {
                 await playerToGameSchema.removePlayerFromGame(currentPlayerId);
+                console.log(playerDoc.gameId, currentPlayerId)
                 await gameSchema.removePlayerFromGame(playerDoc.gameId, currentPlayerId);
+                // await gameSchema.removePlayersNotInGame(gameId);
+                // 
             }
 
             // await playerToGameSchema.removePlayerFromGame(currentPlayerId);

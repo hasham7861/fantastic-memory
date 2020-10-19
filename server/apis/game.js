@@ -7,6 +7,8 @@ const words = require("../database/category_of_words.json").words;
 const { currentGamesMap } = require('../socket-events/webchat');
 
 
+const gameSchema = require("../database/gameSchema");
+
 const gameEventEmitter = new EventEmitter();
 
 function generateWord() {
@@ -31,17 +33,15 @@ module.exports = function (webSocketIo) {
         if (!req.query.inputGameId)
             return res.status(400).send("valid_game_id: missing inputGameId query param")
 
-        if (!currentGamesMap)
-            return res.status(403).send("valid_game_id: there isn't any games going on")
-
         let inputGameId = req.query.inputGameId.slice(0, 8);
 
-        if (inputGameId in currentGamesMap) {
-            res.send({ game_id_valid: true })
-        } else {
-            res.send({ game_id_valid: false })
-        }
-
+        return gameSchema.doesGameExist(inputGameId).then(gameExist => {
+            if (gameExist)
+                res.send({ game_id_valid: true })
+            else
+                res.send({ game_id_valid: false })
+    
+        })
     })
 
     game.post("/start_game", (req, res) => {
