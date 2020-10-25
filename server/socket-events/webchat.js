@@ -5,7 +5,6 @@ const playerToGameSchema = require("../database/playerToGameSchema");
 const Player = require("../models/Player");
 
 
-
 // stores context of all games
 global.currentGamesMap = {
     // '096ef6e3': new Game(...)
@@ -53,7 +52,7 @@ function initializeWSEvents(webSocketIo) {
                     { "$set": { "game.hostId": currentGame.hostId, "game.playerTurnId": currentPlayerId, "game.players": currentGame.players } })
                     .catch((err) => console.log(err))
 
-              
+
 
                 await playerToGameSchema.createPlayer(currentPlayerId, gameId)
             }
@@ -65,7 +64,7 @@ function initializeWSEvents(webSocketIo) {
         socket.on("join-game-lobby", async ({ gameId }) => {
 
             let gameDoc = await gameSchema.fetchGame(gameId);
-          
+
             // Game doesn't exist in the store
             if (!gameDoc) {
                 await gameSchema.createGame(gameId,
@@ -92,39 +91,20 @@ function initializeWSEvents(webSocketIo) {
                         .catch((err) => console.log(err))
                 }
 
+                await playerToGameSchema.createPlayer(currentPlayerId, gameId)
+
                 // update list of players for client
                 gameNSP.to(currentGame.hostId).emit("players-list", currentGame.players)
+
             }
 
         })
 
 
         // return list of players within the same game
-        socket.on("find-players-list", async gameId => {
-
-            let gameDoc = await gameSchema.fetchGame(gameId);
-
-            if (gameDoc) {
-                let gameObj = new Game(gameDoc.game);
-
-                // TODO move this logic when user closes window
-                // delete players from context of game when they closed out of game
-                // await gameSchema.removePlayersNotInGame(gameId);
-                for (let playerId in gameObj.players) {
-                    if (gameObj.players.inGame == false) {
-                        delete gameObj.players[playerId];
-                    }
-                }
-
-                // update list of players in store
-                await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": gameObj.players } })
-                    .catch(() => console.log("unable to update player list"))
-
-
-                // update player list 
-                gameNSP.to(currentPlayerId).emit("players-list", gameObj.players)
-            }
-
+        socket.on("find-players-list", gameId => {
+            let emitPlayerId = currentPlayerId;
+            emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
         })
 
 
@@ -160,34 +140,23 @@ function initializeWSEvents(webSocketIo) {
              */
 
             gameSchema.removeGame(gameId);
-            playerToGameSchema.removePlayersFromGame(gameId);
+
         })
 
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", async () => {
 
-            console.log('client discconect here')
             let playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
+            let playerGameId = playerDoc.gameId;
 
             if (playerDoc) {
+                await gameSchema.setPlayerNotInGame(playerGameId, currentPlayerId);
+                await gameSchema.removePlayerFromGame(playerGameId, currentPlayerId);
                 await playerToGameSchema.removePlayerFromGame(currentPlayerId);
-                console.log(playerDoc.gameId, currentPlayerId)
-                await gameSchema.removePlayerFromGame(playerDoc.gameId, currentPlayerId);
-                // await gameSchema.removePlayersNotInGame(gameId);
-                // 
-            }
 
-            // await playerToGameSchema.removePlayerFromGame(currentPlayerId);
-            // console.log("playerDoc "+playerDoc.gameId)
-            // if (currentPlayerId in userToGameMap) {
-            //     let gameId = userToGameMap[currentPlayerId];
-            //     let player = currentGamesMap[gameId].players[currentPlayerId];
-            //     if (player) {
-            //         player.inGame = false;
-            //         delete userToGameMap[currentPlayerId];
-            //         delete currentGamesMap[gameId].players[currentPlayerId];
-            //     }
-            // }
+                await emitUpdatedPlayersListInGame(gameNSP, playerGameId);
+
+            }
         })
 
     })
@@ -197,6 +166,42 @@ function initializeWSEvents(webSocketIo) {
     })
 
 
+}
+
+async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
+    let gameDoc = await gameSchema.fetchGame(gameId);
+
+
+
+
+
+    if (gameDoc) {
+
+        let gameObj = new Game(gameDoc.game);
+
+        // if there is no player id specifiy to emit then emit to host id
+        if (!emitPlayerId) {
+            emitPlayerId = gameObj.hostId;
+        }
+
+        // TODO move this logic when user closes window
+        // delete players from context of game when they closed out of game
+        // await gameSchema.removePlayersNotInGame(gameId);
+        for (let playerId in gameObj.players) {
+            if (gameObj.players.inGame == false) {
+                delete gameObj.players[playerId];
+            }
+        }
+
+        // update list of players in store
+        await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": gameObj.players } })
+            .catch(() => console.log("unable to update player list"))
+
+
+        // update player list 
+        gameNSP.to(emitPlayerId).emit("players-list", gameObj.players)
+
+    }
 }
 
 

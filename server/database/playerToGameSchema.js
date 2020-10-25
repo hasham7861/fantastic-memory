@@ -9,7 +9,7 @@ const playerToGameSchema = new mongoose.Schema({
 
 
 playerToGameSchema.statics.createPlayer = function (playerId, gameId) {
-    mongoose.model('playerToGame').create({ playerId, gameId }, function (err) { if (err) console.log(err) });
+    mongoose.model('playerToGame').findOneAndUpdate({ playerId }, { playerId, gameId }, { upsert: true }, function (err) { if (err) console.log(err) });
 }
 
 

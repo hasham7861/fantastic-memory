@@ -45,8 +45,9 @@ gameSchema.statics.setPlayerNotInGame = function (gameId, playerId) {
 //             mongoose.model('game').findOneAndUpdate({ _id: new ObjectId(doc._id) }, { "$set": { "game.players": doc.game.players } }, function () { console.log("should have removed players") })
 //         }
 //     })
-
 // }
+
+
 gameSchema.statics.removePlayerFromGame = function (gameId, playerId) {
     console.log('game.players.' + playerId)
     mongoose.model('game').findOneAndUpdate({ "gameId": gameId }, { "$unset": { ['game.players.' + playerId]: 1 } }, function (err) {

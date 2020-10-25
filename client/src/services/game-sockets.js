@@ -8,6 +8,10 @@ const initiateGameSockets = isServerUp(() => {
     mySocket.on('connect', function () {
         return "intiated all socket"
     });
+
+    // mySocket.on('disconnect', function (){
+    //     mySocket.emit("disconnect",{msg:"close connection"})
+    // })
     mySocket.on('player-id', function (msg) { console.log(msg) });
 
 })
