@@ -40,7 +40,7 @@ module.exports = function (webSocketIo) {
                 res.send({ game_id_valid: true })
             else
                 res.send({ game_id_valid: false })
-    
+
         })
     })
 
@@ -64,7 +64,7 @@ module.exports = function (webSocketIo) {
 
 
 
-    gameEventEmitter.once("start-game", async (gameId) => {
+    gameEventEmitter.on("start-game", async (gameId) => {
         //keep track of timer, points, and switch turns here
         /**
          * this should also emit event to all the other players listening in to start game
@@ -77,24 +77,21 @@ module.exports = function (webSocketIo) {
          */
 
         if (!gameNSP) {
-            console.log("start-game-event: gameNSP hasn't been intialized yet")
+            console.log("start-game-event: gameNSP hasn't been initialized yet");
             return;
         }
 
-        if (!(gameId in currentGamesMap)) {
+        const gameDoc = await gameSchema.fetchGame(gameId);
+        const gameObj = new Game(gameDoc.doc);
+
+        if (gameObj) {
             console.log("start-game-event: unable to start game");
             return;
         }
 
-        if (!currentGamesMap[gameId].players) {
-            console.log("start-game-event: unable to find players to start game for");
-            return;
-        }
-
-
         // emitting event to other users that game has started
-        for (let playerId in currentGamesMap[gameId].players) {
-            let player = currentGamesMap[gameId].players[playerId];
+        for (let playerId in gameObj.players) {
+            let player = gameObj.players[playerId];
             // emit event to all players that game has started
             gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
         }
@@ -102,10 +99,10 @@ module.exports = function (webSocketIo) {
 
         //  start rounds loop here
         for (let roundNum = 1; roundNum <= currentGamesMap[gameId].totalRounds; ++roundNum) {
-            let currentPlayerTurnId = currentGamesMap[gameId].playerTurnId;
+            let currentPlayerTurnId = gameObj.playerTurnId;
 
             // setup the screen for currentPlayerDrawing
-            for (let playerId in currentGamesMap[gameId].players) {
+            for (let playerId in gameObj.players) {
                 let isMyTurn = playerId == currentPlayerTurnId;
                 gameNSP.to(playerId).emit("toggle-drawing-canvas", !isMyTurn);
 
@@ -119,19 +116,19 @@ module.exports = function (webSocketIo) {
 
             // update time left for drawing player
             let timeLeftInterval = setInterval(() => {
-                currentGamesMap[gameId].timeForEachRound -= 1000;
-                gameNSP.to(currentPlayerTurnId).emit("update-time-left", currentGamesMap[gameId].timeForEachRound / 1000);
+                gameObj.timeForEachRound -= 1000;
+                gameNSP.to(currentPlayerTurnId).emit("update-time-left", gameObj.timeForEachRound / 1000);
             }, 1000)
             // start the timer for each round
-            await sleep(currentGamesMap[gameId].timeForEachRound);
+            await sleep(gameObj.timeForEachRound);
 
             clearInterval(timeLeftInterval);
-            currentGamesMap[gameId].ResetTimeLeft();
+            gameObj.ResetTimeLeft();
 
             // switch the playerId turn to another person.
-            currentGamesMap[gameId].ChangeToDifferentPlayerId();
+            gameObj.ChangeToDifferentPlayerId();
 
-            console.log(`Round ${roundNum} is over. Player ${currentGamesMap[gameId].playerTurnId} turn to draw`);
+            console.log(`Round ${roundNum} is over. Player ${gameObj.playerTurnId} turn to draw`);
 
         }
         return "Game should be over now"
