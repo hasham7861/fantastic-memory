@@ -5,6 +5,7 @@ const EventEmitter = require('events');
 const { sleep } = require('../util/reusable');
 const words = require("../database/category_of_words.json").words;
 const { currentGamesMap } = require('../socket-events/webchat');
+const Game = require("../models/Game");
 
 
 const gameSchema = require("../database/gameSchema");
