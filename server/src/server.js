@@ -15,7 +15,7 @@ const webSocketIo = require('socket.io')(http);
 initializeWebSocketNameSpaces(webSocketIo);
 
 // load up server and frontend module
-const app = require('./apis/app')(webSocketIo);
+const app = require('./apis/app-routes')(webSocketIo);
 
 
 

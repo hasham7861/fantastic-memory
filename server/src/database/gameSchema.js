@@ -21,8 +21,8 @@ gameSchema.statics.fetchGame = function (gameId) {
 }
 
 gameSchema.statics.updateGame = function (gameId, updatedGameObj) {
-    mongoose.model('game').findOneAndUpdate({"gameId":gameId}, updatedGameObj, function(err){
-        if(err)
+    mongoose.model('game').findOneAndUpdate({ "gameId": gameId }, updatedGameObj, function (err) {
+        if (err)
             console.log("unable to update game obj")
     })
 }
@@ -38,28 +38,29 @@ gameSchema.statics.setPlayerNotInGame = function (gameId, playerId) {
     })
 }
 
-// gameSchema.statics.removePlayersNotInGame = function (gameId) {
-//     mongoose.model('game').findOne({ "gameId": gameId }, function (err, doc) {
-//         if (err)
-//             console.log("unable to remove players not In game");
-//         if (doc) {
-
-//             for (let playerId in doc.game.players) {
-//                 if (doc.game.players[playerId].inGame === false) {
-//                     delete doc.game.players[playerId]
-//                 }
-//             }
-//             mongoose.model('game').findOneAndUpdate({ _id: new ObjectId(doc._id) }, { "$set": { "game.players": doc.game.players } }, function () { console.log("should have removed players") })
-//         }
-//     })
-// }
-
-
 gameSchema.statics.removePlayerFromGame = function (gameId, playerId) {
-    console.log('game.players.' + playerId)
     mongoose.model('game').findOneAndUpdate({ "gameId": gameId }, { "$unset": { ['game.players.' + playerId]: 1 } }, function (err) {
         if (err)
             console.log("unable to remove player from game");
+    })
+}
+
+// return true when the input word matches the game round wort To guess
+gameSchema.statics.isValidGuessedWordOfRound = function (gameId, guessedWord, roundNum) {
+    return mongoose.model('game').findOne({ "gameId": gameId }, function (err, doc) {
+        if (err) {
+            console.log("unable to record with this gameId");
+            return;
+        }
+        // compare the game round word with input guessed word
+        return doc.game.gameRounds[roundNum - 1].guessedWord == guessedWord;
+    })
+}
+
+// add or remove points from a player in a game
+gameSchema.statics.addPointsToPlayer = function (gameId, playerId, points) {
+    mongoose.model('game').findOneAndUpdate({ "gameId": gameId }, { "$inc": { ['game.players.' + playerId + "points"]: points } }, function (err) {
+        if (err) console.log("unable to add points to a player in game")
     })
 }
 

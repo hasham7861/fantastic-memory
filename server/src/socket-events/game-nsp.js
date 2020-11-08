@@ -1,8 +1,8 @@
-const Game = require("../models/Game");
+const {Game} = require("../models/Game");
 const gameSchema = require("../database/gameSchema");
 const playerToGameSchema = require("../database/playerToGameSchema");
 
-const Player = require("../models/Player");
+const {Player} = require("../models/Game");
 
 
 function initializeGameNSP(webSocketIo) {
@@ -141,9 +141,10 @@ function initializeGameNSP(webSocketIo) {
         socket.on("disconnect", async () => {
 
             let playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
-            let playerGameId = playerDoc.gameId;
-
+           
             if (playerDoc) {
+                let playerGameId = playerDoc.gameId;
+
                 await gameSchema.setPlayerNotInGame(playerGameId, currentPlayerId);
                 await gameSchema.removePlayerFromGame(playerGameId, currentPlayerId);
                 await playerToGameSchema.removePlayerFromGame(currentPlayerId);

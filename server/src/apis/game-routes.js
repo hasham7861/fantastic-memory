@@ -5,7 +5,7 @@ const EventEmitter = require('events');
 const { sleep } = require('../util/reusable');
 const words = require("../database/category_of_words.json").words;
 
-const Game = require("../models/Game");
+const {Game} = require("../models/Game");
 
 
 const gameSchema = require("../database/gameSchema");
@@ -32,7 +32,7 @@ module.exports = function (webSocketIo) {
 
     game.get("/is_valid_game_id", (req, res) => {
         if (!req.query.inputGameId)
-            return res.status(400).send("valid_game_id: missing inputGameId query param")
+            return res.status(400).send("valid_game_id: missing inputGameId query param");
 
         let inputGameId = req.query.inputGameId.slice(0, 8);
 
@@ -44,6 +44,31 @@ module.exports = function (webSocketIo) {
 
         })
     })
+
+    game.post("/guess_word", async (req,res)=>{
+        if(!req.body.gameId || !req.body.guessedWord || !req.body.playerId || !req.body.roundNum){
+            return res.status(400).send("guessed_word: missing props in body");
+        }
+
+        /**
+         * //TODO 
+         * 1. check if the guessed word matches the word given to current host of the game
+         * 2. if word matches, return a feedback to user that they guessed the word 
+         *     and disable the input field for them for the current round and add 1 point to the player who guessed the word in gameMap
+         * 3. otherwise return a feedback to user that please try rephrasing or different word
+         */
+
+        let { guessedWord } = req.body.guessedWord.toLowerCase();
+
+        let guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord, roundNum);
+
+        if(guessedWordMatches){
+            gameSchema.addPointsToPlayer(gameId, playerId, 1);
+        }
+
+        res.send({"wordMatches": guessedWordMatches});
+    })
+
 
     game.post("/start_game", (req, res) => {
         /** //FIXME
@@ -103,7 +128,7 @@ module.exports = function (webSocketIo) {
         //  start rounds loop here
         for (let roundNum = 1; roundNum <= gameObj.totalRounds; ++roundNum) {
             let currentPlayerTurnId = gameObj.playerTurnId;
-
+            
             // setup the screen for currentPlayerDrawing
             for (let playerId in gameObj.players) {
                 let isMyTurn = playerId == currentPlayerTurnId;
@@ -112,6 +137,7 @@ module.exports = function (webSocketIo) {
                 // generate random word to draw for player is currently turn it is
                 let drawingWord = playerId === currentPlayerTurnId ? generateWord() : "";
                 gameNSP.to(playerId).emit("drawing-word", drawingWord);
+                gameObj.gameRounds[roundNum-1].wordToGuess = drawingWord;
 
                 // emitting to weather or not to enable input for guessing word
                 gameNSP.to(playerId).emit("is-my-turn", isMyTurn);
@@ -130,10 +156,15 @@ module.exports = function (webSocketIo) {
 
             // switch the playerId turn to another person.
             gameObj.ChangeToDifferentPlayerId();
+
+            // update game round
+            gameObj.currentGameRound+=1;
     
             gameSchema.updateGame(gameObj.gameId,gameObj);
 
             console.log(`Round ${roundNum} is over. Player ${gameObj.playerTurnId} turn to draw`);
+
+            
 
         }
         return "Game should be over now"

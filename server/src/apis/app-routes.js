@@ -11,7 +11,7 @@ module.exports = function (webSocketIo) {
   });
 
   // all other apis here
-  app.use("/game", require('./game')(webSocketIo));
+  app.use("/game", require('./game-routes')(webSocketIo));
 
   return app;
 
