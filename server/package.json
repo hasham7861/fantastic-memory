@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "node server",
-    "dev": "nodemon server",
+    "start": "node src/server",
+    "dev": "nodemon src/server",
     "docker-install": "docker build -t fantastic-server .",
     "docker-start": "docker run -it -p 9000:5000 fantastic-server"
   },

@@ -83,9 +83,11 @@ module.exports = function (webSocketIo) {
         }
 
         const gameDoc = await gameSchema.fetchGame(gameId);
-        const gameObj = new Game(gameDoc.doc);
+      
+        const gameObj = new Game(gameDoc.game);
+     
 
-        if (gameObj) {
+        if (!gameObj) {
             console.log("start-game-event: unable to start game");
             return;
         }
@@ -99,7 +101,7 @@ module.exports = function (webSocketIo) {
 
 
         //  start rounds loop here
-        for (let roundNum = 1; roundNum <= currentGamesMap[gameId].totalRounds; ++roundNum) {
+        for (let roundNum = 1; roundNum <= gameObj.totalRounds; ++roundNum) {
             let currentPlayerTurnId = gameObj.playerTurnId;
 
             // setup the screen for currentPlayerDrawing
@@ -128,6 +130,8 @@ module.exports = function (webSocketIo) {
 
             // switch the playerId turn to another person.
             gameObj.ChangeToDifferentPlayerId();
+    
+            gameSchema.updateGame(gameObj.gameId,gameObj);
 
             console.log(`Round ${roundNum} is over. Player ${gameObj.playerTurnId} turn to draw`);
 

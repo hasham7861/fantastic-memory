@@ -20,6 +20,13 @@ gameSchema.statics.fetchGame = function (gameId) {
     return mongoose.model('game').findOne({ gameId });
 }
 
+gameSchema.statics.updateGame = function (gameId, updatedGameObj) {
+    mongoose.model('game').findOneAndUpdate({"gameId":gameId}, updatedGameObj, function(err){
+        if(err)
+            console.log("unable to update game obj")
+    })
+}
+
 gameSchema.statics.removeGame = function (gameId) {
     mongoose.model('game').deleteOne({ "gameId": gameId }, function (err) { if (err) { console.log(err) } });
 }
