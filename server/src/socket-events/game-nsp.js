@@ -5,13 +5,7 @@ const playerToGameSchema = require("../database/playerToGameSchema");
 const Player = require("../models/Player");
 
 
-// stores context of all games
-global.currentGamesMap = {
-    // '096ef6e3': new Game(...)
-}
-
-
-function initializeWSEvents(webSocketIo) {
+function initializeGameNSP(webSocketIo) {
 
     let gameNSP = webSocketIo.of('/game-nsp');
     gameNSP.on("connection", socket => {
@@ -161,18 +155,10 @@ function initializeWSEvents(webSocketIo) {
 
     })
 
-    webSocketIo.on("connection", socket => {
-        // generic io events 
-    })
-
-
 }
 
 async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
     let gameDoc = await gameSchema.fetchGame(gameId);
-
-
-
 
 
     if (gameDoc) {
@@ -207,6 +193,5 @@ async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null
 
 
 module.exports = {
-    currentGamesMap,
-    initializeWSEvents
+    initializeGameNSP
 }

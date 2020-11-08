@@ -2,7 +2,7 @@
 const express = require("express");
 const { connectToDB } = require("./database/db");
 
-const { initializeWSEvents } = require('./socket-events/webchat');
+const { initializeWebSocketNameSpaces } = require('./socket-events/main-nsp');
 const PORT = process.env.PORT | "5000";
 
 // server
@@ -12,7 +12,7 @@ const http = require('http').createServer(server);
 // set the global app var io
 const webSocketIo = require('socket.io')(http);
 // initialize all the WS events
-initializeWSEvents(webSocketIo);
+initializeWebSocketNameSpaces(webSocketIo);
 
 // load up server and frontend module
 const app = require('./apis/app')(webSocketIo);
