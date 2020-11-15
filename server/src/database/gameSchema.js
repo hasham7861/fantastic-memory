@@ -50,10 +50,15 @@ gameSchema.statics.isValidGuessedWordOfRound = function (gameId, guessedWord, ro
     return mongoose.model('game').findOne({ "gameId": gameId }, function (err, doc) {
         if (err) {
             console.log("unable to record with this gameId");
-            return;
+            return false;
         }
-        // compare the game round word with input guessed word
-        return doc.game.gameRounds[roundNum - 1].guessedWord == guessedWord;
+        else if (doc.game.gameRounds[doc.game.currentGameRound - 1]) {
+            // compare the game round word with input guessed word
+            return doc.game.gameRounds[doc.game.currentGameRound - 1].guessedWord == guessedWord;
+        } else {
+            return false;
+        }
+
     })
 }
 

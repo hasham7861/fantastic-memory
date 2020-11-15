@@ -46,9 +46,17 @@ module.exports = function (webSocketIo) {
     })
 
     game.post("/guess_word", async (req,res)=>{
-        if(!req.body.gameId || !req.body.guessedWord || !req.body.playerId || !req.body.roundNum){
+
+        let {gameId, guessedWord, playerId} = req.body;
+
+        console.log(gameId, guessedWord, playerId)
+        if(!gameId|| 
+            !guessedWord|| 
+            !playerId){
             return res.status(400).send("guessed_word: missing props in body");
         }
+
+        guessedWord = guessedWord.toLowerCase()
 
         /**
          * //TODO 
@@ -58,9 +66,8 @@ module.exports = function (webSocketIo) {
          * 3. otherwise return a feedback to user that please try rephrasing or different word
          */
 
-        let { guessedWord } = req.body.guessedWord.toLowerCase();
 
-        let guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord, roundNum);
+        let guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
 
         if(guessedWordMatches){
             gameSchema.addPointsToPlayer(gameId, playerId, 1);

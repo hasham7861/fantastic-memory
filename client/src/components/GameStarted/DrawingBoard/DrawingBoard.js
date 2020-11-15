@@ -1,12 +1,13 @@
+import './DrawingBoard.css';
 import CanvasDraw from 'react-canvas-draw';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import React, { useContext } from 'react';
 import { mySocket } from '../../../services/game-sockets'
 
 import { AppContext } from '../../../App'
 
-export default function DrawingBoard(props) {
 
+const DrawingBoard = forwardRef((props, ref) => {
     // dom references
     let drawingCanvas = useRef(null);
 
@@ -20,7 +21,7 @@ export default function DrawingBoard(props) {
         catenaryColor: "black",
         gridColor: "rgba(150,150,150,0.17)",
         hideGrid: true,
-        canvasWidth: 600,
+        canvasWidth: 500,
         canvasHeight: 400,
         disabled: false, // TODO by default it is disabled until the turn of player
         imgSrc: "",
@@ -33,47 +34,34 @@ export default function DrawingBoard(props) {
     const { playerId } = useContext(AppContext)
     /// END OF STATES
 
-    ////// CSS
-    const containerStyle = {
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'Row'
-    }
 
-    const ioMenuStyle = {
-        display: "flex",
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row'
-    }
 
-    const paintMenuStyle = {
-        // display: "flex",
-        // flexDirection: "Column",
-        // justifyContent: 'center',
-        // alignItems: 'center'
-
-    }
-    /////// END OF CSS
 
     // Handlers
-    const brushColorChange = (event) => {
 
-        setCanvasOptions({
-            ...canvasOptions,
-            brushColor: event.target.value,
-            catenaryColor: event.target.value
+    // These methods are to be called by reference from outside the component for example sibling or parent
+    useImperativeHandle(ref, () => ({
+        clearCanvas:()=>{
+            drawingCanvas.clear();
+        },
+        brushColorChange: (event) => {
+            setCanvasOptions({
+                ...canvasOptions,
+                brushColor: event.target.value,
+                catenaryColor: event.target.value
 
-        })
-    }
+            })
+        },
+        brushStrokeSizeChange: (event) => {
+            setCanvasOptions({
+                ...canvasOptions,
+                brushRadius: parseInt(event.target.value)
+            })
+        }
+    }))
 
-    const brushStrokeSizeChange = (event) => {
 
-        setCanvasOptions({
-            ...canvasOptions,
-            brushRadius: parseInt(event.target.value)
-        })
-    }
+
 
     const newDrawnLineOnCanvasHandler = _ => {
         // console.log(drawingCanvas.getSaveData())
@@ -123,21 +111,21 @@ export default function DrawingBoard(props) {
 
 
     return (
-        <div style={containerStyle}>
-            <div style={ioMenuStyle}>
-                <button onClick={() => drawingCanvas.undo()}>Undo</button>
-                <button onClick={() => drawingCanvas.clear()}> Clear </button>
-                <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
-                <button onClick={() => {
-                    setCanvasOptions(
-                        {
-                            ...canvasOptions,
-                            saveData: localStorage.getItem('savedDrawing')
-                        }
-                    )
-                }}
-                > Load</button>
-            </div>
+        <div id="drawing-container">
+            {/* <div style={ioMenuStyle}>
+             <button onClick={() => drawingCanvas.undo()}>Undo</button>
+             <button onClick={() => drawingCanvas.clear()}> Clear </button>
+             <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
+             <button onClick={() => {
+                 setCanvasOptions(
+                     {
+                         ...canvasOptions,
+                         saveData: localStorage.getItem('savedDrawing')
+                     }
+                 )
+             }}
+             > Load</button>
+         </div> */}
 
 
             <div
@@ -156,13 +144,14 @@ export default function DrawingBoard(props) {
                 />
             </div>
 
-            <div style={paintMenuStyle}>
-                <label htmlFor="stroke">Brush Stroke</label>
-                <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
-                <label>Brush Color</label>
-                <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
-            </div>
+            {/* <div id="paint-menu">
+             <label htmlFor="stroke">Brush Stroke</label>
+             <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
+             <label>Brush Color</label>
+             <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
+         </div> */}
 
         </div>
     )
-}
+})
+export default DrawingBoard;

@@ -1,0 +1,54 @@
+.GameScreen{
+    display: flex;
+    
+}
+
+
+#PaintMenu{
+    background-color: whitesmoke;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding:20px;
+    width:150px;
+    margin-top:105px;
+}
+
+#PaintMenu > #stroke{
+    width: 100px;
+}
+
+#PaintMenu > #leave-game{
+    margin-top: 150px;
+}
+
+#DrawingDashboard{
+    width: 500px;
+    height: 100px;
+    padding-left: 10px;
+}
+
+
+#PlayersInLobby{
+    background-color: whitesmoke;
+    padding:10px;
+    padding-top:30px;
+    margin-top:105px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius:10px;
+
+}
+
+#PlayersInLobby > ul{
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.7em;
+    text-overflow: ellipsis;
+}
+
+
+
+
+#PlayersInLobby > ul >  .player-turn{
+    padding:10px;
+    border:1px solid blue;
+}
