@@ -33,7 +33,7 @@ class Game {
         this.hostId = hostId ? hostId : ""
         this.playerTurnId = playerTurnId ? playerTurnId : "";
         this.playerTurnIndex = playerTurnIndex ? playerTurnIndex : 0;
-        this.gameRounds = gameRounds ? gameRounds : new Array(3).fill(new GameRound(),0,2); // stores GameRound Objects
+        this.gameRounds = gameRounds ? gameRounds : new Array(3).fill(new GameRound(),0,3); // stores GameRound Objects
         this.currentGameRound = this.currentGameRound ? this.currentGameRound : 1;
         this.totalRounds = totalRounds ? totalRounds : 3;
         // time is in milliseconds 

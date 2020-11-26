@@ -5,7 +5,7 @@ const EventEmitter = require('events');
 const { sleep } = require('../util/reusable');
 const words = require("../database/category_of_words.json").words;
 
-const {Game} = require("../models/Game");
+const { Game } = require("../models/Game");
 
 
 const gameSchema = require("../database/gameSchema");
@@ -45,14 +45,13 @@ module.exports = function (webSocketIo) {
         })
     })
 
-    game.post("/guess_word", async (req,res)=>{
+    game.post("/guess_word", async (req, res) => {
 
-        let {gameId, guessedWord, playerId} = req.body;
+        let { gameId, guessedWord, playerId } = req.body;
 
-        console.log(gameId, guessedWord, playerId)
-        if(!gameId|| 
-            !guessedWord|| 
-            !playerId){
+        if (!gameId ||
+            !guessedWord ||
+            !playerId) {
             return res.status(400).send("guessed_word: missing props in body");
         }
 
@@ -68,12 +67,13 @@ module.exports = function (webSocketIo) {
 
 
         let guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
-
-        if(guessedWordMatches){
-            gameSchema.addPointsToPlayer(gameId, playerId, 1);
+        console.log(gameId, playerId, 1)
+        if (guessedWordMatches) {
+            await gameSchema.addPointsToPlayer(gameId, playerId, 1);
         }
 
-        res.send({"wordMatches": guessedWordMatches});
+
+        res.send({ "wordMatches": guessedWordMatches });
     })
 
 
@@ -115,9 +115,9 @@ module.exports = function (webSocketIo) {
         }
 
         const gameDoc = await gameSchema.fetchGame(gameId);
-      
+
         const gameObj = new Game(gameDoc.game);
-     
+
 
         if (!gameObj) {
             console.log("start-game-event: unable to start game");
@@ -132,23 +132,29 @@ module.exports = function (webSocketIo) {
         }
 
 
+
+
         //  start rounds loop here
-        for (let roundNum = 1; roundNum <= gameObj.totalRounds; ++roundNum) {
+        for (let roundNum = 1; roundNum <= gameObj.totalRounds; roundNum++) {
             let currentPlayerTurnId = gameObj.playerTurnId;
-            
+            // generate random word to draw for player is currently turn it is
+            let drawingWord = generateWord();
+            gameNSP.to(currentPlayerTurnId).emit("drawing-word", drawingWord);
+
             // setup the screen for currentPlayerDrawing
             for (let playerId in gameObj.players) {
                 let isMyTurn = playerId == currentPlayerTurnId;
                 gameNSP.to(playerId).emit("toggle-drawing-canvas", !isMyTurn);
 
-                // generate random word to draw for player is currently turn it is
-                let drawingWord = playerId === currentPlayerTurnId ? generateWord() : "";
-                gameNSP.to(playerId).emit("drawing-word", drawingWord);
-                gameObj.gameRounds[roundNum-1].wordToGuess = drawingWord;
-
                 // emitting to weather or not to enable input for guessing word
                 gameNSP.to(playerId).emit("is-my-turn", isMyTurn);
             }
+
+
+            gameObj.gameRounds[roundNum - 1].wordToGuess = drawingWord;
+            await gameSchema.updateGame(gameSchema.FILTER_QUERIES.filterGame(gameObj.gameId),
+                gameSchema.UPDATE_QUERIES.updateGameRounds(gameObj.gameRounds))
+
 
             // update time left for drawing player
             let timeLeftInterval = setInterval(() => {
@@ -165,13 +171,20 @@ module.exports = function (webSocketIo) {
             gameObj.ChangeToDifferentPlayerId();
 
             // update game round
-            gameObj.currentGameRound+=1;
-    
-            gameSchema.updateGame(gameObj.gameId,gameObj);
+            gameObj.currentGameRound += 1;
+
+            // update currentplayerTurn, currentGameRound, restimeleft
+            await gameSchema.updateGame(gameSchema.FILTER_QUERIES.filterGame(gameObj.gameId),
+                gameSchema.UPDATE_QUERIES.updatePlayerTurn(gameObj.playerTurnId, gameObj.playerTurnIndex));
+            await gameSchema.updateGame(gameSchema.FILTER_QUERIES.filterGame(gameObj.gameId),
+                gameSchema.UPDATE_QUERIES.updateCurrentGameRound(gameObj.currentGameRound));
+            await gameSchema.updateGame(gameSchema.FILTER_QUERIES.filterGame(gameObj.gameId),
+                gameSchema.UPDATE_QUERIES.updateTimeForEachRound(gameObj.timeForEachRound));
+
 
             console.log(`Round ${roundNum} is over. Player ${gameObj.playerTurnId} turn to draw`);
 
-            
+
 
         }
         return "Game should be over now"
