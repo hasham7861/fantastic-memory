@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { AppContext } from '../../App';
 
 import { mySocket } from '../../services/game-sockets'
-import { useCookies } from 'react-cookie'
+
 import { envUri } from '../../services/environment';
 
 
@@ -81,37 +81,34 @@ function DrawingDashboard() {
 
     const [drawingWord, setDrawingWord] = useState("");
     const [timeLeft, updateTimeLeft] = useState(0);
-    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"]);
+  
+    mySocket.on("drawing-word", word => {
+        if (word && word !== drawingWord) {
+            console.log(word)
+            setDrawingWord(word)
+        }
+    })
 
+    mySocket.on("update-time-left", newTime => {
+        updateTimeLeft(newTime)
+    })
 
 
     useEffect(() => {
 
-        mySocket.on("drawing-word", word => {
-            if (word && word != drawingWord) {
-                setDrawingWord(word)
-            }
-        })
-
-        mySocket.on("update-time-left", newTime => {
-            updateTimeLeft(newTime)
-        })
-
-
-
     }, [])
     return (
         <div id="DrawingDashboard">
-            <h4 style={{ "display": drawingWord == "" ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
-            <h4 style={{ "display": timeLeft == 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
+            <h4 style={{ "display": drawingWord === "" ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
+            <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
         </div>
     )
 }
 
-function GuessingInput({gameId, playerId}) {
+function GuessingInput({ gameId, playerId }) {
 
 
-    
+
 
 
     const [isMyTurn, setIsMyTurn] = useState(false);
@@ -119,13 +116,13 @@ function GuessingInput({gameId, playerId}) {
 
     const verifyGuess = async () => {
 
-        let guessVerified = await fetch(envUri+"/game/guess_word", {
+        let guessVerified = await fetch(envUri + "/game/guess_word", {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ gameId, guessedWord: inputGuess, playerId })
-        }).catch(err=>{console.log(err); return false})
+        }).catch(err => { console.log(err); return false })
 
-       
+
         console.log(guessVerified)
 
     }
@@ -137,7 +134,7 @@ function GuessingInput({gameId, playerId}) {
 
 
     return (<div style={{ "display": isMyTurn ? "none" : "block" }}>
-        <input type="text" name="guess-word-input" placeholder="guess word" onChange={(e)=>setInputGuess(e.currentTarget.value)}/>
+        <input type="text" name="guess-word-input" placeholder="guess word" onChange={(e) => setInputGuess(e.currentTarget.value)} />
         <input type="submit" value="guess word" onClick={verifyGuess} />
     </div>)
 }

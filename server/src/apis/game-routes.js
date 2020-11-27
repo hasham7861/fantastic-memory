@@ -139,7 +139,7 @@ module.exports = function (webSocketIo) {
             let currentPlayerTurnId = gameObj.playerTurnId;
             // generate random word to draw for player is currently turn it is
             let drawingWord = generateWord();
-            gameNSP.to(currentPlayerTurnId).emit("drawing-word", drawingWord);
+           
 
             // setup the screen for currentPlayerDrawing
             for (let playerId in gameObj.players) {
@@ -148,6 +148,13 @@ module.exports = function (webSocketIo) {
 
                 // emitting to weather or not to enable input for guessing word
                 gameNSP.to(playerId).emit("is-my-turn", isMyTurn);
+
+                if(isMyTurn){
+                    gameNSP.to(playerId).emit("drawing-word", drawingWord);
+                }else{
+                    // If it isn't your turn then rest the word
+                    gameNSP.to(playerId).emit("drawing-word", "");
+                }
             }
 
 
@@ -159,7 +166,9 @@ module.exports = function (webSocketIo) {
             // update time left for drawing player
             let timeLeftInterval = setInterval(() => {
                 gameObj.timeForEachRound -= 1000;
-                gameNSP.to(currentPlayerTurnId).emit("update-time-left", gameObj.timeForEachRound / 1000);
+                Object.keys(gameObj.players).forEach(playerId=>{
+                    gameNSP.to(playerId).emit("update-time-left", gameObj.timeForEachRound / 1000);     
+                })
             }, 1000)
             // start the timer for each round
             await sleep(gameObj.timeForEachRound);
