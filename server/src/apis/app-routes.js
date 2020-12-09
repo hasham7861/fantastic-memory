@@ -1,7 +1,5 @@
-const app = require('express')();
+module.exports = function (webSocketIo, app) {
 
-module.exports = function (webSocketIo) {
- 
   // main app routes
   app.get("/api", (req, res) => {
     res.send({
@@ -11,8 +9,15 @@ module.exports = function (webSocketIo) {
   });
 
   // all other apis here
-  app.use("/game", require('./game-routes')(webSocketIo));
+  require('./game-routes')(webSocketIo, app)
+  
 
-  return app;
+  app.use((req, res) => {
+    res.status(404).send({
+      message: "Not Found",
+      status: 404
+    });
+  });
+
 
 }

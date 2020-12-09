@@ -1,4 +1,3 @@
-const game = require('express')();
 const crypto = require('crypto');
 const EventEmitter = require('events');
 
@@ -17,12 +16,13 @@ function generateWord() {
     return words[randomNumIndex]
 }
 
+const RELATIVE_HTTP_PATH = "/game";
 
-module.exports = function (webSocketIo) {
+module.exports = function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
-
-    game.get("/generate_game_id", (req, res) => {
+    
+    app.get(RELATIVE_HTTP_PATH + "/generate_game_id", (req, res) => {
         crypto.randomBytes(4, function (err, buffer) {
             if (err)
                 res.status(404).send("generate_game_token err: unable to generate random game token");
@@ -30,7 +30,7 @@ module.exports = function (webSocketIo) {
         });
     })
 
-    game.get("/is_valid_game_id", (req, res) => {
+    app.get(RELATIVE_HTTP_PATH + "/is_valid_game_id", (req, res) => {
         if (!req.query.inputGameId)
             return res.status(400).send("valid_game_id: missing inputGameId query param");
 
@@ -45,7 +45,7 @@ module.exports = function (webSocketIo) {
         })
     })
 
-    game.post("/guess_word", async (req, res) => {
+    app.post(RELATIVE_HTTP_PATH + "/guess_word", async (req, res) => {
 
         let { gameId, guessedWord, playerId } = req.body;
 
@@ -77,20 +77,22 @@ module.exports = function (webSocketIo) {
     })
 
 
-    game.post("/start_game", (req, res) => {
+    app.post(RELATIVE_HTTP_PATH + "/start_game", (req, res) => {
         /** //FIXME
          * when host of the game, clicks starts game,
          * emit event start game-loop, which starts game loop
          */
 
 
+       
         const gameId = req.body.gameId;
 
         if (!gameId) {
             res.status(400).send("you need a gameId to start game")
         } else {
-            res.send("game has started");
             gameEventEmitter.emit("start-game", gameId);
+            res.send("game has started");
+            
         }
 
     })
@@ -108,6 +110,7 @@ module.exports = function (webSocketIo) {
          * show score of game
          * save score for each person in file somewhere after game is over
          */
+        
 
         if (!gameNSP) {
             console.log("start-game-event: gameNSP hasn't been initialized yet");
@@ -139,7 +142,7 @@ module.exports = function (webSocketIo) {
             let currentPlayerTurnId = gameObj.playerTurnId;
             // generate random word to draw for player is currently turn it is
             let drawingWord = generateWord();
-           
+
 
             // setup the screen for currentPlayerDrawing
             for (let playerId in gameObj.players) {
@@ -149,9 +152,9 @@ module.exports = function (webSocketIo) {
                 // emitting to weather or not to enable input for guessing word
                 gameNSP.to(playerId).emit("is-my-turn", isMyTurn);
 
-                if(isMyTurn){
+                if (isMyTurn) {
                     gameNSP.to(playerId).emit("drawing-word", drawingWord);
-                }else{
+                } else {
                     // If it isn't your turn then rest the word
                     gameNSP.to(playerId).emit("drawing-word", "");
                 }
@@ -166,8 +169,8 @@ module.exports = function (webSocketIo) {
             // update time left for drawing player
             let timeLeftInterval = setInterval(() => {
                 gameObj.timeForEachRound -= 1000;
-                Object.keys(gameObj.players).forEach(playerId=>{
-                    gameNSP.to(playerId).emit("update-time-left", gameObj.timeForEachRound / 1000);     
+                Object.keys(gameObj.players).forEach(playerId => {
+                    gameNSP.to(playerId).emit("update-time-left", gameObj.timeForEachRound / 1000);
                 })
             }, 1000)
             // start the timer for each round
@@ -199,10 +202,6 @@ module.exports = function (webSocketIo) {
         return "Game should be over now"
     })
 
-
-
-
-    return game;
 }
 
 
