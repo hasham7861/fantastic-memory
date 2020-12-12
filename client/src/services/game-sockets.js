@@ -2,9 +2,9 @@ import io from 'socket.io-client';
 import { envUri } from './environment';
 import { isServerUp } from './rest';
 
-const mySocket = io(envUri + "/game-nsp");
+export const mySocket = io(envUri + "/game-nsp");
 
-const initiateGameSockets = isServerUp(() => {
+export const initiateGameSockets = isServerUp(() => {
     mySocket.on('connect', function () {
         return "intiated all socket"
     });
@@ -16,27 +16,17 @@ const initiateGameSockets = isServerUp(() => {
 
 })
 
-const joinGame = (gameId, playerIndexStart) => {
+export const joinGame = (gameId, playerIndexStart) => {
     mySocket.emit("join-game-lobby", { gameId, playerIndexStart });
 }
 
-const closeGame = (gameId) => {
+export const closeGame = (gameId) => {
     mySocket.emit("close-game", gameId)
 }
 
 
-const checkIsMyTurn = (isMyTurnStateChangeCB) =>{
+export const checkIsMyTurn = (isMyTurnStateChangeCB) =>{
     mySocket.on("is-my-turn", isMyTurn => {
         isMyTurnStateChangeCB(isMyTurn);
     })
-}
-
-export {
-    initiateGameSockets, 
-    joinGame, 
-    closeGame, 
-    mySocket,
-    checkIsMyTurn
-    
-
 }

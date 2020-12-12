@@ -84,7 +84,7 @@ function DrawingDashboard() {
     const [isMyTurn, setIsMyTurn] = useState(false);
     const [drawingWord, setDrawingWord] = useState("");
     const [timeLeft, updateTimeLeft] = useState(0);
-  
+
     mySocket.on("drawing-word", word => {
         if (word && word !== drawingWord) {
             console.log(word)
@@ -114,6 +114,7 @@ function GuessingInput({ gameId, playerId }) {
 
     const [isMyTurn, setIsMyTurn] = useState(false);
     const [inputGuess, setInputGuess] = useState("");
+    const [guessedStatus, setGuessStatus] = useState(false);
 
     const verifyGuess = async () => {
 
@@ -121,18 +122,23 @@ function GuessingInput({ gameId, playerId }) {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ gameId, guessedWord: inputGuess, playerId })
+        }).then(async response => {
+            const data = await response.json();
+            const wordMatches = !!data.wordMatches;
+
+            if (wordMatches)
+                setGuessStatus(wordMatches);
         }).catch(err => { console.log(err); return false })
 
-
-        console.log(guessVerified)
 
     }
 
     checkIsMyTurn(setIsMyTurn);
-    
+
     return (<div style={{ "display": isMyTurn ? "none" : "block" }}>
-        <input type="text" name="guess-word-input" placeholder="guess word" onChange={(e) => setInputGuess(e.currentTarget.value)} />
-        <input type="submit" value="guess word" onClick={verifyGuess} />
+        <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
+        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} onChange={(e) => setInputGuess(e.currentTarget.value)} />
+        <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} />
     </div>)
 }
 
