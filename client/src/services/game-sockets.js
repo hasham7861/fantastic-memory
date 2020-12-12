@@ -25,6 +25,18 @@ const closeGame = (gameId) => {
 }
 
 
+const checkIsMyTurn = (isMyTurnStateChangeCB) =>{
+    mySocket.on("is-my-turn", isMyTurn => {
+        isMyTurnStateChangeCB(isMyTurn);
+    })
+}
+
 export {
-    initiateGameSockets, joinGame, closeGame, mySocket
+    initiateGameSockets, 
+    joinGame, 
+    closeGame, 
+    mySocket,
+    checkIsMyTurn
+    
+
 }

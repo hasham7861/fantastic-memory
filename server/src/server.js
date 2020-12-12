@@ -35,6 +35,7 @@ class Server {
    * @returns {void}
    */
   static async _initServer() {
+    
     const app = await this._initApp();
     const server = http.createServer(app);
     // connect to mongo db

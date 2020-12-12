@@ -12,7 +12,7 @@ const gameSchema = require("../database/gameSchema");
 const gameEventEmitter = new EventEmitter();
 
 function generateWord() {
-    let randomNumIndex = Math.floor(Math.random() * words.length - 1)
+    let randomNumIndex = Math.floor(Math.random() * words.length)
     return words[randomNumIndex]
 }
 

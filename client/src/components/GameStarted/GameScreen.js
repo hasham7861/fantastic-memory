@@ -5,9 +5,11 @@ import { withRouter } from 'react-router-dom';
 
 import { AppContext } from '../../App';
 
-import { mySocket } from '../../services/game-sockets'
+import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
 import { envUri } from '../../services/environment';
+
+
 
 
 function GameScreen(props) {
@@ -79,6 +81,7 @@ function PaintMenuStyle(props) {
 
 function DrawingDashboard() {
 
+    const [isMyTurn, setIsMyTurn] = useState(false);
     const [drawingWord, setDrawingWord] = useState("");
     const [timeLeft, updateTimeLeft] = useState(0);
   
@@ -93,22 +96,20 @@ function DrawingDashboard() {
         updateTimeLeft(newTime)
     })
 
+    checkIsMyTurn(setIsMyTurn);
 
     useEffect(() => {
 
     }, [])
     return (
         <div id="DrawingDashboard">
-            <h4 style={{ "display": drawingWord === "" ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
+            <h4 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
             <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
         </div>
     )
 }
 
 function GuessingInput({ gameId, playerId }) {
-
-
-
 
 
     const [isMyTurn, setIsMyTurn] = useState(false);
@@ -127,12 +128,8 @@ function GuessingInput({ gameId, playerId }) {
 
     }
 
-    mySocket.on("is-my-turn", isMyTurn => {
-        setIsMyTurn(isMyTurn);
-    })
-
-
-
+    checkIsMyTurn(setIsMyTurn);
+    
     return (<div style={{ "display": isMyTurn ? "none" : "block" }}>
         <input type="text" name="guess-word-input" placeholder="guess word" onChange={(e) => setInputGuess(e.currentTarget.value)} />
         <input type="submit" value="guess word" onClick={verifyGuess} />
