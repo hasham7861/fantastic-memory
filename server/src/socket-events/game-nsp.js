@@ -10,7 +10,7 @@ function initializeGameNSP(webSocketIo) {
     let gameNSP = webSocketIo.of('/game-nsp');
     gameNSP.on("connection", socket => {
 
-        let currentPlayerId = socket.id;
+        const currentPlayerId = socket.id;
 
         //send the id back to user to know who they are
         gameNSP.to(socket.id).emit("player-id", currentPlayerId);
@@ -117,15 +117,6 @@ function initializeGameNSP(webSocketIo) {
                 }
             }
         })
-
-
-
-        // TODO set score of player based on drawing, increase score of player based on the correct guess word
-        socket.on("check-guessed-word", ({ gameId, guessedWord }) => {
-
-        })
-
-
 
         // clean up everything related to game from datastore
         socket.on("close-game", gameId => {

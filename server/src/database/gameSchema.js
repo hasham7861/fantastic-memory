@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
+const { defaultTo, isEmpty } = require("ramda")
 
 const gameSchema = new mongoose.Schema({
     gameId: { type: String, unique: true, required: true },
@@ -127,6 +128,17 @@ gameSchema.statics.addPointsToPlayer = function (gameId, playerId, points) {
             });
         }
     })
+}
+
+
+gameSchema.statics.getCurrentRoundPlayers = async function (gameId) {
+    if(isEmpty(gameId))
+        return
+        
+    const gameDoc = await mongoose.model('game').findOne({ "gameId": gameId })
+    const playersList = defaultTo({})(gameDoc.game.players)
+    return playersList
+
 }
 
 

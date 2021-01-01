@@ -143,6 +143,9 @@ module.exports = function (webSocketIo, app) {
             // generate random word to draw for player is currently turn it is
             let drawingWord = generateWord();
 
+            const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
+               
+               
 
             // setup the screen for currentPlayerDrawing
             for (let playerId in gameObj.players) {
@@ -158,6 +161,9 @@ module.exports = function (webSocketIo, app) {
                     // If it isn't your turn then rest the word
                     gameNSP.to(playerId).emit("drawing-word", "");
                 }
+
+                // emite player list to game dashboard
+                gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerTurnId})
             }
 
 

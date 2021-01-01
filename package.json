@@ -4,18 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "client-dev": "cd client; npm start;",
-    "server-dev": "cd server; npm run dev",
-    "database-dev": "/usr/local/bin/mongod --dbpath ~/data/db"
+    "client:dev": "cd client; npm start;",
+    "server:dev": "cd server; npm run dev",
+    "database:dev":"npm run database:dev-kill; npm run database:dev-start",
+    "database:dev-start": "/usr/local/bin/mongod --dbpath ~/data/db",
+    "database:dev-kill": "pgrep mongod | xargs kill"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hasham7861/fantastic-memory.git"
   },
-  "author": "",
+  "author": "hashamalam",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/hasham7861/fantastic-memory/issues"
   },
-  "homepage": "https://github.com/hasham7861/fantastic-memory#readme"
+  "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
+  "dependencies": {
+    "ramda": "^0.27.1"
+  }
 }

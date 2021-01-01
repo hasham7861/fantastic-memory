@@ -9,6 +9,8 @@ import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
 import { envUri } from '../../services/environment';
 
+import {isNil} from 'ramda';
+
 
 
 
@@ -38,7 +40,7 @@ function GameScreen(props) {
                 <DrawingBoard gameId={gameId} ref={dashboardRef}></DrawingBoard>
                 <GuessingInput gameId={gameId} playerId={playerId}></GuessingInput>
             </div>
-            <PlayersInLobby />
+            <PlayersInLobby gameId={gameId}/>
 
         </div>
     )
@@ -145,10 +147,51 @@ function GuessingInput({ gameId, playerId }) {
 
 
 function PlayersInLobby() {
+  
+    const [playerListJSX, updatePlayerListJSX ] = useState("");
+    mySocket.on("load-players-list", ({players, currentPlayerId}) => {
+     
+        updatePlayerListJSX(formatPlayersToJSX(players,currentPlayerId))
+    })
+
+    const formatPlayersToJSX = (players, currentPlayerId) =>{
+    
+        if (isNil(players))
+            return
+       
+        const playersList = Object.keys(players).reduce((list, playerId) =>{
+            list.push(players[playerId])
+            return list
+        },[])
+
+        
+        const playersListToJSX = playersList.map((player, index)=>{
+            if(player.id != currentPlayerId){
+                return <li key={index}>
+                        <p>${player.id}</p>
+                        <p>Points {player.points}</p>
+                    </li>
+            }
+            return <li key={index} className="player-turn">
+                        <p>${player.id}</p>
+                        <p>Points {player.points}</p>
+                    </li>
+        })
+
+        return playersListToJSX
+
+        
+        
+        
+    }
+    useEffect(()=>{
+
+    })
     return <div id="PlayersInLobby">
         <b><p>Players</p></b>
         <ul>
-            <li>
+            {playerListJSX}
+            {/* <li>
                 <p>/game-nsp#iltrQRgZ9Jzkn1cRAACA</p>
                 <p>Points 0 </p>
             </li>
@@ -159,7 +202,7 @@ function PlayersInLobby() {
             <li>
                 <p>/game-nsp#iltrQRgZ9Jzkn1cRAACC</p>
                 <p>Points 2 </p>
-            </li>
+            </li> */}
         </ul>
     </div>
 }
