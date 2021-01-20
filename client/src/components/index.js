@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
+import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { initiateGameSockets } from '../services/game-sockets';
+import GameLogo from '../images/logo.png'
 
 initiateGameSockets.then(data => data);
 
@@ -8,37 +10,60 @@ export default function () {
     useEffect(() => {
 
     })
-    const style = {
-        width: '100%',
-        height: '300px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'Column',
-        color: "blue"
-    }
-    const optionsContainer = {
-        display: "flex",
-        flexDirection: "Row"
-    }
-    const btnStyle = {
-        border: '1px solid blue',
-        padding: '10px',
-        margin: '5px',
-        borderRadius: "20px",
-        textDecoration: "none",
-        color: "blue"
 
-    }
     return (
-
-        <div style={style}>
-            <h1>Fantastic Memory</h1>
-            <div style={optionsContainer}>
-                <Link style={btnStyle} to="/host-game">Host Game</Link>
-                <Link style={btnStyle} to="/join-game">Join Game</Link>
-            </div>
-        </div>
-
+        <SplashPageContainer>
+            <img src={GameLogo} alt="game-logo" width="100px"></img>
+            <Heading>Fantastic Memory</Heading>
+            <SubHeading>draw and your friend(s) will guess your drawing</SubHeading>
+            <OptionsContainer>
+                <Option to="/host-game">Host Game</Option>
+                <MainOption to="/join-game">Join Game</MainOption>
+            </OptionsContainer>
+        </SplashPageContainer>
     )
 }
+
+const SplashPageContainer = styled.div`
+    display:flex;
+    width: 100%;
+    height: 500px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: Column;
+    color: blue;
+`;
+
+const Heading = styled.h1`
+    color:#3D2175;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 4rem;
+    line-height:0;
+`
+
+const SubHeading = styled.h2`
+    color: #9E83D4;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:lighter;
+    line-height:0;
+    margin-bottom:30px;
+`
+
+const OptionsContainer = styled.div`
+    display: flex;
+    flex-direction: Row;
+`
+
+const Option = styled(Link)`
+    border: 1px solid #3D2175;
+    padding: 10px 30px;
+    margin: 5px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #3D2175;
+`
+
+const MainOption = styled(Option)`
+    background-color:#3D2175;
+    color:white;
+`
