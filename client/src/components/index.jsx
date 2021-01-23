@@ -32,7 +32,6 @@ const SplashPageContainer = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: Column;
-    color: blue;
 `;
 
 const Heading = styled.h1`

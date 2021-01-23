@@ -6,9 +6,8 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import GameScreen from './components/GameStarted/GameScreen';
 import GameOver from './components/GameOver/GameOver';
 
-
 export var AppContext = React.createContext('App')
-// App Component
+
 export default function App() {
 
     const [playerId, setPlayerId] = useState(null)

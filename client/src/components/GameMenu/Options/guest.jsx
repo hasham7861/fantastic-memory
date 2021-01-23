@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { joinGame, mySocket } from '../../../services/game-sockets';
-import { withRouter } from 'react-router-dom'
+import { withRouter, Link } from 'react-router-dom'
 import { isValidGameId } from '../../../services/rest'
-import './guest.css'
+import styled from 'styled-components'
 
 import { AppContext } from '../../../App'
 
@@ -48,24 +48,78 @@ function Guest(props) {
     }, [props.history, setPlayerId])
 
     return (
-
-        <div id="guest">
-            <p id="title">Sup Guest</p>
-            <div ref={joinGameDiv}>
-                <p>To join a game please enter in gameId</p>
-                <input type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
-                <button onClick={joinLobby}>Join Game</button>
-                <div ref={invalidGameIdDiv} style={{ display: "none", color: "red" }}>
+        <GuestContainer id="guest">
+            <Heading>Join Game</Heading>
+            <SubHeading>join your friend's game lobby</SubHeading>
+            <p>enter a valid gameId</p>
+            <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
+            <OptionsContainer>
+                <MainOption onClick={joinLobby}>Join Lobby</MainOption>
+                <Option to="/">Return Home</Option>
+            </OptionsContainer>
+            <div ref={invalidGameIdDiv} style={{ display: "none", color: "red" }}>
                     <p>Please enter in a valid gameid</p>
                 </div>
-            </div>
             <div ref={waitingDiv} style={{ display: "none" }}>
                 <p >Waiting on host to start the game</p>
             </div>
-            {/* {appContext} */}
-        </div>
-
+        </GuestContainer>
     )
 }
+
+const GuestContainer = styled.div`
+    margin: 2rem;
+    button {
+        margin-left: 1rem;
+   }
+   p{
+       color:#3D2175;
+   }
+   display:flex;
+    width: 100%;
+    height: 700px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: Column;
+` 
+
+const Heading = styled.h1`
+    color:#3D2175;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 4rem;
+    line-height:0;
+`
+
+const SubHeading = styled.h2`
+    color: #9E83D4;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:lighter;
+    line-height:0;
+    margin-bottom:40px;
+`
+
+const GameInputText = styled.input.attrs({type:"text"})`
+   color::#3D2175;
+   height:30px;
+   margin-bottom:20px;
+`
+const OptionsContainer = styled.div`
+    display: flex;
+    flex-direction: Row;
+`
+
+const Option = styled(Link)`
+    border: 1px solid #3D2175;
+    padding: 10px 30px;
+    margin: 5px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #3D2175;
+`
+
+const MainOption = styled(Option)`
+    background-color:#3D2175;
+    color:white;
+`
 
 export default withRouter(Guest)
