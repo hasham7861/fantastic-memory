@@ -17,8 +17,9 @@ export default function () {
             <Heading>Fantastic Memory</Heading>
             <SubHeading>draw and your friend(s) will guess your drawing</SubHeading>
             <OptionsContainer>
-                <Option to="/host-game">Host Game</Option>
                 <MainOption to="/join-game">Join Game</MainOption>
+                <Option to="/host-game">Host Game</Option>
+                <Option to="/instructions">Instructions</Option>
             </OptionsContainer>
         </SplashPageContainer>
     )
@@ -27,7 +28,7 @@ export default function () {
 const SplashPageContainer = styled.div`
     display:flex;
     width: 100%;
-    height: 500px;
+    height: 700px;
     justify-content: center;
     align-items: center;
     flex-direction: Column;
@@ -46,12 +47,12 @@ const SubHeading = styled.h2`
     font-family: Helvetica, Arial, sans-serif;
     font-weight:lighter;
     line-height:0;
-    margin-bottom:30px;
+    margin-bottom:40px;
 `
 
 const OptionsContainer = styled.div`
     display: flex;
-    flex-direction: Row;
+    flex-direction: Column;
 `
 
 const Option = styled(Link)`
