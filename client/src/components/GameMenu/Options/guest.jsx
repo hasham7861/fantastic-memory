@@ -51,8 +51,10 @@ function Guest(props) {
         <GuestContainer id="guest">
             <Heading>Join Game</Heading>
             <SubHeading>join your friend's game lobby</SubHeading>
+            <div ref={joinGameDiv}>
             <p>enter a valid gameId</p>
             <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
+            </div>
             <OptionsContainer>
                 <MainOption onClick={joinLobby}>Join Lobby</MainOption>
                 <Option to="/">Return Home</Option>
