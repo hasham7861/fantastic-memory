@@ -2,22 +2,32 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import './GameScreen.css';
 import DrawingBoard from './DrawingBoard/DrawingBoard';
 import { withRouter, useHistory } from 'react-router-dom';
-
 import { AppContext } from '../../App';
 
-import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
+import { mySocket, closeGame, checkIsMyTurn } from '../../services/game-sockets'
 
 import { envUri } from '../../services/environment';
 
 import { isEmpty, isNil } from 'ramda';
 import { MainOption, Option } from '../../common/components/Button';
 
-import {useCookies} from 'react-cookie'
+import {useCookies,setCookie, removeCookie} from 'react-cookie'
+
 
 function GameScreen(props) {
 
+    const history = useHistory();
+
      // config of react tools
-     const [cookies] = useCookies(["cookie-name"])
+    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
+
+    window.onbeforeunload = function() {
+        history.push("/")
+        closeGame(cookies.gameId)
+        removeCookie("gameId")
+        removeCookie("hostId")
+    }.bind(this);
+
 
     const [gameId, setGameId] = useState("");
     const dashboardRef = useRef();
