@@ -4,11 +4,11 @@ import DrawingBoard from './DrawingBoard/DrawingBoard';
 import { withRouter, useHistory } from 'react-router-dom';
 import { AppContext } from '../../App';
 
-import { mySocket, closeGame, checkIsMyTurn } from '../../services/game-sockets'
+import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
 import { envUri } from '../../services/environment';
 
-import { isEmpty, isNil } from 'ramda';
+import { isNil } from 'ramda';
 import { MainOption, Option } from '../../common/components/Button';
 
 import {useCookies,setCookie, removeCookie} from 'react-cookie'
@@ -19,11 +19,10 @@ function GameScreen(props) {
     const history = useHistory();
 
      // config of react tools
-    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
+    const [cookies, removeCookie] = useCookies(["cookie-name"])
 
     window.onbeforeunload = function() {
         history.push("/")
-        closeGame(cookies.gameId)
         removeCookie("gameId")
         removeCookie("hostId")
     }.bind(this);
