@@ -10,9 +10,7 @@ import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 import { envUri } from '../../services/environment';
 
 import {isNil} from 'ramda';
-
-
-
+import { MainOption, Option } from '../../common/components/Button';
 
 function GameScreen(props) {
 
@@ -59,21 +57,24 @@ function PaintMenuStyle(props) {
         dashboardRef.current.brushStrokeSizeChange(event);
     }
 
-    const clearCanvas = () => {
+    const clearCanvas = (e) => {
+        e.preventDefault()
         dashboardRef.current.clearCanvas();
     }
 
     return <div id="PaintMenu">
-        <b><p>Brush Options</p></b>
-        <label htmlFor="stroke">Stroke</label>
+        <b><p style={{fontSize:"1.3rem"}}>Brush Setting</p></b>
+        <label htmlFor="stroke">Select Size</label>
         <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
         <br></br>
-        <label>Color </label>
-        <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
+        <label>Select Color</label>
+        <input style={{marginLeft:"5px"}}type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
         <br></br>
         <br></br>
-        <button onClick={clearCanvas}>Clear Canvas</button>
-        <button id="leave-game">Leave Game</button>
+        <div className="paint-menu-style-container">
+            <MainOption onClick={(e)=>clearCanvas(e)}>Clear Canvas</MainOption>
+            <Option>Stop Game</Option>
+        </div>
     </div>
 }
 
@@ -105,8 +106,8 @@ function DrawingDashboard() {
     }, [])
     return (
         <div id="DrawingDashboard">
-            <h4 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
-            <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
+            <h3 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "white" }}>{drawingWord}</span></h3>
+            <h3 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "limegreen" }}>{timeLeft}</span></h3>
         </div>
     )
 }
@@ -137,10 +138,14 @@ function GuessingInput({ gameId, playerId }) {
 
     checkIsMyTurn(setIsMyTurn);
 
-    return (<div style={{ "display": isMyTurn ? "none" : "block" }}>
+    return (<div style={{ "display": isMyTurn ? "none" : "flex", justifyContent:"center" }}>
         <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
-        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} onChange={(e) => setInputGuess(e.currentTarget.value)} />
-        <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} />
+        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} 
+        onChange={(e) => setInputGuess(e.currentTarget.value)} 
+        style={{borderRadius:"5px"}}
+        />
+        {/* <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} /> */}
+        <MainOption to="#" disabled={guessedStatus} onClick={verifyGuess} style={{marginLeft:"10px"}} >Guess Word</MainOption>
     </div>)
 }
 
@@ -168,12 +173,12 @@ function PlayersInLobby() {
         const playersListToJSX = playersList.map((player, index)=>{
             if(player.id != currentPlayerId){
                 return <li key={index}>
-                        <p>${player.id}</p>
+                        <p style={{color:"#3D2175", fontSize:"1.2rem", wordBreak:"break-word", width:"200px"}}>${player.id}</p>
                         <p>Points {player.points}</p>
                     </li>
             }
             return <li key={index} className="player-turn">
-                        <p>${player.id}</p>
+                        <p style={{color:"#3D2175", fontSize:"1.2rem", wordBreak:"break-word", width:"200px"}}>${player.id}</p>
                         <p>Points {player.points}</p>
                     </li>
         })
@@ -188,29 +193,12 @@ function PlayersInLobby() {
 
     })
     return <div id="PlayersInLobby">
-        <b><p>Players</p></b>
-        <ul>
+        <b><p style={{fontSize:"1.3rem", display:"flex",justifyContent:"center"}}>Players</p></b>
+        <ul style={{overflowY:"auto"}}>
             {playerListJSX}
-            {/* <li>
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACA</p>
-                <p>Points 0 </p>
-            </li>
-            <li className="player-turn">
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACB</p>
-                <p>Points 3 </p>
-            </li>
-            <li>
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACC</p>
-                <p>Points 2 </p>
-            </li> */}
         </ul>
     </div>
 }
-
-
-// GameScreen.propTypes = {
-
-// }
 
 export default withRouter(GameScreen);
 

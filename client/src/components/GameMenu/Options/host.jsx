@@ -3,8 +3,10 @@ import { withRouter } from 'react-router-dom';
 import { getGameToken } from '../../../services/rest';
 import { joinGame, closeGame, mySocket } from '../../../services/game-sockets';
 import { useCookies } from 'react-cookie';
+import styled from "styled-components"
+import { Link } from 'react-router-dom'
+import { Smile as IconSmile, Key as IconKey, Clipboard as IconClipBoard} from 'react-feather';
 
-import './host.css'
 import { AppContext } from '../../../App'
 import { envUri } from '../../../services/environment';
 
@@ -26,7 +28,7 @@ const Host = function (props) {
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
-                    return <li key={i}>{playersList[p].id}</li>
+                    return (<PlayerRow key={i}><span><IconSmile color="black" width="40px" height="30px"/></span><span>{playersList[p].id}</span></PlayerRow>)
                 }
             )
         )
@@ -129,17 +131,105 @@ const Host = function (props) {
 
 
 
+    const copyToClipboard = () => { 
+        navigator.clipboard.writeText(gameId)
+    };
 
     return (
-        <div className="host-css">Hey there Host, share the following gameid: <span>{gameId}</span> with your guests
-            <div>
-                Players in lobby:
-            <ul id="game-lobby-list">{playersInLobby}</ul>
-            </div>
-            <button onClick={startGame}>Start Game</button>
-            <button onClick={stopGame} >Stop Game</button>
-        </div>
+        
+        <HostContainer>
+            <Heading>Host Game</Heading>
+            <SubHeading>host game for your friends to join game</SubHeading>
+            <GameId><IconKey/><span>GameId: </span> <span style={{color:"black"}}>{gameId}</span><IconClipBoard style={{cursor:"pointer"}}onClick={copyToClipboard}/></GameId>
+            <PLayersListWrapper>{playersInLobby}</PLayersListWrapper>
+            <OptionsContainer>
+                <MainOption to="#" onClick={startGame}>Start Game</MainOption>
+                <Option to="#" onClick={stopGame}>Stop Game</Option>
+            </OptionsContainer>
+        </HostContainer>
     )
 }
+
+const HostContainer = styled.div`
+    display:flex;
+    width: 100%;
+    height: 700px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: Column;
+    margin: 2rem;
+`
+
+const Heading = styled.h1`
+    color:#3D2175;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 4rem;
+    line-height:0;
+`
+
+const SubHeading = styled.h2`
+    color: #9E83D4;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:lighter;
+    line-height:0;
+    margin-bottom:40px;
+`
+const GameId = styled.h3`
+     color:#3D2175;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1.5rem;
+    display:flex;
+    svg{
+        margin:0 5px;
+    }
+    span{
+        margin: 0 5px;
+    }
+
+`
+const PLayersListWrapper = styled.ul`
+    width:500px;
+    height:200px;
+    background-color: #f1def1;
+    font-family: Helvetica, Arial, sans-serif;
+    color:#3D2175;
+    font-size:1.5rem;
+    border-radius:20px;
+    padding:50px;
+    margin-bottom:30px;
+    list-style: none;
+    overflow-y: auto;
+    display:flex;
+    align-items:center;
+    flex-direction:column;
+`
+
+const PlayerRow = styled.li`
+    padding-bottom:5px;
+    display: flex;
+    span{
+        margin:0 5px;
+    }
+`
+const OptionsContainer = styled.div`
+    display: flex;
+    flex-direction: Row;
+`
+
+
+const Option = styled(Link)`
+    border: 1px solid #3D2175;
+    padding: 10px 30px;
+    margin: 5px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #3D2175;
+`
+
+const MainOption = styled(Option)`
+    background-color:#3D2175;
+    color:white;
+`
+
 
 export default withRouter(Host);
