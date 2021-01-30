@@ -10,6 +10,7 @@ import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 import { envUri } from '../../services/environment';
 
 import {isNil} from 'ramda';
+import { MainOption } from '../../common/components/Button';
 
 
 
@@ -64,11 +65,11 @@ function PaintMenuStyle(props) {
     }
 
     return <div id="PaintMenu">
-        <b><p>Brush Options</p></b>
-        <label htmlFor="stroke">Stroke</label>
+        <b><p>Brush Setting</p></b>
+        <label htmlFor="stroke">Select Size</label>
         <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
         <br></br>
-        <label>Color </label>
+        <label>Select Color</label>
         <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
         <br></br>
         <br></br>
@@ -105,8 +106,8 @@ function DrawingDashboard() {
     }, [])
     return (
         <div id="DrawingDashboard">
-            <h4 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "blue" }}>{drawingWord}</span></h4>
-            <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "red" }}>{timeLeft}</span></h4>
+            <h4 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "white" }}>{drawingWord}</span></h4>
+            <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "white" }}>{timeLeft}</span></h4>
         </div>
     )
 }
@@ -191,26 +192,9 @@ function PlayersInLobby() {
         <b><p>Players</p></b>
         <ul>
             {playerListJSX}
-            {/* <li>
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACA</p>
-                <p>Points 0 </p>
-            </li>
-            <li className="player-turn">
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACB</p>
-                <p>Points 3 </p>
-            </li>
-            <li>
-                <p>/game-nsp#iltrQRgZ9Jzkn1cRAACC</p>
-                <p>Points 2 </p>
-            </li> */}
         </ul>
     </div>
 }
-
-
-// GameScreen.propTypes = {
-
-// }
 
 export default withRouter(GameScreen);
 

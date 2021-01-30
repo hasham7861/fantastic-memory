@@ -5,6 +5,7 @@ import { joinGame, closeGame, mySocket } from '../../../services/game-sockets';
 import { useCookies } from 'react-cookie';
 import styled from "styled-components"
 import { Link } from 'react-router-dom'
+import { User as IconUser } from 'react-feather';
 
 import { AppContext } from '../../../App'
 import { envUri } from '../../../services/environment';
@@ -27,7 +28,7 @@ const Host = function (props) {
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
-                    return <li key={i}>{playersList[p].id}</li>
+                    return (<PlayerRow key={i}><span><IconUser/></span><span>{playersList[p].id}</span></PlayerRow>)
                 }
             )
         )
@@ -189,7 +190,12 @@ const PLayersListWrapper = styled.ul`
     list-style: none;
     overflow-y: auto;
     display:flex;
-    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+`
+
+const PlayerRow = styled.li`
+    padding-bottom:5px;
 `
 const OptionsContainer = styled.div`
     display: flex;
