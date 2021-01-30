@@ -4,14 +4,14 @@ import DrawingBoard from './DrawingBoard/DrawingBoard';
 import { withRouter, useHistory } from 'react-router-dom';
 import { AppContext } from '../../App';
 
-import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
+import { mySocket, closeGame, checkIsMyTurn } from '../../services/game-sockets'
 
 import { envUri } from '../../services/environment';
 
 import { isNil } from 'ramda';
 import { MainOption, Option } from '../../common/components/Button';
 
-import {useCookies,setCookie, removeCookie} from 'react-cookie'
+import {useCookies, setCookie, removeCookie} from 'react-cookie'
 
 
 function GameScreen(props) {
@@ -64,6 +64,9 @@ function GameScreen(props) {
 
 function PaintMenuStyle(props) {
 
+    const history = useHistory()
+
+    const [cookies, removeCookie] = useCookies(["cookie-name"])
     const { dashboardRef } = props;
     const brushColorChange = (event) => {
         dashboardRef.current.brushColorChange(event);
@@ -74,8 +77,14 @@ function PaintMenuStyle(props) {
     }
 
     const clearCanvas = (e) => {
-        e.preventDefault()
         dashboardRef.current.clearCanvas();
+        
+    }
+
+    const stopGameHandler = () =>{
+        removeCookie("gameId")
+        removeCookie("hostId")
+        history.push("/")
     }
 
     return <div id="PaintMenu">
@@ -89,7 +98,7 @@ function PaintMenuStyle(props) {
         <br></br>
         <div className="paint-menu-style-container">
             <MainOption to="#" onClick={(e) => clearCanvas(e)}>Clear Canvas</MainOption>
-            <Option  to="#">Stop Game</Option>
+            <Option  to="#" onClick={stopGameHandler}>Stop Game</Option>
         </div>
     </div>
 }
