@@ -77,11 +77,12 @@ function PaintMenuStyle(props) {
     }
 
     const clearCanvas = (e) => {
+        e.preventDefault()
         dashboardRef.current.clearCanvas();
-        
     }
 
-    const stopGameHandler = () =>{
+    const stopGameHandler = (e) =>{
+        e.preventDefault()
         removeCookie("gameId")
         removeCookie("hostId")
         history.push("/")
@@ -98,7 +99,7 @@ function PaintMenuStyle(props) {
         <br></br>
         <div className="paint-menu-style-container">
             <MainOption to="#" onClick={(e) => clearCanvas(e)}>Clear Canvas</MainOption>
-            <Option  to="#" onClick={stopGameHandler}>Stop Game</Option>
+            <Option  to="#" onClick={(e) => stopGameHandler(e)}>Stop Game</Option>
         </div>
     </div>
 }
