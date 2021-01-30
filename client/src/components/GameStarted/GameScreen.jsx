@@ -10,10 +10,7 @@ import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 import { envUri } from '../../services/environment';
 
 import {isNil} from 'ramda';
-import { MainOption } from '../../common/components/Button';
-
-
-
+import { MainOption, Option } from '../../common/components/Button';
 
 function GameScreen(props) {
 
@@ -60,21 +57,24 @@ function PaintMenuStyle(props) {
         dashboardRef.current.brushStrokeSizeChange(event);
     }
 
-    const clearCanvas = () => {
+    const clearCanvas = (e) => {
+        e.preventDefault()
         dashboardRef.current.clearCanvas();
     }
 
     return <div id="PaintMenu">
-        <b><p>Brush Setting</p></b>
+        <b><p style={{fontSize:"1.3rem"}}>Brush Setting</p></b>
         <label htmlFor="stroke">Select Size</label>
         <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
         <br></br>
         <label>Select Color</label>
-        <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
+        <input style={{marginLeft:"5px"}}type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
         <br></br>
         <br></br>
-        <button onClick={clearCanvas}>Clear Canvas</button>
-        <button id="leave-game">Leave Game</button>
+        <div className="paint-menu-style-container">
+            <MainOption onClick={(e)=>clearCanvas(e)}>Clear Canvas</MainOption>
+            <Option>Stop Game</Option>
+        </div>
     </div>
 }
 
@@ -106,8 +106,8 @@ function DrawingDashboard() {
     }, [])
     return (
         <div id="DrawingDashboard">
-            <h4 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "white" }}>{drawingWord}</span></h4>
-            <h4 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "white" }}>{timeLeft}</span></h4>
+            <h3 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "white" }}>{drawingWord}</span></h3>
+            <h3 style={{ "display": timeLeft === 0 ? "none" : "block" }}>Time Left: <span style={{ color: "limegreen" }}>{timeLeft}</span></h3>
         </div>
     )
 }
@@ -174,7 +174,7 @@ function PlayersInLobby() {
                     </li>
             }
             return <li key={index} className="player-turn">
-                        <p>${player.id}</p>
+                        <p style={{color:"#3D2175", fontSize:"1.2rem", wordBreak:"break-word", width:"200px"}}>${player.id}</p>
                         <p>Points {player.points}</p>
                     </li>
         })
@@ -189,8 +189,8 @@ function PlayersInLobby() {
 
     })
     return <div id="PlayersInLobby">
-        <b><p>Players</p></b>
-        <ul>
+        <b><p style={{fontSize:"1.3rem", display:"flex",justifyContent:"center"}}>Players</p></b>
+        <ul style={{overflowY:"auto"}}>
             {playerListJSX}
         </ul>
     </div>

@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 
 export const Option = styled(Link)`
     border: 1px solid #3D2175;
-    padding: 10px 30px;
-    margin: 5px;
+    padding: 5px 10px;
     border-radius: 20px;
     text-decoration: none;
     color: #3D2175;

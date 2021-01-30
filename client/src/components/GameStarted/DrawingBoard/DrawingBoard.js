@@ -22,7 +22,7 @@ const DrawingBoard = forwardRef((props, ref) => {
         gridColor: "rgba(150,150,150,0.17)",
         hideGrid: true,
         canvasWidth: 500,
-        canvasHeight: 400,
+        canvasHeight: 420,
         disabled: false, // TODO by default it is disabled until the turn of player
         imgSrc: "",
         saveData: null,
@@ -134,7 +134,7 @@ const DrawingBoard = forwardRef((props, ref) => {
                 <CanvasDraw
                     ref={canvasDraw => (drawingCanvas = canvasDraw)}
                     {...canvasOptions}
-                    style={{ border: '1px solid #ccc', margin: '10px' }}
+                    style={{ border: '1px solid #ccc', margin: '10px', borderRadius:'7px' }}
                     // update the drawing locally
                     onChange={
                         () => {
