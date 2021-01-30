@@ -71,7 +71,7 @@ const Host = function (props) {
         })
 
         // Player has not hosted any game at the moment
-        if (!cookies.hasOwnProperty("gameId") && !cookies.hasOwnProperty("hostId")) {
+        if (!cookies.gameId || !cookies.hostId || cookies.gameId=="undefined") {
             // create the game
             getGameToken().then(resp => {
                 setCookie("gameId", resp.data.gameId, { expires: new Date(new Date().getTime() + 8.64e+7) /**expire gameId after a day just incase*/ })
@@ -86,7 +86,7 @@ const Host = function (props) {
 
 
         }
-        else if (cookies.hasOwnProperty("hostId")) {
+        else if (cookies.hostId) {
             setGameId(cookies.gameId)
             if (cookies.gameId) {
                 mySocket.emit("update-host-id", cookies.gameId)
@@ -127,7 +127,7 @@ const Host = function (props) {
         })
 
 
-    }, [gameId, cookies, setCookie, removeCookie, props, setPlayerId])
+    }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId])
 
 
 
