@@ -15,7 +15,7 @@ export default function () {
         <SplashPageContainer>
             <img src={GameLogo} alt="game-logo" width="100px"></img>
             <Heading>Fantastic Memory</Heading>
-            <SubHeading>draw and your friend(s) will guess your drawing</SubHeading>
+            <SubHeading>draw and your friends will guess your drawing</SubHeading>
             <OptionsContainer>
                 <MainOption to="/join-game">Join Game</MainOption>
                 <Option to="/host-game">Host Game</Option>

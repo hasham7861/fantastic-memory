@@ -5,7 +5,7 @@ import { joinGame, closeGame, mySocket } from '../../../services/game-sockets';
 import { useCookies } from 'react-cookie';
 import styled from "styled-components"
 import { Link } from 'react-router-dom'
-import { User as IconUser } from 'react-feather';
+import { Smile as IconSmile, Key as IconKey, Clipboard as IconClipBoard} from 'react-feather';
 
 import { AppContext } from '../../../App'
 import { envUri } from '../../../services/environment';
@@ -28,7 +28,7 @@ const Host = function (props) {
         setPlayersInLobby(
             Object.keys(playersList).map(
                 (p, i) => {
-                    return (<PlayerRow key={i}><span><IconUser/></span><span>{playersList[p].id}</span></PlayerRow>)
+                    return (<PlayerRow key={i}><span><IconSmile color="black" width="40px" height="30px"/></span><span>{playersList[p].id}</span></PlayerRow>)
                 }
             )
         )
@@ -131,17 +131,20 @@ const Host = function (props) {
 
 
 
+    const copyToClipboard = () => { 
+        navigator.clipboard.writeText(gameId)
+    };
 
     return (
         
         <HostContainer>
             <Heading>Host Game</Heading>
             <SubHeading>host game for your friends to join game</SubHeading>
-            <GameId>GameId: {gameId}</GameId>
+            <GameId><IconKey/><span>GameId: </span> <span style={{color:"black"}}>{gameId}</span><IconClipBoard style={{cursor:"pointer"}}onClick={copyToClipboard}/></GameId>
             <PLayersListWrapper>{playersInLobby}</PLayersListWrapper>
             <OptionsContainer>
-                <MainOption onClick={startGame}>Start Game</MainOption>
-                <Option onClick={stopGame}>Stop Game</Option>
+                <MainOption to="#" onClick={startGame}>Start Game</MainOption>
+                <Option to="#" onClick={stopGame}>Stop Game</Option>
             </OptionsContainer>
         </HostContainer>
     )
@@ -175,6 +178,13 @@ const GameId = styled.h3`
      color:#3D2175;
     font-family: Helvetica, Arial, sans-serif;
     font-size: 1.5rem;
+    display:flex;
+    svg{
+        margin:0 5px;
+    }
+    span{
+        margin: 0 5px;
+    }
 
 `
 const PLayersListWrapper = styled.ul`
@@ -196,6 +206,10 @@ const PLayersListWrapper = styled.ul`
 
 const PlayerRow = styled.li`
     padding-bottom:5px;
+    display: flex;
+    span{
+        margin:0 5px;
+    }
 `
 const OptionsContainer = styled.div`
     display: flex;

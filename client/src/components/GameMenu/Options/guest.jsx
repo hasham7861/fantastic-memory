@@ -52,16 +52,18 @@ function Guest(props) {
             <Heading>Join Game</Heading>
             <SubHeading>join your friend's game lobby</SubHeading>
             <div ref={joinGameDiv}>
-            <p>enter a valid gameId</p>
-            <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
+                <GameInputWrapper>
+                    <h3>GameId</h3>
+                    <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
+                </GameInputWrapper>
+                <OptionsContainer>
+                    <MainOption onClick={joinLobby}>Join Lobby</MainOption>
+                    <Option to="/">Return Home</Option>
+                </OptionsContainer>
             </div>
-            <OptionsContainer>
-                <MainOption onClick={joinLobby}>Join Lobby</MainOption>
-                <Option to="/">Return Home</Option>
-            </OptionsContainer>
             <div ref={invalidGameIdDiv} style={{ display: "none", color: "red" }}>
-                    <p>Please enter in a valid gameid</p>
-                </div>
+                <p>Please enter in a valid gameid</p>
+            </div>
             <div ref={waitingDiv} style={{ display: "none" }}>
                 <p >Waiting on host to start the game</p>
             </div>
@@ -100,11 +102,17 @@ const SubHeading = styled.h2`
     margin-bottom:40px;
 `
 
-const GameInputText = styled.input.attrs({type:"text"})`
-   color::#3D2175;
-   height:30px;
-   margin-bottom:20px;
+const GameInputWrapper = styled.div`
+    display:flex;
+    justify-content:center;
 `
+const GameInputText = styled.input.attrs({type:"text"})`
+   color:#3D2175;
+   height:20px;
+   margin-left:10px;
+   margin-top:15px;
+`
+
 const OptionsContainer = styled.div`
     display: flex;
     flex-direction: Row;
@@ -123,5 +131,6 @@ const MainOption = styled(Option)`
     background-color:#3D2175;
     color:white;
 `
+
 
 export default withRouter(Guest)

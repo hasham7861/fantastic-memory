@@ -138,10 +138,14 @@ function GuessingInput({ gameId, playerId }) {
 
     checkIsMyTurn(setIsMyTurn);
 
-    return (<div style={{ "display": isMyTurn ? "none" : "block" }}>
+    return (<div style={{ "display": isMyTurn ? "none" : "flex", justifyContent:"center" }}>
         <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
-        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} onChange={(e) => setInputGuess(e.currentTarget.value)} />
-        <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} />
+        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} 
+        onChange={(e) => setInputGuess(e.currentTarget.value)} 
+        style={{borderRadius:"5px"}}
+        />
+        {/* <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} /> */}
+        <MainOption to="#" disabled={guessedStatus} onClick={verifyGuess} style={{marginLeft:"10px"}} >Guess Word</MainOption>
     </div>)
 }
 
@@ -169,7 +173,7 @@ function PlayersInLobby() {
         const playersListToJSX = playersList.map((player, index)=>{
             if(player.id != currentPlayerId){
                 return <li key={index}>
-                        <p>${player.id}</p>
+                        <p style={{color:"#3D2175", fontSize:"1.2rem", wordBreak:"break-word", width:"200px"}}>${player.id}</p>
                         <p>Points {player.points}</p>
                     </li>
             }
