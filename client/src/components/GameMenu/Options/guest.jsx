@@ -12,6 +12,7 @@ function Guest(props) {
     const joinGameDiv = useRef(null)
     const waitingDiv = useRef(null)
     const invalidGameIdDiv = useRef(null)
+    const [errorMessage, setErrorMessage] = useState("")
 
     const { setPlayerId } = useContext(AppContext)
 
@@ -19,7 +20,8 @@ function Guest(props) {
         // join game if use enters a valid id
         if (inputGameId.length > 1) {
             isValidGameId(inputGameId).then(resp => {
-                let isGameIdValid = resp.data.game_id_valid
+                const {game_id_valid, error_message} = resp.data
+                let isGameIdValid = game_id_valid
                 if (isGameIdValid === true) {
                     joinGameDiv.current.style.display = "none"
                     waitingDiv.current.style.display = "block"
@@ -27,6 +29,7 @@ function Guest(props) {
                     joinGame(inputGameId)
                 } else if (isGameIdValid === false) {
                     invalidGameIdDiv.current.style.display = "block"
+                    setErrorMessage(error_message)
 
                 }
             })
@@ -62,7 +65,7 @@ function Guest(props) {
                 </OptionsContainer>
             </div>
             <div ref={invalidGameIdDiv} style={{ display: "none", color: "red" }}>
-                <p>Please enter in a valid gameid</p>
+                <p>{errorMessage}</p>
             </div>
             <div ref={waitingDiv} style={{ display: "none" }}>
                 <p >Waiting on host to start the game</p>

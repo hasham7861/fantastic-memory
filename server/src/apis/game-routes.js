@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const {isEmpty, isNil, keysIn}= require('ramda')
 
 const { sleep } = require('../util/reusable');
 const words = require("../database/category_of_words.json").words;
@@ -30,19 +31,27 @@ module.exports = function (webSocketIo, app) {
         });
     })
 
-    app.get(RELATIVE_HTTP_PATH + "/is_valid_game_id", (req, res) => {
+    app.get(RELATIVE_HTTP_PATH + "/is_valid_game_id", async (req, res) => {
         if (!req.query.inputGameId)
             return res.status(400).send("valid_game_id: missing inputGameId query param");
 
         let inputGameId = req.query.inputGameId.slice(0, 8);
 
-        return gameSchema.doesGameExist(inputGameId).then(gameExist => {
-            if (gameExist)
-                res.send({ game_id_valid: true })
-            else
-                res.send({ game_id_valid: false })
-
-        })
+        const gameDoc = await gameSchema.fetchGame(inputGameId)
+        const gameExists = !isNil(gameDoc.game) || !isEmpty(gameDoc.game);
+        if(!gameExists){
+            res.send({ game_id_valid: false, error_message:"gameId is invalid"})
+        }
+        const playersExist = !isEmpty(gameDoc.game.players)
+        
+        if(playersExist){
+            const gameLobbyPlayerLimit = 3
+            if(keysIn(gameDoc.game.players).length >= gameLobbyPlayerLimit )
+                res.send({game_id_valid: false, error_message:"max 3 players allowed in lobby"})
+        }
+       
+        return res.send({ game_id_valid: true, error_message:""})
+         
     })
 
     app.post(RELATIVE_HTTP_PATH + "/guess_word", async (req, res) => {
