@@ -127,7 +127,7 @@ const Host = function (props) {
         })
 
 
-    }, [gameId, cookies, setCookie, removeCookie, props, setPlayerId])
+    }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId])
 
 
 

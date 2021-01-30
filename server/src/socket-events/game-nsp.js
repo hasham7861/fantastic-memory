@@ -101,6 +101,25 @@ function initializeGameNSP(webSocketIo) {
             emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
         })
 
+        socket.on("load-players", async (gameId) =>{
+            
+            if(!gameId)
+                return
+            console.log(gameId, currentPlayerId)
+            const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
+            
+            const gameDoc = await gameSchema.fetchGame(gameId);
+
+            const gameObj = new Game(gameDoc.game);
+
+            for (let playerId in gameObj.players) {
+                console.log(playersList)
+                // emite player list to game dashboard
+                gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerId})
+            }
+
+        })
+
 
         // share drawing with all the users within the same game
         socket.on("share-drawing-with-players", async ({ gameId, playerId, canvasData }) => {
