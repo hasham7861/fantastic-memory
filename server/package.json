@@ -6,7 +6,8 @@
     "start": "node src/server",
     "dev": "nodemon src/server",
     "docker-install": "docker build -t fantastic-server .",
-    "docker-start": "docker run -it -p 9000:5000 fantastic-server"
+    "docker-start": "docker run -it -p 9000:5000 fantastic-server",
+    "eslint":"eslint"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,9 @@
     "mongoose": "^5.10.1",
     "nodemon": "^2.0.4",
     "ramda": "^0.27.1",
-    "socket.io": "^2.3.0",
-    "ws": "^7.3.0"
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.19.0"
   }
 }
