@@ -39,8 +39,6 @@ function GameScreen(props) {
 
     mySocket.on("navigate-to-gameover-screen", ()=>{
         history.push("/game-over")
-        removeCookie("gameId")
-        removeCookie("hostId")
     })
 
 

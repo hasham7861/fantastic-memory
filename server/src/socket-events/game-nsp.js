@@ -7,7 +7,7 @@ const {Player} = require("../models/Game");
 
 function initializeGameNSP(webSocketIo) {
 
-    let gameNSP = webSocketIo.of('/game-nsp');
+    const gameNSP = webSocketIo.of('/game-nsp');
     gameNSP.on("connection", socket => {
 
         const currentPlayerId = socket.id;
@@ -25,12 +25,12 @@ function initializeGameNSP(webSocketIo) {
          * */
         socket.on("update-host-id", async gameId => {
 
-            let gameDoc = await gameSchema.fetchGame(gameId);
+            const gameDoc = await gameSchema.fetchGame(gameId);
 
             // check if the game exists
             if (!gameDoc) { return }
 
-            let currentGame = new Game(gameDoc.game);
+            const currentGame = new Game(gameDoc.game);
 
             if (!(gameDoc.game.players.hasOwnProperty(currentPlayerId))) {
 
@@ -47,7 +47,6 @@ function initializeGameNSP(webSocketIo) {
                     .catch((err) => console.log(err))
 
 
-
                 await playerToGameSchema.createPlayer(currentPlayerId, gameId)
             }
 
@@ -57,7 +56,7 @@ function initializeGameNSP(webSocketIo) {
          * */
         socket.on("join-game-lobby", async ({ gameId }) => {
 
-            let gameDoc = await gameSchema.fetchGame(gameId);
+            const gameDoc = await gameSchema.fetchGame(gameId);
 
             // Game doesn't exist in the store
             if (!gameDoc) {
@@ -77,7 +76,7 @@ function initializeGameNSP(webSocketIo) {
             }
             // when game exists
             else if (gameDoc) {
-                let currentGame = new Game(gameDoc.game);
+                const currentGame = new Game(gameDoc.game);
                 if (!(gameDoc.game.players.hasOwnProperty(currentPlayerId))) {
                     currentGame.AddPlayerToGame(currentPlayerId);
                     // update players obj within mongo
@@ -97,7 +96,7 @@ function initializeGameNSP(webSocketIo) {
 
         // return list of players within the same game
         socket.on("find-players-list", gameId => {
-            let emitPlayerId = currentPlayerId;
+            const emitPlayerId = currentPlayerId;
             emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
         })
 
@@ -112,7 +111,7 @@ function initializeGameNSP(webSocketIo) {
 
             const gameObj = new Game(gameDoc.game);
 
-            for (let playerId in gameObj.players) {
+            for (const playerId in gameObj.players) {
                 console.log(playersList)
                 // emite player list to game dashboard
                 gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerId})
@@ -124,17 +123,22 @@ function initializeGameNSP(webSocketIo) {
         // share drawing with all the users within the same game
         socket.on("share-drawing-with-players", async ({ gameId, playerId, canvasData }) => {
 
-            let gameDoc = await gameSchema.fetchGame(gameId);
+            const gameDoc = await gameSchema.fetchGame(gameId);
 
             if (gameDoc) {
-                let gameObj = new Game(gameDoc.game);
+                const gameObj = new Game(gameDoc.game);
 
-                for (let pId in gameObj.players) {
+                for (const pId in gameObj.players) {
                     if (pId != playerId) {// all the players that don't match the current drawer
                         gameNSP.to(pId).emit("draw-on-canvas", canvasData)
                     }
                 }
             }
+        })
+
+        socket.on("get-players-and-score", async (gameId) =>{
+            const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
+            gameNSP.to(currentPlayerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerId})
         })
 
         // clean up everything related to game from datastore
@@ -150,10 +154,10 @@ function initializeGameNSP(webSocketIo) {
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", async () => {
 
-            let playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
+            const playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
            
             if (playerDoc) {
-                let playerGameId = playerDoc.gameId;
+                const playerGameId = playerDoc.gameId;
 
                 await gameSchema.setPlayerNotInGame(playerGameId, currentPlayerId);
                 await gameSchema.removePlayerFromGame(playerGameId, currentPlayerId);
@@ -169,12 +173,12 @@ function initializeGameNSP(webSocketIo) {
 }
 
 async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
-    let gameDoc = await gameSchema.fetchGame(gameId);
+    const gameDoc = await gameSchema.fetchGame(gameId);
 
 
     if (gameDoc) {
 
-        let gameObj = new Game(gameDoc.game);
+        const gameObj = new Game(gameDoc.game);
 
         // if there is no player id specifiy to emit then emit to host id
         if (!emitPlayerId) {
@@ -184,7 +188,7 @@ async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null
         // TODO move this logic when user closes window
         // delete players from context of game when they closed out of game
         // await gameSchema.removePlayersNotInGame(gameId);
-        for (let playerId in gameObj.players) {
+        for (const playerId in gameObj.players) {
             if (gameObj.players.inGame == false) {
                 delete gameObj.players[playerId];
             }
@@ -200,7 +204,6 @@ async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null
 
     }
 }
-
 
 
 module.exports = {
