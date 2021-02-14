@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const {isEmpty, isNil, keysIn}= require('ramda')
+const { isNil, keysIn } = require('ramda')
 const { sleep } = require('../../shared/reusable');
 const words = require("./scaffold_data/category_of_words.json").words;
 const { Game } = require("./game.model");
@@ -17,33 +17,21 @@ const getRelativePath = (route) => "/game/" + route
 module.exports = function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
-    
+
     app.get(getRelativePath("generate_game_id"), async (req, res) => {
         const gameId = await Game.getGeneratedGameId()
-        res.send({gameId: gameId})
+        res.send({ gameId: gameId })
     })
 
-    app.get(getRelativePath("is_valid_game_id") , async (req, res) => {
-        if (!req.query.inputGameId)
+    app.get(getRelativePath("is_valid_game_id"), async (req, res) => {
+        const { inputGameId } = req.query
+
+        if (isNil(inputGameId))
             return res.status(400).send("valid_game_id: missing inputGameId query param");
 
-        const inputGameId = req.query.inputGameId.slice(0, 8);
+        const canJoinGameResp = await Game.canJoinGame(inputGameId)
 
-        const gameDoc = await gameSchema.fetchGame(inputGameId)
-        const gameExists = !isNil(gameDoc.game) || !isEmpty(gameDoc.game);
-        if(!gameExists){
-            res.send({ game_id_valid: false, error_message:"gameId is invalid"})
-        }
-        const playersExist = !isEmpty(gameDoc.game.players)
-        
-        if(playersExist){
-            const gameLobbyPlayerLimit = 3
-            if(keysIn(gameDoc.game.players).length >= gameLobbyPlayerLimit )
-                res.send({game_id_valid: false, error_message:"max 3 players allowed in lobby"})
-        }
-       
-        return res.send({ game_id_valid: true, error_message:""})
-         
+        return res.send(canJoinGameResp)
     })
 
     app.post(getRelativePath("guess_word"), async (req, res) => {
@@ -58,21 +46,11 @@ module.exports = function (webSocketIo, app) {
 
         const guessedWord = req.body.guessedWord.toLowerCase()
 
-        /**
-         * //TODO 
-         * 1. check if the guessed word matches the word given to current host of the game
-         * 2. if word matches, return a feedback to user that they guessed the word 
-         *     and disable the input field for them for the current round and add 1 point to the player who guessed the word in gameMap
-         * 3. otherwise return a feedback to user that please try rephrasing or different word
-         */
-
-
         const guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
 
         if (guessedWordMatches) {
             await gameSchema.addPointsToPlayer(gameId, playerId, 1);
         }
-
 
         res.send({ "wordMatches": guessedWordMatches });
     })
@@ -84,22 +62,22 @@ module.exports = function (webSocketIo, app) {
          * emit event start game-loop, which starts game loop
          */
 
-       
+
         const gameId = req.body.gameId;
 
         if (!gameId) {
             res.status(400).send("you need a gameId to start game")
             return
-        } 
+        }
 
         const players = await gameSchema.getCurrentRoundPlayers(gameId)
         const playersTally = keysIn(players).length
 
-        if(playersTally < 2) {
-            res.send({error_message:"game needs more than one player to start game"})
+        if (playersTally < 2) {
+            res.send({ error_message: "game needs more than one player to start game" })
             return
         }
-        
+
         else {
             gameEventEmitter.emit("start-game", gameId);
             res.send("game has started");
@@ -120,7 +98,7 @@ module.exports = function (webSocketIo, app) {
          * show score of game
          * save score for each person in file somewhere after game is over
          */
-        
+
 
         if (!gameNSP) {
             console.log("start-game-event: gameNSP hasn't been initialized yet");
@@ -152,7 +130,7 @@ module.exports = function (webSocketIo, app) {
             const drawingWord = generateWord();
 
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
-               
+
 
             // setup the screen for currentPlayerDrawing
             for (const playerId in gameObj.players) {
@@ -170,12 +148,12 @@ module.exports = function (webSocketIo, app) {
                 }
 
                 // emite player list to game dashboard
-                gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerTurnId})
+                gameNSP.to(playerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerTurnId })
 
                 // this should reset all canvas on start of gameround
-                gameNSP.to(playerId).emit("draw-on-canvas", {lines:[]})
-                    
-                
+                gameNSP.to(playerId).emit("draw-on-canvas", { lines: [] })
+
+
             }
 
 
@@ -218,12 +196,12 @@ module.exports = function (webSocketIo, app) {
 
         console.log('gameOver')
         // Navigate all the users for given gameId to gameOverScreen
-        for (const  playerId in gameObj.players) {
+        for (const playerId in gameObj.players) {
             const player = gameObj.players[playerId];
             // emit event to all players that game has started
             gameNSP.to(player.id).emit("navigate-to-gameover-screen")
         }
-        
+
 
         return "Game should be over now"
     })

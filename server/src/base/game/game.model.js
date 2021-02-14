@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const { isEmpty, isNil, keysIn } = require('ramda')
+const gameSchema = require('./game.schema')
 
 class Player {
     constructor(id = "", inGame = true, points = 0) {
@@ -8,8 +10,8 @@ class Player {
     }
 }
 
-class GameRound { 
-    constructor (wordToGuess = "", playersWithPoints = []){
+class GameRound {
+    constructor(wordToGuess = "", playersWithPoints = []) {
         wordToGuess = wordToGuess;
         playersWithPoints = playersWithPoints; // store list of players with points
     }
@@ -19,11 +21,11 @@ const GameStates = ["MENU", "STARTED", "CLOSED"];
 
 class Game {
     constructor(gameObj) {
-        if (!gameObj){
+        if (!gameObj) {
             console.log("gameObj is not set");
             return;
         }
-        const { gameId , players , status, hostId, playerTurnId, playerTurnIndex, gameRounds, totalRounds, timeForEachRound, currentGameRound } = gameObj;
+        const { gameId, players, status, hostId, playerTurnId, playerTurnIndex, gameRounds, totalRounds, timeForEachRound, currentGameRound } = gameObj;
 
         this.gameId = gameId ? gameId : "";
         // cast player objects to player type
@@ -35,7 +37,7 @@ class Game {
         this.hostId = hostId ? hostId : ""
         this.playerTurnId = playerTurnId ? playerTurnId : "";
         this.playerTurnIndex = playerTurnIndex ? playerTurnIndex : 0;
-        this.gameRounds = gameRounds ? gameRounds : new Array(3).fill(new GameRound(),0,3); // stores GameRound Objects
+        this.gameRounds = gameRounds ? gameRounds : new Array(3).fill(new GameRound(), 0, 3); // stores GameRound Objects
         this.currentGameRound = this.currentGameRound ? this.currentGameRound : 1;
         this.totalRounds = totalRounds ? totalRounds : 3;
         // time is in milliseconds 
@@ -63,11 +65,33 @@ class Game {
         this.timeForEachRound = 30000;
     }
 
-    static async getGeneratedGameId(){
+    static async getGeneratedGameId() {
         const gameIdBuffer = await crypto.randomBytes(4)
         const gameId = gameIdBuffer.toString('hex')
 
         return gameId;
+    }
+
+    static isValidGame(inputGameId) {
+        return inputGameId.length === 8
+    }
+
+    static async canJoinGame(gameId) {
+        const inputGameId = gameId.slice(0, 8);
+        const gameDoc = await gameSchema.fetchGame(inputGameId)
+        const gameExists = !isNil(gameDoc.game) || !isEmpty(gameDoc.game);
+        if (!gameExists) {
+            return { game_id_valid: false, error_message: "gameId is invalid" }
+        }
+        const playersExist = !isEmpty(gameDoc.game.players)
+
+        if (playersExist) {
+            const gameLobbyPlayerLimit = 3
+            if (keysIn(gameDoc.game.players).length >= gameLobbyPlayerLimit)
+                return { game_id_valid: false, error_message: "max 3 players allowed in lobby" }
+        }
+
+        return { game_id_valid: true, error_message: "" }
     }
 }
 
