@@ -34,9 +34,6 @@ const DrawingBoard = forwardRef((props, ref) => {
     const { playerId } = useContext(AppContext)
     /// END OF STATES
 
-
-
-
     // Handlers
 
     // These methods are to be called by reference from outside the component for example sibling or parent
@@ -80,6 +77,14 @@ const DrawingBoard = forwardRef((props, ref) => {
     }
     // END OF Handlers
 
+    // disable and enable drawing for the player
+    mySocket.on("toggle-drawing-canvas", canvasDisabled => {
+        // only toggle canvas when the state doesn't match
+        if (canvasOptions.disabled !== canvasDisabled) {
+            console.log("i can't draw", canvasDisabled)
+            setCanvasOptions({ ...canvasOptions, disabled: canvasDisabled })
+        }
+    })
 
     useEffect(() => {
 
@@ -95,16 +100,6 @@ const DrawingBoard = forwardRef((props, ref) => {
                 }
             })
 
-            // omit to enable or disable canvas based on the right player turn
-            // mySocket.emit("enable-drawing-canvas", props.gameId)
-
-            // disable and enable drawing for the player
-            mySocket.on("toggle-drawing-canvas", canvasDisabled => {
-                // only toggle canvas when the state doesn't match
-                if (canvasOptions.disabled !== canvasDisabled) {
-                    setCanvasOptions({ ...canvasOptions, disabled: canvasDisabled })
-                }
-            })
         }
     })
 
@@ -112,22 +107,6 @@ const DrawingBoard = forwardRef((props, ref) => {
 
     return (
         <div id="drawing-container">
-            {/* <div style={ioMenuStyle}>
-             <button onClick={() => drawingCanvas.undo()}>Undo</button>
-             <button onClick={() => drawingCanvas.clear()}> Clear </button>
-             <button onClick={() => localStorage.setItem("savedDrawing", drawingCanvas.getSaveData())}> Save</button>
-             <button onClick={() => {
-                 setCanvasOptions(
-                     {
-                         ...canvasOptions,
-                         saveData: localStorage.getItem('savedDrawing')
-                     }
-                 )
-             }}
-             > Load</button>
-         </div> */}
-
-
             <div
                 // share drawing once user clicks off drawn line
                 onClick={() => newDrawnLineOnCanvasHandler()}>
@@ -143,14 +122,6 @@ const DrawingBoard = forwardRef((props, ref) => {
                     }
                 />
             </div>
-
-            {/* <div id="paint-menu">
-             <label htmlFor="stroke">Brush Stroke</label>
-             <input name="stroke" type="range" id="stroke" min="4" max="10" step="2" defaultValue="4" onChange={brushStrokeSizeChange} />
-             <label>Brush Color</label>
-             <input type="color" name="brushStroke" defaultValue="black" onChange={brushColorChange} />
-         </div> */}
-
         </div>
     )
 })
