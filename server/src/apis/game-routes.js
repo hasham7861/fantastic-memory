@@ -77,7 +77,7 @@ module.exports = function (webSocketIo, app) {
 
 
         const guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
-        console.log(gameId, playerId, 1)
+
         if (guessedWordMatches) {
             await gameSchema.addPointsToPlayer(gameId, playerId, 1);
         }
@@ -87,7 +87,7 @@ module.exports = function (webSocketIo, app) {
     })
 
 
-    app.post(getRelativePath("start_game"), (req, res) => {
+    app.post(getRelativePath("start_game"), async (req, res) => {
         /** //FIXME
          * when host of the game, clicks starts game,
          * emit event start game-loop, which starts game loop
@@ -98,10 +98,21 @@ module.exports = function (webSocketIo, app) {
 
         if (!gameId) {
             res.status(400).send("you need a gameId to start game")
-        } else {
+            return
+        } 
+
+        const players = await gameSchema.getCurrentRoundPlayers(gameId)
+        const playersTally = keysIn(players).length
+
+        if(playersTally < 2) {
+            res.send({error_message:"game needs more than one player to start game"})
+            return
+        }
+        
+        else {
             gameEventEmitter.emit("start-game", gameId);
             res.send("game has started");
-            
+            return
         }
 
     })

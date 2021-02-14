@@ -10,13 +10,16 @@ import { Smile as IconSmile, Key as IconKey, Clipboard as IconClipBoard} from 'r
 import { AppContext } from '../../../App'
 import { envUri } from '../../../services/environment';
 
+import {isNil}  from 'ramda'
+
 const Host = function (props) {
 
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
     const { setPlayerId } = useContext(AppContext)
-
+    const [errAlertElement, setErrAlertElement] = useState(null)
+    
     // config of react tools
     const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
 
@@ -42,17 +45,23 @@ const Host = function (props) {
         props.history.push('/')
     }
 
-    const startGame = () => {
+    const startGame = (event) => {
         // move to start game push
         // props.history.push({ pathname: "/start-game", state: { gameId } })
-
+        event.preventDefault()
         fetch(envUri + "/game/start_game",
             {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ gameId })
             })
-            .then(data => data)
+            .then(resp=>resp.json()).then((data)=> {
+                if(!isNil(data.error_message)){
+                    console.log(data.error_message)
+                    setErrAlertElement(data.error_message)
+                }
+            
+            })
         // signal to all the other clients in the same socket that game has started
         // mySocket.emit("game-started", gameId)
     }
@@ -71,7 +80,7 @@ const Host = function (props) {
         })
 
         // Player has not hosted any game at the moment
-        if (!cookies.gameId || !cookies.hostId || cookies.gameId=="undefined") {
+        if (!cookies.gameId || !cookies.hostId || cookies.gameId==="undefined") {
             // create the game
             getGameToken().then(resp => {
                 setCookie("gameId", resp.data.gameId, { expires: new Date(new Date().getTime() + 8.64e+7) /**expire gameId after a day just incase*/ })
@@ -115,19 +124,13 @@ const Host = function (props) {
 
 
         }
-
-
-
-
-
-
-
+       
         //cleanup
         return (() => {
         })
 
 
-    }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId])
+    }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId, errAlertElement])
 
 
 
@@ -141,9 +144,10 @@ const Host = function (props) {
             <Heading>Host Game</Heading>
             <SubHeading>host game for your friends to join game</SubHeading>
             <GameId><IconKey/><span>GameId: </span> <span style={{color:"black"}}>{gameId}</span><IconClipBoard style={{cursor:"pointer"}}onClick={copyToClipboard}/></GameId>
+            <ErrorAlert style={{display:errAlertElement ? "block" :"none"}}>{errAlertElement}</ErrorAlert>
             <PLayersListWrapper>{playersInLobby}</PLayersListWrapper>
             <OptionsContainer>
-                <MainOption to="#" onClick={startGame}>Start Game</MainOption>
+                <MainOption to="#" onClick={(event)=>startGame(event)}>Start Game</MainOption>
                 <Option to="#" onClick={stopGame}>Stop Game</Option>
             </OptionsContainer>
         </HostContainer>
@@ -173,6 +177,14 @@ const SubHeading = styled.h2`
     font-weight:lighter;
     line-height:0;
     margin-bottom:40px;
+`
+const ErrorAlert = styled.p`
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:lighter;
+    color:red;
+    font-size:1rem;
+    display:block;
+    margin-top:10px;
 `
 const GameId = styled.h3`
      color:#3D2175;
