@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const {isEmpty, isNil, keysIn}= require('ramda')
 
 const { sleep } = require('../util/reusable');
 const words = require("../database/category_of_words.json").words;
@@ -12,17 +13,18 @@ const gameSchema = require("../database/gameSchema");
 const gameEventEmitter = new EventEmitter();
 
 function generateWord() {
-    let randomNumIndex = Math.floor(Math.random() * words.length)
+    const randomNumIndex = Math.floor(Math.random() * words.length)
     return words[randomNumIndex]
 }
 
-const RELATIVE_HTTP_PATH = "/game";
+const getRelativePath = (route) => "/game/" + route
+
 
 module.exports = function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
     
-    app.get(RELATIVE_HTTP_PATH + "/generate_game_id", (req, res) => {
+    app.get(getRelativePath("generate_game_id"), (req, res) => {
         crypto.randomBytes(4, function (err, buffer) {
             if (err)
                 res.status(404).send("generate_game_token err: unable to generate random game token");
@@ -30,24 +32,32 @@ module.exports = function (webSocketIo, app) {
         });
     })
 
-    app.get(RELATIVE_HTTP_PATH + "/is_valid_game_id", (req, res) => {
+    app.get(getRelativePath("is_valid_game_id") , async (req, res) => {
         if (!req.query.inputGameId)
             return res.status(400).send("valid_game_id: missing inputGameId query param");
 
-        let inputGameId = req.query.inputGameId.slice(0, 8);
+        const inputGameId = req.query.inputGameId.slice(0, 8);
 
-        return gameSchema.doesGameExist(inputGameId).then(gameExist => {
-            if (gameExist)
-                res.send({ game_id_valid: true })
-            else
-                res.send({ game_id_valid: false })
-
-        })
+        const gameDoc = await gameSchema.fetchGame(inputGameId)
+        const gameExists = !isNil(gameDoc.game) || !isEmpty(gameDoc.game);
+        if(!gameExists){
+            res.send({ game_id_valid: false, error_message:"gameId is invalid"})
+        }
+        const playersExist = !isEmpty(gameDoc.game.players)
+        
+        if(playersExist){
+            const gameLobbyPlayerLimit = 3
+            if(keysIn(gameDoc.game.players).length >= gameLobbyPlayerLimit )
+                res.send({game_id_valid: false, error_message:"max 3 players allowed in lobby"})
+        }
+       
+        return res.send({ game_id_valid: true, error_message:""})
+         
     })
 
-    app.post(RELATIVE_HTTP_PATH + "/guess_word", async (req, res) => {
+    app.post(getRelativePath("guess_word"), async (req, res) => {
 
-        let { gameId, guessedWord, playerId } = req.body;
+        const { gameId, guessedWord, playerId } = req.body;
 
         if (!gameId ||
             !guessedWord ||
@@ -66,7 +76,7 @@ module.exports = function (webSocketIo, app) {
          */
 
 
-        let guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
+        const guessedWordMatches = await gameSchema.isValidGuessedWordOfRound(gameId, guessedWord);
         console.log(gameId, playerId, 1)
         if (guessedWordMatches) {
             await gameSchema.addPointsToPlayer(gameId, playerId, 1);
@@ -77,12 +87,11 @@ module.exports = function (webSocketIo, app) {
     })
 
 
-    app.post(RELATIVE_HTTP_PATH + "/start_game", (req, res) => {
+    app.post(getRelativePath("start_game"), (req, res) => {
         /** //FIXME
          * when host of the game, clicks starts game,
          * emit event start game-loop, which starts game loop
          */
-
 
        
         const gameId = req.body.gameId;
@@ -96,7 +105,6 @@ module.exports = function (webSocketIo, app) {
         }
 
     })
-
 
 
     gameEventEmitter.on("start-game", async (gameId) => {
@@ -128,28 +136,25 @@ module.exports = function (webSocketIo, app) {
         }
 
         // emitting event to other users that game has started
-        for (let playerId in gameObj.players) {
-            let player = gameObj.players[playerId];
+        for (const playerId in gameObj.players) {
+            const player = gameObj.players[playerId];
             // emit event to all players that game has started
             gameNSP.to(player.id).emit("start-game", { gameId, playerId: player.id })
         }
 
 
-
-
         //  start rounds loop here
         for (let roundNum = 1; roundNum <= gameObj.totalRounds; roundNum++) {
-            let currentPlayerTurnId = gameObj.playerTurnId;
+            const currentPlayerTurnId = gameObj.playerTurnId;
             // generate random word to draw for player is currently turn it is
-            let drawingWord = generateWord();
+            const drawingWord = generateWord();
 
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
                
-               
 
             // setup the screen for currentPlayerDrawing
-            for (let playerId in gameObj.players) {
-                let isMyTurn = playerId == currentPlayerTurnId;
+            for (const playerId in gameObj.players) {
+                const isMyTurn = playerId == currentPlayerTurnId;
                 gameNSP.to(playerId).emit("toggle-drawing-canvas", !isMyTurn);
 
                 // emitting to weather or not to enable input for guessing word
@@ -173,7 +178,7 @@ module.exports = function (webSocketIo, app) {
 
 
             // update time left for drawing player
-            let timeLeftInterval = setInterval(() => {
+            const timeLeftInterval = setInterval(() => {
                 gameObj.timeForEachRound -= 1000;
                 Object.keys(gameObj.players).forEach(playerId => {
                     gameNSP.to(playerId).emit("update-time-left", gameObj.timeForEachRound / 1000);
@@ -202,13 +207,20 @@ module.exports = function (webSocketIo, app) {
 
             console.log(`Round ${roundNum} is over. Player ${gameObj.playerTurnId} turn to draw`);
 
-
-
         }
+
+        console.log('gameOver')
+        // Navigate all the users for given gameId to gameOverScreen
+        for (const  playerId in gameObj.players) {
+            const player = gameObj.players[playerId];
+            // emit event to all players that game has started
+            gameNSP.to(player.id).emit("navigate-to-gameover-screen")
+        }
+        
+
         return "Game should be over now"
     })
 
 }
-
 
 

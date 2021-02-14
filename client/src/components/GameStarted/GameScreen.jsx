@@ -1,53 +1,57 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import './GameScreen.css';
-import DrawingBoard from './DrawingBoard/DrawingBoard';
-import { withRouter, useHistory } from 'react-router-dom';
-import { AppContext } from '../../App';
+/* eslint-disable no-console */
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import PropTypes from 'prop-types'
+import './GameScreen.css'
+import DrawingBoard from './DrawingBoard/DrawingBoard'
+import { withRouter, useHistory } from 'react-router-dom'
+import { AppContext } from '../../App'
 
-import { mySocket, closeGame, checkIsMyTurn } from '../../services/game-sockets'
+import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
-import { envUri } from '../../services/environment';
+import { envUri } from '../../services/environment'
 
-import { isNil } from 'ramda';
-import { MainOption, Option } from '../../common/components/Button';
+import { isEmpty, isNil } from 'ramda'
+import { MainOption, Option } from '../../common/components/Button'
 
-import {useCookies, setCookie, removeCookie} from 'react-cookie'
+import {useCookies} from 'react-cookie'
 
+GameScreen.propTypes = {
+    location: PropTypes.object
+}
 
 function GameScreen(props) {
 
-    const history = useHistory();
+    const {location} = props
+    const {state} = location
 
-     // config of react tools
+    const history = useHistory()
+    const [gameId, setGameId] = useState("")
+    const dashboardRef = useRef()
+    const { playerId } = useContext(AppContext)
     const [cookies, removeCookie] = useCookies(["cookie-name"])
 
+    // temporary solution for when user tries to reload screen, then it should end game
     window.onbeforeunload = function() {
         history.push("/")
         removeCookie("gameId")
         removeCookie("hostId")
-    }.bind(this);
+    }
 
+    mySocket.on("navigate-to-gameover-screen", ()=>{
+        history.push("/game-over")
+    })
 
-    const [gameId, setGameId] = useState("");
-    const dashboardRef = useRef();
-
-    const { playerId } = useContext(AppContext)
-
-    
 
     useEffect(() => {
-        if (!props.location.state) {
-            props.history.push("/")
+        if (!state) {
+            history.push("/")
         } else {
             setGameId(cookies.gameId)
         }
        
-    }, [props.history, props.location.state, cookies.gameId])
+    }, [history, state, cookies.gameId])
 
-    return (
-        // show different screen based on who is drawing currently
-        <div className="GameScreen">
-
+    return ( <div className="GameScreen">
             <PaintMenuStyle dashboardRef={dashboardRef} />
             <div>
                 <DrawingDashboard />
@@ -61,27 +65,31 @@ function GameScreen(props) {
 }
 
 
+PaintMenuStyle.propTypes = {
+    dashboardRef : PropTypes.object
+}
 
 function PaintMenuStyle(props) {
 
     const history = useHistory()
 
-    const [cookies, removeCookie] = useCookies(["cookie-name"])
-    const { dashboardRef } = props;
+    const [,removeCookie] = useCookies(["cookie-name"])
+    const { dashboardRef } = props
     const brushColorChange = (event) => {
-        dashboardRef.current.brushColorChange(event);
+        dashboardRef.current.brushColorChange(event)
     }
 
     const brushStrokeSizeChange = (event) => {
-        dashboardRef.current.brushStrokeSizeChange(event);
+        dashboardRef.current.brushStrokeSizeChange(event)
     }
 
     const clearCanvas = (e) => {
-        dashboardRef.current.clearCanvas();
-        
+        e.preventDefault()
+        dashboardRef.current.clearCanvas()
     }
 
-    const stopGameHandler = () =>{
+    const stopGameHandler = (e) =>{
+        e.preventDefault()
         removeCookie("gameId")
         removeCookie("hostId")
         history.push("/")
@@ -98,24 +106,20 @@ function PaintMenuStyle(props) {
         <br></br>
         <div className="paint-menu-style-container">
             <MainOption to="#" onClick={(e) => clearCanvas(e)}>Clear Canvas</MainOption>
-            <Option  to="#" onClick={stopGameHandler}>Stop Game</Option>
+            <Option  to="#" onClick={(e) => stopGameHandler(e)}>Stop Game</Option>
         </div>
     </div>
 }
 
 
-
-
-
 function DrawingDashboard() {
 
-    const [isMyTurn, setIsMyTurn] = useState(false);
-    const [drawingWord, setDrawingWord] = useState("");
-    const [timeLeft, updateTimeLeft] = useState(0);
+    const [isMyTurn, setIsMyTurn] = useState(false)
+    const [drawingWord, setDrawingWord] = useState("")
+    const [timeLeft, updateTimeLeft] = useState(0)
 
     mySocket.on("drawing-word", word => {
         if (word && word !== drawingWord) {
-            console.log(word)
             setDrawingWord(word)
         }
     })
@@ -124,7 +128,7 @@ function DrawingDashboard() {
         updateTimeLeft(newTime)
     })
 
-    checkIsMyTurn(setIsMyTurn);
+    checkIsMyTurn(setIsMyTurn)
 
     useEffect(() => {
 
@@ -137,31 +141,36 @@ function DrawingDashboard() {
     )
 }
 
-function GuessingInput({ gameId, playerId }) {
+GuessingInput.propTypes = {
+    gameId: PropTypes.string, 
+    playerId: PropTypes.string
+}
+function GuessingInput(props) {
 
+    const { gameId, playerId} = props
 
-    const [isMyTurn, setIsMyTurn] = useState(false);
-    const [inputGuess, setInputGuess] = useState("");
-    const [guessedStatus, setGuessStatus] = useState(false);
+    const [isMyTurn, setIsMyTurn] = useState(false)
+    const [inputGuess, setInputGuess] = useState("")
+    const [guessedStatus, setGuessStatus] = useState(false)
 
-    const verifyGuess = async () => {
-
+    const verifyGuess = async (event) => {
+        event.preventDefault()
         await fetch(envUri + "/game/guess_word", {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ gameId, guessedWord: inputGuess, playerId })
         }).then(async response => {
-            const data = await response.json();
-            const wordMatches = !!data.wordMatches;
+            const data = await response.json()
+            const wordMatches = !!data.wordMatches
 
             if (wordMatches)
-                setGuessStatus(wordMatches);
-        }).catch(err => { console.log(err); return false })
+                setGuessStatus(wordMatches)
+        }).catch(()=> { return false })
 
 
     }
 
-    checkIsMyTurn(setIsMyTurn);
+    checkIsMyTurn(setIsMyTurn)
 
     return (<div style={{ "display": isMyTurn ? "none" : "flex", justifyContent: "center" }}>
         <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
@@ -170,25 +179,17 @@ function GuessingInput({ gameId, playerId }) {
             style={{ borderRadius: "5px" }}
         />
         {/* <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} /> */}
-        <MainOption to="#" disabled={guessedStatus} onClick={verifyGuess} style={{ marginLeft: "10px" }} >Guess Word</MainOption>
+        <MainOption to="#" disabled={guessedStatus} onClick={(event)=>verifyGuess(event)} style={{ marginLeft: "10px" }} >Guess Word</MainOption>
     </div>)
 }
 
+function PlayersInLobby() {
 
-
-function PlayersInLobby(props) {
-
-      // config of react tools
-    const [cookies] = useCookies(["cookie-name"])
-    const history = useHistory()
-
-    const [playerListJSX, updatePlayerListJSX] = useState("");
+    const [playerListJSX, updatePlayerListJSX] = useState("")
 
     mySocket.on("load-players-list", ({ players, currentPlayerId }) => {
         updatePlayerListJSX(formatPlayersToJSX(players, currentPlayerId))
     })
-
-   
 
     const formatPlayersToJSX = (players, currentPlayerId) => {
         if (isNil(players))
@@ -198,7 +199,6 @@ function PlayersInLobby(props) {
             list.push(players[playerId])
             return list
         }, [])
-
 
         const playersListToJSX = playersList.map((player, index) => {
             if (player.id !== currentPlayerId) {
@@ -215,22 +215,7 @@ function PlayersInLobby(props) {
 
         return playersListToJSX
 
-
     }
-    
-    useEffect(() => {
-        mySocket.emit("load-players", cookies.gameId, ()=>{
-            console.log("got here")
-            
-        });
- 
-
-        return function cleanup(){
-            history.push("/")
-        }
-        
-
-    },[cookies.gameId, history])
 
     return <div id="PlayersInLobby">
         <b><p style={{ fontSize: "1.3rem", display: "flex", justifyContent: "center" }}>Players</p></b>
@@ -240,5 +225,7 @@ function PlayersInLobby(props) {
     </div>
 }
 
-export default withRouter(GameScreen);
+export default withRouter(GameScreen)
+
+
 
