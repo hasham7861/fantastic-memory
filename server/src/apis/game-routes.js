@@ -57,15 +57,15 @@ module.exports = function (webSocketIo, app) {
 
     app.post(getRelativePath("guess_word"), async (req, res) => {
 
-        const { gameId, guessedWord, playerId } = req.body;
+        const { gameId, playerId } = req.body;
 
         if (!gameId ||
-            !guessedWord ||
+            !req.body.guessedWord ||
             !playerId) {
             return res.status(400).send("guessed_word: missing props in body");
         }
 
-        guessedWord = guessedWord.toLowerCase()
+        const guessedWord = req.body.guessedWord.toLowerCase()
 
         /**
          * //TODO 
@@ -169,6 +169,11 @@ module.exports = function (webSocketIo, app) {
 
                 // emite player list to game dashboard
                 gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerTurnId})
+
+                // this should reset all canvas on start of gameround
+                gameNSP.to(playerId).emit("draw-on-canvas", {lines:[]})
+                    
+                
             }
 
 
