@@ -1,15 +1,9 @@
-const crypto = require('crypto');
 const EventEmitter = require('events');
 const {isEmpty, isNil, keysIn}= require('ramda')
-
-const { sleep } = require('../util/reusable');
-const words = require("../database/category_of_words.json").words;
-
-const { Game } = require("../models/Game");
-
-
-const gameSchema = require("../database/gameSchema");
-
+const { sleep } = require('../../shared/reusable');
+const words = require("./scaffold_data/category_of_words.json").words;
+const { Game } = require("./game.model");
+const gameSchema = require("./game.schema");
 const gameEventEmitter = new EventEmitter();
 
 function generateWord() {
@@ -24,12 +18,9 @@ module.exports = function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
     
-    app.get(getRelativePath("generate_game_id"), (req, res) => {
-        crypto.randomBytes(4, function (err, buffer) {
-            if (err)
-                res.status(404).send("generate_game_token err: unable to generate random game token");
-            res.send({ gameId: buffer.toString('hex') });
-        });
+    app.get(getRelativePath("generate_game_id"), async (req, res) => {
+        const gameId = await Game.getGeneratedGameId()
+        res.send({gameId: gameId})
     })
 
     app.get(getRelativePath("is_valid_game_id") , async (req, res) => {

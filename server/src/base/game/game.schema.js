@@ -49,7 +49,7 @@ gameSchema.statics.UPDATE_QUERIES = {
 
 
 gameSchema.statics.doesGameExist = async function (gameId) {
-    let doc = await mongoose.model('game').findOne({ "gameId": gameId });
+    const doc = await mongoose.model('game').findOne({ "gameId": gameId });
     return doc ? true : false
 }
 
@@ -88,7 +88,7 @@ gameSchema.statics.removePlayerFromGame = function (gameId, playerId) {
 
 // return true when the input word matches the game round wort To guess
 gameSchema.statics.isValidGuessedWordOfRound = async function (gameId, guessedWord) {
-    let gameDoc = await mongoose.model('game').findOne({ "gameId": gameId }, function (err, doc) {
+    const gameDoc = await mongoose.model('game').findOne({ "gameId": gameId }, function (err, doc) {
         if (err) {
             console.log("unable to record with this gameId");
         }
@@ -114,7 +114,7 @@ gameSchema.statics.addPointsToPlayer = function (gameId, playerId, points) {
         if (err) console.log("unable to find player")
         else {
 
-            let playersWithUpdatedPoints = {
+            const playersWithUpdatedPoints = {
                 ...doc["game"]["players"]
             }
 
@@ -143,6 +143,5 @@ gameSchema.statics.getCurrentRoundPlayers = async function (gameId) {
 
 
 module.exports = mongoose.model("game", gameSchema)
-
 
 

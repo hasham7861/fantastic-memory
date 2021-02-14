@@ -1,4 +1,4 @@
-const { initializeGameNSP } = require("./game-nsp");
+const { initializeGameNSP } = require("../game/game.subscription");
 
 function initializeWebSocketNameSpaces(webSocketIo) {
 

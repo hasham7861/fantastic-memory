@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 class Player {
     constructor(id = "", inGame = true, points = 0) {
         this.id = id;
@@ -21,7 +23,7 @@ class Game {
             console.log("gameObj is not set");
             return;
         }
-        let { gameId , players , status, hostId, playerTurnId, playerTurnIndex, gameRounds, totalRounds, timeForEachRound, currentGameRound } = gameObj;
+        const { gameId , players , status, hostId, playerTurnId, playerTurnIndex, gameRounds, totalRounds, timeForEachRound, currentGameRound } = gameObj;
 
         this.gameId = gameId ? gameId : "";
         // cast player objects to player type
@@ -59,6 +61,13 @@ class Game {
 
     ResetTimeLeft() {
         this.timeForEachRound = 30000;
+    }
+
+    static async getGeneratedGameId(){
+        const gameIdBuffer = await crypto.randomBytes(4)
+        const gameId = gameIdBuffer.toString('hex')
+
+        return gameId;
     }
 }
 

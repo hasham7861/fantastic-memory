@@ -4,10 +4,10 @@ const http = require('http');
 const cors = require('cors');
 
 const env = require("./env.json");
-const { connectToDB } = require("./database/db");
+const { connectToDB } = require("./shared/mongoDB");
 const webSocket = require('socket.io');
-const initAppRoutes = require('./apis/app-routes');
-const { initializeWebSocketNameSpaces } = require('./socket-events/main-nsp');
+const initAppRoutes = require('./base/app/app.route');
+const { initializeWebSocketNameSpaces } = require('./base/app/app.subscription');
 
 
 class Server {

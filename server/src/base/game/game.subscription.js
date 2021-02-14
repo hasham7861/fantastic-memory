@@ -1,8 +1,8 @@
-const {Game} = require("../models/Game");
-const gameSchema = require("../database/gameSchema");
-const playerToGameSchema = require("../database/playerToGameSchema");
+const { Game } = require("./game.model")
+const gameSchema = require("./game.schema")
+const playerToGameSchema = require("../player/player.schema")
 
-const {Player} = require("../models/Game");
+const { Player } = require("./game.model");
 
 
 function initializeGameNSP(webSocketIo) {
@@ -100,13 +100,13 @@ function initializeGameNSP(webSocketIo) {
             emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
         })
 
-        socket.on("load-players", async (gameId) =>{
-            
-            if(!gameId)
+        socket.on("load-players", async (gameId) => {
+
+            if (!gameId)
                 return
             console.log(gameId, currentPlayerId)
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
-            
+
             const gameDoc = await gameSchema.fetchGame(gameId);
 
             const gameObj = new Game(gameDoc.game);
@@ -114,7 +114,7 @@ function initializeGameNSP(webSocketIo) {
             for (const playerId in gameObj.players) {
                 console.log(playersList)
                 // emite player list to game dashboard
-                gameNSP.to(playerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerId})
+                gameNSP.to(playerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerId })
             }
 
         })
@@ -136,9 +136,9 @@ function initializeGameNSP(webSocketIo) {
             }
         })
 
-        socket.on("get-players-and-score", async (gameId) =>{
+        socket.on("get-players-and-score", async (gameId) => {
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
-            gameNSP.to(currentPlayerId).emit("load-players-list", {"players": playersList, "currentPlayerId":currentPlayerId})
+            gameNSP.to(currentPlayerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerId })
         })
 
         // clean up everything related to game from datastore
@@ -155,7 +155,7 @@ function initializeGameNSP(webSocketIo) {
         socket.on("disconnect", async () => {
 
             const playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
-           
+
             if (playerDoc) {
                 const playerGameId = playerDoc.gameId;
 
