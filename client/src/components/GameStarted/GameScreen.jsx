@@ -1,67 +1,57 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import PropTypes from 'prop-types';
-import './GameScreen.css';
-import DrawingBoard from './DrawingBoard/DrawingBoard';
-import { withRouter, useHistory } from 'react-router-dom';
-import { AppContext } from '../../App';
+/* eslint-disable no-console */
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import PropTypes from 'prop-types'
+import './GameScreen.css'
+import DrawingBoard from './DrawingBoard/DrawingBoard'
+import { withRouter, useHistory } from 'react-router-dom'
+import { AppContext } from '../../App'
 
 import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
-import { envUri } from '../../services/environment';
+import { envUri } from '../../services/environment'
 
-import { isNil } from 'ramda';
-import { MainOption, Option } from '../../common/components/Button';
+import { isEmpty, isNil } from 'ramda'
+import { MainOption, Option } from '../../common/components/Button'
 
 import {useCookies} from 'react-cookie'
 
 GameScreen.propTypes = {
-    location: {
-        state: PropTypes.object
-    }
+    location: PropTypes.object
 }
 
-
 function GameScreen(props) {
-
-    const [removeCookie] = useCookies(["cookie-name"])
-    const History = useHistory();
 
     const {location} = props
     const {state} = location
 
-
-     // config of react tools
-    const [cookies] = useCookies(["cookie-name"])
+    const history = useHistory()
+    const [gameId, setGameId] = useState("")
+    const dashboardRef = useRef()
+    const { playerId } = useContext(AppContext)
+    const [cookies, removeCookie] = useCookies(["cookie-name"])
 
     // temporary solution for when user tries to reload screen, then it should end game
     window.onbeforeunload = function() {
-        History.push("/")
+        history.push("/")
         removeCookie("gameId")
         removeCookie("hostId")
-    }.bind(this);
+    }
 
-  
-    mySocket.on("/navigate-to-gameover-screen", ()=>{
-        History.push("/")
+    mySocket.on("navigate-to-gameover-screen", ()=>{
+        history.push("/game-over")
         removeCookie("gameId")
         removeCookie("hostId")
     })
 
-    const [gameId, setGameId] = useState("");
-    const dashboardRef = useRef();
-
-    const { playerId } = useContext(AppContext)
-
-    
 
     useEffect(() => {
         if (!state) {
-            History.push("/")
+            history.push("/")
         } else {
             setGameId(cookies.gameId)
         }
        
-    }, [History, state, cookies.gameId])
+    }, [history, state, cookies.gameId])
 
     return ( <div className="GameScreen">
             <PaintMenuStyle dashboardRef={dashboardRef} />
@@ -78,13 +68,7 @@ function GameScreen(props) {
 
 
 PaintMenuStyle.propTypes = {
-    dashboardRef : {
-        current: {
-            brushColorChange: Function,
-            brushStrokeSizeChange: Function,
-            clearCanvas: Function
-        }
-    }
+    dashboardRef : PropTypes.object
 }
 
 function PaintMenuStyle(props) {
@@ -92,18 +76,18 @@ function PaintMenuStyle(props) {
     const history = useHistory()
 
     const [,removeCookie] = useCookies(["cookie-name"])
-    const { dashboardRef } = props;
+    const { dashboardRef } = props
     const brushColorChange = (event) => {
-        dashboardRef.current.brushColorChange(event);
+        dashboardRef.current.brushColorChange(event)
     }
 
     const brushStrokeSizeChange = (event) => {
-        dashboardRef.current.brushStrokeSizeChange(event);
+        dashboardRef.current.brushStrokeSizeChange(event)
     }
 
     const clearCanvas = (e) => {
         e.preventDefault()
-        dashboardRef.current.clearCanvas();
+        dashboardRef.current.clearCanvas()
     }
 
     const stopGameHandler = (e) =>{
@@ -132,9 +116,9 @@ function PaintMenuStyle(props) {
 
 function DrawingDashboard() {
 
-    const [isMyTurn, setIsMyTurn] = useState(false);
-    const [drawingWord, setDrawingWord] = useState("");
-    const [timeLeft, updateTimeLeft] = useState(0);
+    const [isMyTurn, setIsMyTurn] = useState(false)
+    const [drawingWord, setDrawingWord] = useState("")
+    const [timeLeft, updateTimeLeft] = useState(0)
 
     mySocket.on("drawing-word", word => {
         if (word && word !== drawingWord) {
@@ -146,7 +130,7 @@ function DrawingDashboard() {
         updateTimeLeft(newTime)
     })
 
-    checkIsMyTurn(setIsMyTurn);
+    checkIsMyTurn(setIsMyTurn)
 
     useEffect(() => {
 
@@ -160,16 +144,16 @@ function DrawingDashboard() {
 }
 
 GuessingInput.propTypes = {
-    gameId: String, 
-    playerId: String
+    gameId: PropTypes.string, 
+    playerId: PropTypes.string
 }
 function GuessingInput(props) {
 
     const { gameId, playerId} = props
 
-    const [isMyTurn, setIsMyTurn] = useState(false);
-    const [inputGuess, setInputGuess] = useState("");
-    const [guessedStatus, setGuessStatus] = useState(false);
+    const [isMyTurn, setIsMyTurn] = useState(false)
+    const [inputGuess, setInputGuess] = useState("")
+    const [guessedStatus, setGuessStatus] = useState(false)
 
     const verifyGuess = async (event) => {
         event.preventDefault()
@@ -178,17 +162,17 @@ function GuessingInput(props) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ gameId, guessedWord: inputGuess, playerId })
         }).then(async response => {
-            const data = await response.json();
-            const wordMatches = !!data.wordMatches;
+            const data = await response.json()
+            const wordMatches = !!data.wordMatches
 
             if (wordMatches)
-                setGuessStatus(wordMatches);
+                setGuessStatus(wordMatches)
         }).catch(()=> { return false })
 
 
     }
 
-    checkIsMyTurn(setIsMyTurn);
+    checkIsMyTurn(setIsMyTurn)
 
     return (<div style={{ "display": isMyTurn ? "none" : "flex", justifyContent: "center" }}>
         <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
@@ -203,17 +187,11 @@ function GuessingInput(props) {
 
 function PlayersInLobby() {
 
-      // config of react tools
-    const [cookies] = useCookies(["cookie-name"])
-    const history = useHistory()
-
-    const [playerListJSX, updatePlayerListJSX] = useState("");
+    const [playerListJSX, updatePlayerListJSX] = useState("")
 
     mySocket.on("load-players-list", ({ players, currentPlayerId }) => {
         updatePlayerListJSX(formatPlayersToJSX(players, currentPlayerId))
     })
-
-   
 
     const formatPlayersToJSX = (players, currentPlayerId) => {
         if (isNil(players))
@@ -223,7 +201,6 @@ function PlayersInLobby() {
             list.push(players[playerId])
             return list
         }, [])
-
 
         const playersListToJSX = playersList.map((player, index) => {
             if (player.id !== currentPlayerId) {
@@ -240,21 +217,7 @@ function PlayersInLobby() {
 
         return playersListToJSX
 
-
     }
-    
-    useEffect(() => {
-        mySocket.emit("load-players", cookies.gameId, ()=>{
-            //console.log("got here")
-        });
- 
-
-        return function cleanup(){
-            history.push("/")
-        }
-        
-
-    },[cookies.gameId, history])
 
     return <div id="PlayersInLobby">
         <b><p style={{ fontSize: "1.3rem", display: "flex", justifyContent: "center" }}>Players</p></b>
@@ -264,7 +227,7 @@ function PlayersInLobby() {
     </div>
 }
 
-export default withRouter(GameScreen);
+export default withRouter(GameScreen)
 
 
 

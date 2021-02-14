@@ -52,7 +52,7 @@ const Host = function (props) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ gameId })
             })
-            .then(data => console.log(data))
+            .then(data => data)
         // signal to all the other clients in the same socket that game has started
         // mySocket.emit("game-started", gameId)
     }
@@ -96,7 +96,7 @@ const Host = function (props) {
                 mySocket.on("players-list", function (listOfPlayers) {
                     // TODO if listOfPlayers is null, then don't set jsx, and remove all hostRelated cookies
                     // only update players if there is new players being added
-                    console.log("fetched player list ")
+                    //console.log("fetched player list ")
                     if (listOfPlayers.length === 0) {
                         removeCookie("hostId")
                         // removeCookie("gameId")
