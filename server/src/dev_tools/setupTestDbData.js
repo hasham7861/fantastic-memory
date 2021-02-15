@@ -7,17 +7,16 @@
 const { MongoClient } = require('mongodb')
 
 
-const mongoClient = MongoClient('mongodb://localhost:27017/fantastic_memory_test', { useUnifiedTopology: true })
+const mongoClient = MongoClient('mongodb://localhost:27017/', { useUnifiedTopology: true })
 
 mongoClient
-    .open(async (err, db) => {
+    .connect(async function (err, client) {
         if (err) throw err
 
-        await db.games.insertOne(
+        const db = client.db("fantastic_memory_test");
+
+        await db.collection('games').insertOne(
             {
-                "_id":
-                    { "$oid": "602843c3ebb80f6ddce3b073" },
-                "createdAt": { "$date": "2021-02-13T21:25:18.269Z" },
                 "gameId": "07deb6f5",
                 "game": {
                     "gameId": "07deb6f5",
@@ -30,27 +29,16 @@ mongoClient
                     "currentGameRound": 1, "totalRounds": 3,
                     "timeForEachRound": 30000
                 },
-                "__v": 0
             }
         )
 
-        await db.playertogames.insertOne(
+        await db.collection('playertogames').insertOne(
             {
-                "_id": {
-                    "$oid": "6028272fa3966204031f1c61"
-                },
                 "playerId": "/game-nsp#7XEPhDhI4P3BNk1HAAAA",
-                "__v": 0,
                 "gameId": "07deb6f5"
             }
         )
 
         console.log('should have finished creating the test db')
         mongoClient.close()
-
     })
-    .catch(() => {
-        console.log('unable to connect to db')
-        mongoClient.close()
-    })
-
