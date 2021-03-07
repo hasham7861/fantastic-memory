@@ -1,15 +1,18 @@
-import './DrawingBoard.css';
-import CanvasDraw from 'react-canvas-draw';
-import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import React, { useContext } from 'react';
+import './DrawingBoard.css'
+import CanvasDraw from 'react-canvas-draw'
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import React, { useContext } from 'react'
+import PropTypes from 'prop-types'
 import { mySocket } from '../../../services/game-sockets'
 
 import { AppContext } from '../../../App'
 
-
+DrawingBoard.propTypes = {
+    gameId: PropTypes.String
+}
 const DrawingBoard = forwardRef((props, ref) => {
     // dom references
-    let drawingCanvas = useRef(null);
+    let drawingCanvas = useRef(null)
 
     //// STATES
     const [canvasOptions, setCanvasOptions] = useState({
@@ -39,7 +42,7 @@ const DrawingBoard = forwardRef((props, ref) => {
     // These methods are to be called by reference from outside the component for example sibling or parent
     useImperativeHandle(ref, () => ({
         clearCanvas:()=>{
-            drawingCanvas.clear();
+            drawingCanvas.clear()
         },
         brushColorChange: (event) => {
             setCanvasOptions({
@@ -57,12 +60,9 @@ const DrawingBoard = forwardRef((props, ref) => {
         }
     }))
 
-
-
-
-    const newDrawnLineOnCanvasHandler = _ => {
+    const newDrawnLineOnCanvasHandler = () => {
         // console.log(drawingCanvas.getSaveData())
-        let canvasData = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null;
+        let canvasData = drawingCanvas.getSaveData() ? JSON.parse(drawingCanvas.getSaveData()) : null
 
         // console.log(canvasData)
         mySocket.emit("share-drawing-with-players",
@@ -70,9 +70,7 @@ const DrawingBoard = forwardRef((props, ref) => {
                 gameId: props.gameId,
                 playerId,
                 canvasData
-            });
-
-
+            })
 
     }
     // END OF Handlers
@@ -81,7 +79,6 @@ const DrawingBoard = forwardRef((props, ref) => {
     mySocket.on("toggle-drawing-canvas", canvasDisabled => {
         // only toggle canvas when the state doesn't match
         if (canvasOptions.disabled !== canvasDisabled) {
-            console.log("i can't draw", canvasDisabled)
             setCanvasOptions({ ...canvasOptions, disabled: canvasDisabled })
         }
     })
@@ -103,8 +100,6 @@ const DrawingBoard = forwardRef((props, ref) => {
         }
     })
 
-
-
     return (
         <div id="drawing-container">
             <div
@@ -125,4 +120,4 @@ const DrawingBoard = forwardRef((props, ref) => {
         </div>
     )
 })
-export default DrawingBoard;
+export default DrawingBoard

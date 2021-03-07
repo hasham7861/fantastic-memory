@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "node src/server",
+    "start": "yarn src/server",
     "dev": "nodemon src/server",
     "docker-install": "docker build -t fantastic-server .",
     "docker-start": "docker run -it -p 9000:5000 fantastic-server",
