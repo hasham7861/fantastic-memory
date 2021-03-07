@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const { isNil, keysIn } = require('ramda')
 const { sleep } = require('../../shared/reusable');
 const words = require("./scaffold_data/category_of_words.json").words;
-const { Game } = require("./game.model");
+const Game = require("./game.model");
 const gameSchema = require("./game.schema");
 const gameEventEmitter = new EventEmitter();
 

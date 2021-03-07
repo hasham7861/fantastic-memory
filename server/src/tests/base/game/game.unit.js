@@ -1,6 +1,5 @@
-const { describe, it } = require('mocha')
 const { assert } = require('chai')
-const {Game} = require('../../../base/game/game.model')
+const Game = require('../../../base/game/game.model')
 
 describe('Game', async function () {
     it('generated gameId string length greater than 0', async function () {

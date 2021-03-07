@@ -1,8 +1,8 @@
-const { Game } = require("./game.model")
+const Game = require("./game.model")
 const gameSchema = require("./game.schema")
 const playerToGameSchema = require("../player/player.schema")
 
-const { Player } = require("./game.model");
+const Player = require("../player/player.model");
 
 
 function initializeGameNSP(webSocketIo) {

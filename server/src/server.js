@@ -1,4 +1,3 @@
-// node modules
 const express = require("express");
 const http = require('http');
 const cors = require('cors');
@@ -13,11 +12,11 @@ const { initializeWebSocketNameSpaces } = require('./base/app/app.subscription')
 class Server {
 
   /**
-   * @method _initApp
+   * @method _setupAndRetrieveExpressApp
    * @description setup the express midleware
    * @returns {ExpressApp} app
    */
-  static async _initApp() {
+  static async _setupAndRetrieveExpressApp() {
 
     const corsOptions = {
       orgins: env.AllowedOrigins,
@@ -35,16 +34,21 @@ class Server {
    * @returns {void}
    */
   static async _initServer() {
-    
-    const app = await this._initApp();
+
+    const app = await this._setupAndRetrieveExpressApp();
+
     const server = http.createServer(app);
+
     // connect to mongo db
     connectToDB()
+
     // enabling websocket protocol
     const webSocketIo = webSocket(server);
     initializeWebSocketNameSpaces(webSocketIo);
-    //linking express middlware with http server
+
+    //giving websocket protocol access to express app
     initAppRoutes(webSocketIo, app);
+
     server.listen(env.PORT);
 
   }
@@ -59,5 +63,9 @@ class Server {
   }
 }
 
-Server.start()
+// IIFE used only for starting the server
+(() => 
+  Server.start()
+)()
+
 

@@ -1,25 +1,12 @@
-const crypto = require('crypto');
+const crypto = require('crypto')
 const { isEmpty, isNil, keysIn } = require('ramda')
 const gameSchema = require('./game.schema')
-
-class Player {
-    constructor(id = "", inGame = true, points = 0) {
-        this.id = id;
-        this.inGame = inGame;
-        this.points = points;
-    }
-}
-
-class GameRound {
-    constructor(wordToGuess = "", playersWithPoints = []) {
-        wordToGuess = wordToGuess;
-        playersWithPoints = playersWithPoints; // store list of players with points
-    }
-}
+const Player = require('../player/player.model')
+const GameRound = require('./gameround/gameround.model')
 
 const GameStates = ["MENU", "STARTED", "CLOSED"];
 
-class Game {
+module.exports = class Game {
     constructor(gameObj) {
         if (!gameObj) {
             console.log("gameObj is not set");
@@ -94,6 +81,3 @@ class Game {
         return { game_id_valid: true, error_message: "" }
     }
 }
-
-module.exports.Player = Player;
-module.exports.Game = Game;
