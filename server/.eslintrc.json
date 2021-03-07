@@ -1,4 +1,4 @@
-module.exports = {
+{
     "parserOptions": {
       "ecmaVersion": 10,
       "sourceType": "module"
@@ -13,5 +13,4 @@ module.exports = {
       "no-var": "error",
       "prefer-const": "error"
     }
-  };
-  
+}
