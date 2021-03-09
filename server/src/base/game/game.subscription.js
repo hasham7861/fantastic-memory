@@ -1,11 +1,10 @@
-const Game = require("./game.model")
-const gameSchema = require("./game.schema")
-const playerToGameSchema = require("../player/player.schema")
+import Game from "./game.model.js"
+import gameSchema from "./game.schema.js"
+import playerToGameSchema from "../player/player.schema.js"
+import Player from "../player/player.model.js"
 
-const Player = require("../player/player.model");
 
-
-function initializeGameNSP(webSocketIo) {
+export function initializeGameNSP(webSocketIo) {
 
     const gameNSP = webSocketIo.of('/game-nsp');
     gameNSP.on("connection", socket => {
@@ -203,9 +202,4 @@ async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null
         gameNSP.to(emitPlayerId).emit("players-list", gameObj.players)
 
     }
-}
-
-
-module.exports = {
-    initializeGameNSP
 }

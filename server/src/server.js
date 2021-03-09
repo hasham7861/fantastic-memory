@@ -1,13 +1,13 @@
-const express = require("express");
-const http = require('http');
-const cors = require('cors');
+import express from 'express'
+import http from 'http'
+import cors from 'cors'
+import webSocket from 'socket.io'
 
-const env = require("./env.json");
-const { connectToDB } = require("./shared/mongoDB");
-const webSocket = require('socket.io');
-const initAppRoutes = require('./base/app/app.route');
-const { initializeWebSocketNameSpaces } = require('./base/app/app.subscription');
+import { connectToDB } from './shared/mongoDB.js'
+import initAppRoutes from './base/app/app.route.js'
+import { initializeWebSocketNameSpaces } from './base/app/app.subscription.js'
 
+import env from './env.js'
 
 class Server {
 
@@ -63,9 +63,5 @@ class Server {
   }
 }
 
-// IIFE used only for starting the server
-(() => 
-  Server.start()
-)()
-
+export default Server.start
 

@@ -1,4 +1,4 @@
-module.exports = class GameRound {
+export default class GameRound {
     constructor(wordToGuess = "", playersWithPoints = []) {
         wordToGuess = wordToGuess;
         playersWithPoints = playersWithPoints; // store list of players with points

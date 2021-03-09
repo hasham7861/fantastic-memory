@@ -1,12 +1,12 @@
-const crypto = require('crypto')
-const { isEmpty, isNil, keysIn } = require('ramda')
-const gameSchema = require('./game.schema')
-const Player = require('../player/player.model')
-const GameRound = require('./gameround/gameround.model')
+import crypto from 'crypto'
+import { isEmpty, isNil, keysIn } from 'ramda'
+import gameSchema from './game.schema.js'
+import Player from '../player/player.model.js'
+import GameRound from './gameround/gameround.model.js'
 
 const GameStates = ["MENU", "STARTED", "CLOSED"];
 
-module.exports = class Game {
+export default class Game {
     constructor(gameObj) {
         if (!gameObj) {
             console.log("gameObj is not set");

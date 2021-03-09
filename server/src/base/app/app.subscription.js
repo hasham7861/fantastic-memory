@@ -1,13 +1,9 @@
-const { initializeGameNSP } = require("../game/game.subscription");
+import { initializeGameNSP } from "../game/game.subscription.js"
 
-function initializeWebSocketNameSpaces(webSocketIo) {
+export function initializeWebSocketNameSpaces(webSocketIo) {
 
     initializeGameNSP(webSocketIo);
     webSocketIo.on("connection", socket => {
         // generic io events 
     })
-}
-
-module.exports = {
-    initializeWebSocketNameSpaces
 }

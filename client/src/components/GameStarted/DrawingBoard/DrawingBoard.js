@@ -7,9 +7,6 @@ import { mySocket } from '../../../services/game-sockets'
 
 import { AppContext } from '../../../App'
 
-DrawingBoard.propTypes = {
-    gameId: PropTypes.String
-}
 const DrawingBoard = forwardRef((props, ref) => {
     // dom references
     let drawingCanvas = useRef(null)

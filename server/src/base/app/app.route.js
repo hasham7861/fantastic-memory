@@ -1,4 +1,4 @@
-module.exports = function (webSocketIo, app) {
+export default function (webSocketIo, app) {
 
     // main app routes
     app.get("/api", (req, res) => {

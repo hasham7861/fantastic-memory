@@ -2,9 +2,10 @@
   "name": "fantastic-memory",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
-    "start": "yarn src/server",
-    "dev": "nodemon src/server",
+    "start": "node src/server.js",
+    "dev": "nodemon --trace-warnings src/server.js",
     "docker-install": "docker build -t fantastic-server .",
     "docker-start": "docker run -it -p 9000:5000 fantastic-server",
     "eslint": "eslint",

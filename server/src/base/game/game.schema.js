@@ -1,5 +1,5 @@
-const mongoose = require("mongoose")
-const { pathOr, isEmpty } = require("ramda")
+import mongoose from "mongoose"
+import { pathOr, isEmpty } from "ramda"
 
 const gameSchema = new mongoose.Schema({
     gameId: { type: String, unique: true, required: true },
@@ -142,6 +142,6 @@ gameSchema.statics.getCurrentRoundPlayers = async function (gameId) {
 }
 
 
-module.exports = mongoose.model("game", gameSchema)
+export default mongoose.model("game", gameSchema)
 
 

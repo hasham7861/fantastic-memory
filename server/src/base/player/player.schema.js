@@ -1,5 +1,4 @@
-const mongoose = require("mongoose")
-const ObjectId = mongoose.ObjectId;
+import mongoose from "mongoose"
 
 const playerToGameSchema = new mongoose.Schema({
     playerId: { type: String, unique: true, required: true },
@@ -30,7 +29,7 @@ playerToGameSchema.statics.removePlayerFromGame = function (playerId) {
 
 
 
-module.exports = mongoose.model("playerToGame", playerToGameSchema)
+export default mongoose.model("playerToGame", playerToGameSchema)
 
 
 
