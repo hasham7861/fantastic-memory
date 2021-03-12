@@ -1,9 +1,10 @@
-const EventEmitter = require('events');
-const { isNil, keysIn } = require('ramda')
-const { sleep } = require('../../shared/reusable');
-const words = require("./scaffold_data/category_of_words.json").words;
-const Game = require("./game.model");
-const gameSchema = require("./game.schema");
+import EventEmitter from 'events'
+import { isNil, keysIn } from 'ramda'
+import { sleep } from '../../shared/reusable.js'
+import {words} from "./scaffold_data/category_of_words.js"
+import Game from "./game.model.js"
+import gameSchema from "./game.schema.js"
+
 const gameEventEmitter = new EventEmitter();
 
 function generateWord() {
@@ -14,7 +15,7 @@ function generateWord() {
 const getRelativePath = (route) => "/game/" + route
 
 
-module.exports = function (webSocketIo, app) {
+export default function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
 

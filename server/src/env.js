@@ -1,4 +1,0 @@
-export default {
-    "PORT":5000,
-    "AllowedOrigins": ["http://localhost:3000", "http://localhost:5000"]
-}

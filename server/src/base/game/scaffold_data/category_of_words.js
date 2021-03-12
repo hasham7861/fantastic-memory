@@ -1,0 +1,1 @@
+export const words = ["pizza","cloud","rain","apple","orange","burger","fries","potato","gas","fire"]

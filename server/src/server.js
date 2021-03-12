@@ -6,8 +6,7 @@ import webSocket from 'socket.io'
 import { connectToDB } from './shared/mongoDB.js'
 import initAppRoutes from './base/app/app.route.js'
 import { initializeWebSocketNameSpaces } from './base/app/app.subscription.js'
-
-import env from './env.js'
+import conf from '../config.js'
 
 class Server {
 
@@ -19,7 +18,7 @@ class Server {
   static async _setupAndRetrieveExpressApp() {
 
     const corsOptions = {
-      orgins: env.AllowedOrigins,
+      orgins: conf.AllowedOrigins,
       optionSuccessStatus: 200
     }
     const app = express();
@@ -34,7 +33,6 @@ class Server {
    * @returns {void}
    */
   static async _initServer() {
-
     const app = await this._setupAndRetrieveExpressApp();
 
     const server = http.createServer(app);
@@ -49,7 +47,7 @@ class Server {
     //giving websocket protocol access to express app
     initAppRoutes(webSocketIo, app);
 
-    server.listen(env.PORT);
+    server.listen(conf.PORT);
 
   }
 
@@ -63,5 +61,8 @@ class Server {
   }
 }
 
-export default Server.start
+(()=>{
+  Server.start()
+})()
+export default {}
 

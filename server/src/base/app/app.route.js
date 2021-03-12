@@ -1,3 +1,5 @@
+import GameRoutes from '../game/game.route.js'
+
 export default function (webSocketIo, app) {
 
     // main app routes
@@ -9,7 +11,7 @@ export default function (webSocketIo, app) {
     });
   
     // all other apis here
-    require('../game/game.route')(webSocketIo, app)
+    GameRoutes(webSocketIo, app)
     
   
     app.use((req, res) => {

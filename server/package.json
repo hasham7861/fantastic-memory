@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon --trace-warnings src/server.js",
-    "docker-install": "docker build -t fantastic-server .",
-    "docker-start": "docker run -it -p 9000:5000 fantastic-server",
+    "dev": "nodemon -L src/server.js",
     "eslint": "eslint",
-    "test": "mocha --recursive src/tests/**/*.js"
+    "test": "mocha --recursive src/tests/**/*.js",
+    "docker-compose-up:dev": "docker-compose -f './docker-compose.yml' up -d --build server-dev",
+    "docker-compose-down:dev": "docker-compose -f './docker-compose.yml' down",
+    "docker:dev": "yarn docker-compose-down:dev ; yarn docker-compose-up:dev"
   },
   "repository": {
     "type": "git",
@@ -23,13 +24,9 @@
   },
   "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
   "dependencies": {
-    "connect-mongo": "^3.2.0",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "mongoose": "^5.10.1",
-    "nodemon": "^2.0.4",
+    "mongoose": "5.11.15",
     "ramda": "^0.27.1",
     "socket.io": "^2.3.0"
   },
@@ -37,6 +34,7 @@
     "chai": "^4.3.0",
     "eslint": "^7.19.0",
     "mocha": "^8.3.0",
-    "mongodb": "^3.6.4"
+    "mongodb": "^3.6.4",
+    "nodemon": "2.0.7"
   }
 }

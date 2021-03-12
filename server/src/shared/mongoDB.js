@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
-const dbUri = "mongodb://localhost:27017/fantastic-memory"
+import conf from '../../config.js'
+const dbUri = conf.DbDevUri
 
 export function connectToDB() {
     const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false };
