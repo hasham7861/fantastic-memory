@@ -10,6 +10,3 @@ RUN yarn
 
 # add app
 COPY . .
-
-# # start app
-# CMD ["yarn", "start"]
