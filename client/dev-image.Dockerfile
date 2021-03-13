@@ -11,5 +11,5 @@ RUN yarn
 # add app
 COPY . .
 
-# start app
-CMD ["yarn", "start"]
+# # start app
+# CMD ["yarn", "start"]
