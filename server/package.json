@@ -8,9 +8,11 @@
     "dev": "nodemon -L src/server.js",
     "eslint": "eslint",
     "test": "mocha --recursive src/tests/**/*.js",
+    "docker-compose-down": "docker-compose -f './docker-compose.yml' down",
     "docker-compose-up:dev": "docker-compose -f './docker-compose.yml' up -d --build server-dev",
-    "docker-compose-down:dev": "docker-compose -f './docker-compose.yml' down",
-    "docker:dev": "yarn docker-compose-down:dev ; yarn docker-compose-up:dev"
+    "docker:dev": "yarn docker-compose-down; yarn docker-compose-up:dev; docker-compose logs -f server-dev",
+    "docker-compose-up:prod": "docker-compose -f './docker-compose.yml' up -d --build server-prod",
+    "docker:prod": "yarn docker-compose-down; yarn docker-compose-up:prod"
   },
   "repository": {
     "type": "git",
