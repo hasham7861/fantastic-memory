@@ -60,7 +60,7 @@ function Guest(props) {
                     <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
                 </GameInputWrapper>
                 <OptionsContainer>
-                    <MainOption onClick={joinLobby}>Join Lobby</MainOption>
+                    <MainOption onClick={joinLobby} to="#">Join Lobby</MainOption>
                     <Option to="/">Return Home</Option>
                 </OptionsContainer>
             </div>
@@ -68,7 +68,7 @@ function Guest(props) {
                 <p>{errorMessage}</p>
             </div>
             <div ref={waitingDiv} style={{ display: "none" }}>
-                <p >Waiting on host to start the game</p>
+                <p>Waiting on host to start the game</p>
             </div>
         </GuestContainer>
     )
