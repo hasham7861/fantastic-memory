@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  client-dev:
+    build:
+      context: .
+      dockerfile: dev-image.Dockerfile
+    stdin_open: true    
+    ports:
+        - "3000:3000"
+    volumes:
+        - /app/node_modules
+        - .:/app     

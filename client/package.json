@@ -2,6 +2,7 @@
   "name": "fantastic-memory-client",
   "version": "0.1.0",
   "private": false,
+  "license": "MIT",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
@@ -22,12 +23,14 @@
   "devDependices": {},
   "scripts": {
     "start": "react-scripts start",
-    "dev":"yarn start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",    
+    "docker-compose-down": "docker-compose -f './docker-compose.yml' down",
+    "docker-compose-up:dev": "docker-compose -f './docker-compose.yml' up -d --build client-dev",
+    "docker:dev": "yarn docker-compose-down; yarn docker-compose-up:dev; docker-compose logs -f client-dev"
   },
   "eslintConfig": {
     "extends": "react-app"

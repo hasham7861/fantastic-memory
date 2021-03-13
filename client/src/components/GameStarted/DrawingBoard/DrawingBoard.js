@@ -2,7 +2,6 @@ import './DrawingBoard.css'
 import CanvasDraw from 'react-canvas-draw'
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import React, { useContext } from 'react'
-import PropTypes from 'prop-types'
 import { mySocket } from '../../../services/game-sockets'
 
 import { AppContext } from '../../../App'
