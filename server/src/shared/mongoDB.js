@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import conf from '../../config.js'
+import conf from '../config.js'
 const dbUri = conf.DbDevUri
 
 export function connectToDB() {

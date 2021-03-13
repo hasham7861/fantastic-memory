@@ -6,7 +6,7 @@ import webSocket from 'socket.io'
 import { connectToDB } from './shared/mongoDB.js'
 import initAppRoutes from './base/app/app.route.js'
 import { initializeWebSocketNameSpaces } from './base/app/app.subscription.js'
-import conf from '../config.js'
+import conf from './config.js'
 
 class Server {
 
