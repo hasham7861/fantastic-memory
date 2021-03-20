@@ -1,30 +1,21 @@
 import EventEmitter from 'events'
+import Express from 'express'
 import { isNil, keysIn } from 'ramda'
 import { sleep } from '../../shared/reusable.js'
-import {words} from "./scaffold_data/category_of_words.js"
 import Game from "./game.model.js"
 import gameSchema from "./game.schema.js"
 
 const gameEventEmitter = new EventEmitter();
+const gameRouter = new Express()
 
-function generateWord() {
-    const randomNumIndex = Math.floor(Math.random() * words.length)
-    return words[randomNumIndex]
-}
+class GameController {
 
-const getRelativePath = (route) => "/game/" + route
-
-
-export default function (webSocketIo, app) {
-
-    const gameNSP = webSocketIo.of("/game-nsp");
-
-    app.get(getRelativePath("generate_game_id"), async (req, res) => {
+    static async generateGameIdRouteHandler(req,res){
         const gameId = await Game.getGeneratedGameId()
         res.send({ gameId: gameId })
-    })
+    }
 
-    app.get(getRelativePath("is_valid_game_id"), async (req, res) => {
+    static async isGameValidRouteHandler(req,res){
         const { inputGameId } = req.query
 
         if (isNil(inputGameId))
@@ -33,10 +24,9 @@ export default function (webSocketIo, app) {
         const canJoinGameResp = await Game.canJoinGame(inputGameId)
 
         return res.send(canJoinGameResp)
-    })
+    }
 
-    app.post(getRelativePath("guess_word"), async (req, res) => {
-
+    static async guessWordRouteHandler(req,res){
         const { gameId, playerId } = req.body;
 
         if (!gameId ||
@@ -54,15 +44,13 @@ export default function (webSocketIo, app) {
         }
 
         res.send({ "wordMatches": guessedWordMatches });
-    })
+    }
 
-
-    app.post(getRelativePath("start_game"), async (req, res) => {
+    static async startGameRouteHandler(req,res){
         /** //FIXME
          * when host of the game, clicks starts game,
          * emit event start game-loop, which starts game loop
          */
-
 
         const gameId = req.body.gameId;
 
@@ -84,11 +72,9 @@ export default function (webSocketIo, app) {
             res.send("game has started");
             return
         }
+    }
 
-    })
-
-
-    gameEventEmitter.on("start-game", async (gameId) => {
+    static async startGameSubscriptionHandler(gameId, gameNSP){
         //keep track of timer, points, and switch turns here
         /**
          * this should also emit event to all the other players listening in to start game
@@ -128,7 +114,7 @@ export default function (webSocketIo, app) {
         for (let roundNum = 1; roundNum <= gameObj.totalRounds; roundNum++) {
             const currentPlayerTurnId = gameObj.playerTurnId;
             // generate random word to draw for player is currently turn it is
-            const drawingWord = generateWord();
+            const drawingWord = Game.generateWord();
 
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
 
@@ -203,10 +189,23 @@ export default function (webSocketIo, app) {
             gameNSP.to(player.id).emit("navigate-to-gameover-screen")
         }
 
-
         return "Game should be over now"
-    })
-
+    }
 }
 
+export default function (webSocketIo, app) {
 
+    const gameNSP = webSocketIo.of("/game-nsp");
+
+    gameRouter.get("/generate_game_id", GameController.generateGameIdRouteHandler)
+
+    gameRouter.get("/is_valid_game_id", GameController.isGameValidRouteHandler)
+
+    gameRouter.post("/guess_word", GameController.guessWordRouteHandler)
+
+    gameRouter.post("/start_game", GameController.startGameRouteHandler)
+
+    gameEventEmitter.on("start-game", async (gameId) => GameController.startGameSubscriptionHandler(gameId, gameNSP))
+
+    app.use("/game", gameRouter)
+}

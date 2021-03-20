@@ -3,6 +3,7 @@ import { isEmpty, isNil, keysIn } from 'ramda'
 import gameSchema from './game.schema.js'
 import Player from '../player/player.model.js'
 import GameRound from './gameround/gameround.model.js'
+import { words } from "./scaffold_data/category_of_words.js"
 
 const GameStates = ["MENU", "STARTED", "CLOSED"];
 
@@ -79,5 +80,10 @@ export default class Game {
         }
 
         return { game_id_valid: true, error_message: "" }
+    }
+
+    static async generateWord() {
+        const randomNumIndex = Math.floor(Math.random() * words.length)
+        return words[randomNumIndex]
     }
 }
