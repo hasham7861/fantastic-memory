@@ -27,7 +27,7 @@ mongoClient
                     "playerTurnIndex": 0,
                     "gameRounds": [{}, {}, {}],
                     "currentGameRound": 1, "totalRounds": 3,
-                    "timeForEachRound": 30000
+                    "timeForEachRound": 60000
                 },
             }
         )

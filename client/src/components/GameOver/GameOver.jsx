@@ -79,15 +79,18 @@ const Heading = styled.h1`
 `
 
 const PlayersInLobbyWrapper = styled.ul`
+    display: flex;
+    flex-direction: column;
     width:500px;
-    height:200px;
+    height: 300px;
+    margin-top:10px;
     background-color: #f1def1;
     font-family: Helvetica, Arial, sans-serif;
     color:#3D2175;
     border-radius:20px;
     margin-bottom:30px;
     list-style:none;
-    overflow-y: scroll;
+    align-items:center;
 `
 
 const Option = styled(Link)`

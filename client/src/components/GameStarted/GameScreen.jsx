@@ -74,8 +74,7 @@ PaintMenuStyle.propTypes = {
 function PaintMenuStyle(props) {
 
     const history = useHistory()
-
-    const [,removeCookie] = useCookies(["cookie-name"])
+    const [cookies,removeCookie] = useCookies(["cookie-name"])
     const { dashboardRef } = props
     const brushColorChange = (event) => {
         dashboardRef.current.brushColorChange(event)
@@ -92,9 +91,7 @@ function PaintMenuStyle(props) {
 
     const stopGameHandler = (e) =>{
         e.preventDefault()
-        removeCookie("gameId")
-        removeCookie("hostId")
-        history.push("/")
+        mySocket.emit("stop-all-players-game",cookies.gameId)
     }
 
     return <div id="PaintMenu">
@@ -174,13 +171,21 @@ function GuessingInput(props) {
 
     checkIsMyTurn(setIsMyTurn)
 
+    useEffect(()=>{
+        if(isMyTurn){
+            setGuessStatus(false)
+        }
+    },[isMyTurn])
+
     return (
         <div style={{ "display": isMyTurn ? "none" : "flex", justifyContent: "center" , flexDirection: "column", alignItems:"center"}}>
             <div style={{flexDirection:"row"}}>
                 <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} onChange={(e) => setInputGuess(e.currentTarget.value)} style={{ borderRadius: "5px", height:"23px"}}/>
                 <GuessInputOption to="#" 
-                    disabled={guessedStatus} 
-                    onClick={(event)=>verifyGuess(event)}>Guess Word</GuessInputOption >
+                    style={{display: guessedStatus ? "none": "inline"}}
+                    onClick={(event)=>verifyGuess(event)}>
+                    Guess Word
+                </GuessInputOption >
             </div>
             <div style={{flexDirection: "column"}}>
                 <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>

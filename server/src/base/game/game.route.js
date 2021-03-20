@@ -79,7 +79,7 @@ class GameController {
         /**
          * this should also emit event to all the other players listening in to start game
          * generate a word for player, and keep track of it in game.
-         * this game loop starts a timer for 30 seconds, then switch turn to another player
+         * this game loop starts a timer for 60 seconds, then switch turn to another player
          * keep tally of rounds
          * once rounds reach 3 rounds, stop game for all players
          * show score of game

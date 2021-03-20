@@ -140,6 +140,19 @@ export function initializeGameNSP(webSocketIo) {
             gameNSP.to(currentPlayerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerId })
         })
 
+        socket.on("stop-all-players-game", async (gameId) =>{
+            const gameDoc = await gameSchema.fetchGame(gameId);
+
+            if (gameDoc) {
+                const gameObj = new Game(gameDoc.game);
+
+                for (const pId in gameObj.players) {
+                    gameNSP.to(pId).emit("navigate-to-gameover-screen",)
+                }
+            }
+
+            
+        })
         // clean up everything related to game from datastore
         socket.on("close-game", gameId => {
             /**

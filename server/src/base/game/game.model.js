@@ -29,7 +29,7 @@ export default class Game {
         this.currentGameRound = this.currentGameRound ? this.currentGameRound : 1;
         this.totalRounds = totalRounds ? totalRounds : 3;
         // time is in milliseconds 
-        this.timeForEachRound = timeForEachRound ? timeForEachRound : 30000;
+        this.timeForEachRound = timeForEachRound ? timeForEachRound : 60000;
 
     }
 
@@ -50,7 +50,7 @@ export default class Game {
     }
 
     ResetTimeLeft() {
-        this.timeForEachRound = 30000;
+        this.timeForEachRound = 60000;
     }
 
     static async getGeneratedGameId() {
