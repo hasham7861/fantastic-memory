@@ -15,6 +15,8 @@ import { MainOption, Option } from '../../common/components/Button'
 
 import {useCookies} from 'react-cookie'
 
+import styled from 'styled-components'
+
 GameScreen.propTypes = {
     location: PropTypes.object
 }
@@ -172,16 +174,26 @@ function GuessingInput(props) {
 
     checkIsMyTurn(setIsMyTurn)
 
-    return (<div style={{ "display": isMyTurn ? "none" : "flex", justifyContent: "center" }}>
-        <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
-        <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus}
-            onChange={(e) => setInputGuess(e.currentTarget.value)}
-            style={{ borderRadius: "5px" }}
-        />
-        {/* <input type="submit" value="guess word" disabled={guessedStatus} onClick={verifyGuess} /> */}
-        <MainOption to="#" disabled={guessedStatus} onClick={(event)=>verifyGuess(event)} style={{ marginLeft: "10px" }} >Guess Word</MainOption>
-    </div>)
+    return (
+        <div style={{ "display": isMyTurn ? "none" : "flex", justifyContent: "center" , flexDirection: "column", alignItems:"center"}}>
+            <div style={{flexDirection:"row"}}>
+                <input type="text" name="guess-word-input" placeholder="guess word" disabled={guessedStatus} onChange={(e) => setInputGuess(e.currentTarget.value)} style={{ borderRadius: "5px", height:"23px"}}/>
+                <GuessInputOption to="#" 
+                    disabled={guessedStatus} 
+                    onClick={(event)=>verifyGuess(event)}>Guess Word</GuessInputOption >
+            </div>
+            <div style={{flexDirection: "column"}}>
+                <p style={{ display: guessedStatus ? "block" : "none", color: "green" }}>You have guessed the word correctly</p>
+            </div>
+        </div>
+    )
 }
+
+const GuessInputOption = styled(MainOption)`
+    border-radius:4px;
+    margin-left:10px;
+
+`
 
 function PlayersInLobby() {
 

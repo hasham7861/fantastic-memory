@@ -82,7 +82,7 @@ export default class Game {
         return { game_id_valid: true, error_message: "" }
     }
 
-    static async generateWord() {
+    static generateWord() {
         const randomNumIndex = Math.floor(Math.random() * words.length)
         return words[randomNumIndex]
     }

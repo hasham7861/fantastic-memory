@@ -87,6 +87,7 @@ const PlayersInLobbyWrapper = styled.ul`
     border-radius:20px;
     margin-bottom:30px;
     list-style:none;
+    overflow-y: scroll;
 `
 
 const Option = styled(Link)`
