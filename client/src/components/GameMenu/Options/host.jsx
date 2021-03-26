@@ -7,7 +7,7 @@ import styled from "styled-components"
 import { Link } from 'react-router-dom'
 import { Smile as IconSmile, Key as IconKey, Clipboard as IconClipBoard} from 'react-feather';
 
-import { AppContext } from '../../../App'
+import { GlobalContext } from '../../../AppContext'
 import { envUri } from '../../../services/environment';
 
 import {isNil}  from 'ramda'
@@ -17,7 +17,7 @@ const Host = function (props) {
     // states
     const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-    const { setPlayerId } = useContext(AppContext)
+    const { setPlayerId } = useContext(GlobalContext)
     const [errAlertElement, setErrAlertElement] = useState(null)
     
     // config of react tools

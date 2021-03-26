@@ -4,7 +4,7 @@ import { withRouter, Link } from 'react-router-dom'
 import { isValidGameId } from '../../../services/rest'
 import styled from 'styled-components'
 
-import { AppContext } from '../../../App'
+import { GlobalContext } from '../../../AppContext'
 
 function Guest(props) {
 
@@ -14,7 +14,7 @@ function Guest(props) {
     const invalidGameIdDiv = useRef(null)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const { setPlayerId } = useContext(AppContext)
+    const { setPlayerId } = useContext(GlobalContext)
 
     const joinLobby = () => {
         // join game if use enters a valid id

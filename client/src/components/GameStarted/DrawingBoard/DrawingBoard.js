@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 're
 import React, { useContext } from 'react'
 import { mySocket } from '../../../services/game-sockets'
 
-import { AppContext } from '../../../App'
+import { GlobalContext } from '../../../AppContext'
 
 const DrawingBoard = forwardRef((props, ref) => {
     // dom references
@@ -30,7 +30,7 @@ const DrawingBoard = forwardRef((props, ref) => {
 
     })
 
-    const { playerId } = useContext(AppContext)
+    const { playerId } = useContext(GlobalContext)
     /// END OF STATES
 
     // Handlers

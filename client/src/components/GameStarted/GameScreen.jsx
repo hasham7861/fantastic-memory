@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import './GameScreen.css'
 import DrawingBoard from './DrawingBoard/DrawingBoard'
 import { withRouter, useHistory } from 'react-router-dom'
-import { AppContext } from '../../App'
+import { GlobalContext } from '../../AppContext'
 
 import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
 
@@ -29,7 +29,7 @@ function GameScreen(props) {
     const history = useHistory()
     const [gameId, setGameId] = useState("")
     const dashboardRef = useRef()
-    const { playerId } = useContext(AppContext)
+    const { playerId } = useContext(GlobalContext)
     const [cookies, removeCookie] = useCookies(["cookie-name"])
 
     // temporary solution for when user tries to reload screen, then it should end game
