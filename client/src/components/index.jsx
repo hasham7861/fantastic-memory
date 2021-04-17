@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { initiateGameSockets } from '../services/game-sockets';
 import GameLogo from '../images/logo.png'
 import { createEnumState } from '../common/helpers/es6-helpers'
 import {InputText, HorizontalContainer} from '../common/components'
+import {GlobalContext} from '../AppContext'
+import {useStateWithPromise} from '../common/helpers/react-custom-hooks'
 
 initiateGameSockets.then(data => data);
 
@@ -13,7 +15,8 @@ const mainMenuState = createEnumState(['Main', 'CreateUsername', 'Options'])
 export default function () {
 
     const [menuState, updateMenuState] = useState(mainMenuState.Main)
-    const [username, updateUserName] = useState("")
+    const [username, updateUserName] = useStateWithPromise("")
+    const {playerId, setPlayerId} = useContext(GlobalContext)
 
     useEffect(() => {
 
@@ -26,26 +29,38 @@ export default function () {
                 renderMenuBasedOnStep()
             }
             
-            return <>
-                <MainOption to="#" 
-                    onClick={onChangeStateToUserName}
-                >Play Game
-                </MainOption>
-                <Option to="/instructions">Instructions</Option>
-            </>
+            return <OptionsContainer>
+                        <MainOption to="#" 
+                            onClick={onChangeStateToUserName}
+                        >Play Game
+                        </MainOption>
+                        <Option to="/instructions">Instructions</Option>
+                    </OptionsContainer>
 
         }else if(menuState=== mainMenuState.CreateUsername){
 
-            const onCreateUsername = () => {
-                console.log(username)
+            const storeUserNameInAppContext = async (username) => setPlayerId(username)
+            
+            const onCreateUsername = async () => {
+                storeUserNameInAppContext(username)
+                updateMenuState(mainMenuState.Options)
             }
-            return <>
-                <HorizontalContainer>
-                    <InputText textState={username} updateTextState={updateUserName}/>
-                    <MainOption to="#" onClick={onCreateUsername}>Create UserName</MainOption>
-                </HorizontalContainer>
-                <Option to="/" onClick={()=>updateMenuState(mainMenuState.Main)}>Go Home</Option>
-            </>
+            return <OptionsContainer>
+                        <HorizontalContainer>
+                            <InputText textState={username} updateTextState={updateUserName}/>
+                            <MainOption to="#" onClick={onCreateUsername}>Create UserName</MainOption>
+                        </HorizontalContainer>
+                        <Option to="/" onClick={()=>updateMenuState(mainMenuState.Main)}>Go Home</Option>
+                    </OptionsContainer>
+        }else if(menuState=== mainMenuState.Options){
+            return <OptionsContainer>
+                        <MainOption to="/join-game">Join Game</MainOption>
+                        <Option to="/host-game">Host Game</Option>
+                        <Option to="/instructions">Instructions</Option>
+                        <Option to="/" onClick={()=>updateMenuState(mainMenuState.Main)}>Go Home</Option>
+                    </OptionsContainer>
+        }else {
+            updateMenuState(mainMenuState.Main)
         }
         
     }
@@ -54,12 +69,7 @@ export default function () {
             <img src={GameLogo} alt="game-logo" width="100px"></img>
             <Heading>Fantastic Memory</Heading>
             <SubHeading>draw and your friends will guess your drawing</SubHeading>
-            <OptionsContainer>
-                {/* <MainOption to="/join-game">Join Game</MainOption>
-                <Option to="/host-game">Host Game</Option> */}
-                {/* <Option to="/instructions">Instructions</Option> */}
-                {renderMenuBasedOnStep()}
-            </OptionsContainer>
+            {renderMenuBasedOnStep()}
         </SplashPageContainer>
     )
 }

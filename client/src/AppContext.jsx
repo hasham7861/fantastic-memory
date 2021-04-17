@@ -1,12 +1,21 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useCookies } from 'react-cookie'
+import {useStateWithPromise} from './common/helpers/react-custom-hooks'
+
 export const GlobalContext = React.createContext('Global')
+
 export default function AppContext(props) {
     // define all state handlers here
-    const [playerId, setPlayerId] = useState(null)
+    const [cookies, setCookie, removeCookie] = useCookies(["cookie-name"])
+    const [playerId, setPlayerId] = useStateWithPromise(null)
+
     // include all the states you want to expose in the entire app
     const GlobalValuesToBeIncludedInContextProvider = {
+        cookies,
+        setCookie,
+        removeCookie,
         playerId,
-        setPlayerId
+        setPlayerId,
     }
     return <GlobalContext.Provider value={GlobalValuesToBeIncludedInContextProvider}>
         {props.children}
