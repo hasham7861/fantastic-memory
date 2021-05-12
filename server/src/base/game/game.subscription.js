@@ -7,23 +7,33 @@ import Player from "../player/player.model.js"
 export function initializeGameNSP(webSocketIo) {
 
     const gameNSP = webSocketIo.of('/game-nsp');
+
     gameNSP.on("connection", socket => {
 
-        const currentPlayerId = socket.id;
+        const currentConnectedSocketId = socket.id
+
+        const currentPlayerId = socket.id
 
         //send the id back to user to know who they are
-        gameNSP.to(socket.id).emit("player-id", currentPlayerId);
+        gameNSP.to(currentConnectedSocketId).emit("player-id", currentPlayerId)
 
 
         socket.on("get-id", _ => {
             gameNSP.to(socket.id).emit("player-id", currentPlayerId);
         })
 
+        socket.on("add-username-to-game", ({username, gameId})=>{
+            /** // TODO 
+             * Add provided username under the game, associated with gameId
+             * associate the username with the game id with a current socketId and the status of this socketId if it alive or not, 
+             *  if socketId of Connected username is offline then allow another player to use same name in the same game
+             */
+        })
         /**
          * Update host player Id upon refresh of host page 
          * */
         socket.on("update-host-id", async gameId => {
-
+            // TODO most likely deprecate this
             const gameDoc = await gameSchema.fetchGame(gameId);
 
             // check if the game exists
@@ -54,6 +64,8 @@ export function initializeGameNSP(webSocketIo) {
          * Host uses this event to initiate a game 
          * */
         socket.on("join-game-lobby", async ({ gameId }) => {
+
+            // TODO update this method so that we now asscoaite username with gameId
 
             const gameDoc = await gameSchema.fetchGame(gameId);
 
@@ -95,12 +107,13 @@ export function initializeGameNSP(webSocketIo) {
 
         // return list of players within the same game
         socket.on("find-players-list", gameId => {
+            // TODO instead of getting playerId get player usernames in game
             const emitPlayerId = currentPlayerId;
             emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
         })
 
         socket.on("load-players", async (gameId) => {
-
+            // TODO why is there duplicate method as above ^
             if (!gameId)
                 return
             console.log(gameId, currentPlayerId)
@@ -121,7 +134,7 @@ export function initializeGameNSP(webSocketIo) {
 
         // share drawing with all the users within the same game
         socket.on("share-drawing-with-players", async ({ gameId, playerId, canvasData }) => {
-
+            // TODO refactor so that you take gameId, playerUsername and canvasData and emit to every other username in game beside yourself
             const gameDoc = await gameSchema.fetchGame(gameId);
 
             if (gameDoc) {
@@ -136,11 +149,13 @@ export function initializeGameNSP(webSocketIo) {
         })
 
         socket.on("get-players-and-score", async (gameId) => {
+            // TODO refactor so get players and score based on usernames
             const playersList = await gameSchema.getCurrentRoundPlayers(gameId)
             gameNSP.to(currentPlayerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerId })
         })
 
         socket.on("stop-all-players-game", async (gameId) =>{
+            // TODO refactor to gamover screen based on usernames mapped to socketId
             const gameDoc = await gameSchema.fetchGame(gameId);
 
             if (gameDoc) {
@@ -165,7 +180,7 @@ export function initializeGameNSP(webSocketIo) {
 
         // clean up game map once user leaves, if host leaves then delete the entire gameid
         socket.on("disconnect", async () => {
-
+            // TODO try to search for usernames in games based on a currentSocketId and then disconnect them
             const playerDoc = await playerToGameSchema.fetchPlayer(currentPlayerId);
 
             if (playerDoc) {
@@ -185,6 +200,7 @@ export function initializeGameNSP(webSocketIo) {
 }
 
 async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
+    // TODO refactor so get playerslist by username
     const gameDoc = await gameSchema.fetchGame(gameId);
 
 
