@@ -1,21 +1,29 @@
 import EventEmitter from 'events'
 import Express from 'express'
-import { isNil, keysIn } from 'ramda'
-import { sleep } from '../../shared/reusable.js'
+import { sleep, isNil, keysIn } from '../../shared/reusable.js'
+import { AppError } from '../../shared/errors.js'
 import Game from "./game.model.js"
 import gameSchema from "./game.schema.js"
 
 const gameEventEmitter = new EventEmitter();
-const gameRouter = new Express()
+const gameRouter = new Express.Router
 
 class GameController {
 
-    static async generateGameIdRouteHandler(req,res){
+    static async getCurrentGameId(req, res) {
+
+        if (isNil(req.session.currentGameId))
+            return res.send({error: "Unable to set current game id"})
+
+        res.send({ gameId: req.session.currentGameId })
+    }
+    static async generateGameIdRouteHandler(req, res) {
         const gameId = await Game.getGeneratedGameId()
-        res.send({ gameId: gameId })
+        req.session.currentGameId = gameId
+        res.send("gameId is set properly")
     }
 
-    static async isGameValidRouteHandler(req,res){
+    static async isGameValidRouteHandler(req, res) {
         const { inputGameId } = req.query
 
         if (isNil(inputGameId))
@@ -26,7 +34,7 @@ class GameController {
         return res.send(canJoinGameResp)
     }
 
-    static async guessWordRouteHandler(req,res){
+    static async guessWordRouteHandler(req, res) {
         const { gameId, playerId } = req.body;
 
         if (!gameId ||
@@ -46,7 +54,7 @@ class GameController {
         res.send({ "wordMatches": guessedWordMatches });
     }
 
-    static async startGameRouteHandler(req,res){
+    static async startGameRouteHandler(req, res) {
         /** //FIXME
          * when host of the game, clicks starts game,
          * emit event start game-loop, which starts game loop
@@ -74,7 +82,7 @@ class GameController {
         }
     }
 
-    static async startGameSubscriptionHandler(gameId, gameNSP){
+    static async startGameSubscriptionHandler(gameId, gameNSP) {
         //keep track of timer, points, and switch turns here
         /**
          * this should also emit event to all the other players listening in to start game
@@ -197,6 +205,9 @@ export default function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
 
+    // FIXME: helper method, must delete after
+    gameRouter.get("/get_current_game_id", GameController.getCurrentGameId)
+
     gameRouter.get("/generate_game_id", GameController.generateGameIdRouteHandler)
 
     gameRouter.get("/is_valid_game_id", GameController.isGameValidRouteHandler)
@@ -206,6 +217,7 @@ export default function (webSocketIo, app) {
     gameRouter.post("/start_game", GameController.startGameRouteHandler)
 
     gameEventEmitter.on("start-game", async (gameId) => GameController.startGameSubscriptionHandler(gameId, gameNSP))
+
 
     app.use("/game", gameRouter)
 }

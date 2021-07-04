@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { mySocket } from '../../services/game-sockets'
+import { mySocket } from '../../services/GameWebSocketClient'
 import { withRouter, Link, useHistory } from 'react-router-dom'
 import { isEmpty, isNil } from 'ramda'
 import styled from 'styled-components'

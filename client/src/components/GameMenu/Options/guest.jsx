@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { joinGame, mySocket } from '../../../services/game-sockets';
+import { joinGame, mySocket } from '../../../services/GameWebSocketClient';
 import { withRouter, Link } from 'react-router-dom'
-import { isValidGameId } from '../../../services/rest'
+import GameApiClient from '../../../services/GameApiClient';
 import styled from 'styled-components'
 
 import { GlobalContext } from '../../../AppContext'
@@ -19,7 +19,7 @@ function Guest(props) {
     const joinLobby = () => {
         // join game if use enters a valid id
         if (inputGameId.length > 1) {
-            isValidGameId(inputGameId).then(resp => {
+            GameApiClient.isValidGameId(inputGameId).then(resp => {
                 const {game_id_valid, error_message} = resp.data
                 let isGameIdValid = game_id_valid
                 if (isGameIdValid === true) {

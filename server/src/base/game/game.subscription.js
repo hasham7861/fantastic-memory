@@ -3,7 +3,6 @@ import gameSchema from "./game.schema.js"
 import playerToGameSchema from "../player/player.schema.js"
 import Player from "../player/player.model.js"
 
-
 export function initializeGameNSP(webSocketIo) {
 
     const gameNSP = webSocketIo.of('/game-nsp');
@@ -28,6 +27,7 @@ export function initializeGameNSP(webSocketIo) {
              * associate the username with the game id with a current socketId and the status of this socketId if it alive or not, 
              *  if socketId of Connected username is offline then allow another player to use same name in the same game
              */
+            console.log(username, gameId)
         })
         /**
          * Update host player Id upon refresh of host page 

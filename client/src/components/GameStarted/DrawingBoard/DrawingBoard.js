@@ -2,7 +2,7 @@ import './DrawingBoard.css'
 import CanvasDraw from 'react-canvas-draw'
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import React, { useContext } from 'react'
-import { mySocket } from '../../../services/game-sockets'
+import { mySocket } from '../../../services/GameWebSocketClient'
 
 import { GlobalContext } from '../../../AppContext'
 

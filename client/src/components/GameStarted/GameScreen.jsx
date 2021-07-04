@@ -6,9 +6,7 @@ import DrawingBoard from './DrawingBoard/DrawingBoard'
 import { withRouter, useHistory } from 'react-router-dom'
 import { GlobalContext } from '../../AppContext'
 
-import { mySocket, checkIsMyTurn } from '../../services/game-sockets'
-
-import { envUri } from '../../services/environment'
+import { mySocket, checkIsMyTurn } from '../../services/GameWebSocketClient'
 
 import { isNil } from 'ramda'
 import { MainOption, Option } from '../../common/components/Button'
@@ -16,6 +14,7 @@ import { MainOption, Option } from '../../common/components/Button'
 import {useCookies} from 'react-cookie'
 
 import styled from 'styled-components'
+import GameApiClient from '../../services/GameApiClient'
 
 GameScreen.propTypes = {
     location: PropTypes.object
@@ -154,11 +153,8 @@ function GuessingInput(props) {
 
     const verifyGuess = async (event) => {
         event.preventDefault()
-        await fetch(envUri + "/game/guess_word", {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ gameId, guessedWord: inputGuess, playerId })
-        }).then(async response => {
+        await GameApiClient.request("/game/guess_word",{ gameId, guessedWord: inputGuess, playerId })
+        .then(async response => {
             const data = await response.json()
             const wordMatches = !!data.wordMatches
 

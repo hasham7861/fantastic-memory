@@ -7,6 +7,8 @@ import { connectToDB } from './shared/mongoDB.js'
 import initAppRoutes from './base/app/app.route.js'
 import { initializeWebSocketNameSpaces } from './base/app/app.subscription.js'
 import conf from './config.js'
+import session from "express-session"
+import MongodbSession from 'connect-mongodb-session'
 
 class Server {
 
@@ -17,13 +19,30 @@ class Server {
    */
   static async _setupAndRetrieveExpressApp() {
 
+    const app = express()
+
     const corsOptions = {
-      orgins: conf.AllowedOrigins,
-      optionSuccessStatus: 200
+      origin: conf.AllowedOrigins,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      preflightContinue: false,
+      optionsSuccessStatus: 204,    
+      credentials: true
     }
-    const app = express();
-    app.use(express.json());
-    app.use(cors(corsOptions));
+    app.use(cors(corsOptions))
+
+    app.use(express.json())
+
+    const SessionStore = MongodbSession(session)
+    app.use(session({
+      secret: conf.SESSION_CONF.SECRET,
+      saveUninitialized: false,
+      resave: false,
+      store: SessionStore({
+        uri: conf.DbDevUri,
+        collection: 'sessions'
+      })
+    }))
+  
     return app;
   }
 
@@ -61,7 +80,7 @@ class Server {
   }
 }
 
-(()=>{
+(() => {
   Server.start()
 })()
 export default {}

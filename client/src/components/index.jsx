@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import { initiateGameSockets } from '../services/game-sockets';
+import { initiateGameSockets } from '../services/GameWebSocketClient';
 import GameLogo from '../images/logo.png'
 import { createEnumState } from '../common/helpers/es6-helpers'
 import {InputText, HorizontalContainer} from '../common/components'
