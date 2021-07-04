@@ -12,14 +12,14 @@ class GameController {
 
     static async getCurrentGameId(req, res) {
 
-        if (isNil(req.session.currentGameId))
+        if (isNil(req.session.gameId))
             return res.send({error: "Unable to set current game id"})
 
-        res.send({ gameId: req.session.currentGameId })
+        res.send({ gameId: req.session.gameId })
     }
     static async generateGameIdRouteHandler(req, res) {
         const gameId = await Game.getGeneratedGameId()
-        req.session.currentGameId = gameId
+        req.session.gameId = gameId
         res.send("gameId is set properly")
     }
 

@@ -11,12 +11,14 @@ import { GlobalContext } from '../../../AppContext'
 
 import { isNil } from 'ramda'
 
+
 const getGameIdOtherwiseCreateAndGet = async () => {
 
     const getCurrentGameId = async () => {
         const resp = await GameApiClient.request("/game/get_current_game_id")
         const data = await resp.json()
         const { gameId } = data
+
         return gameId
     }
 
@@ -28,8 +30,11 @@ const getGameIdOtherwiseCreateAndGet = async () => {
     return gameId
 }
 
-const setPlayerUsernameInSession = async (username) => {
-    return GameApiClient.request("/player/set_player_username", {username: username})
+const getPlayerUsername = async () => {
+    const resp = await GameApiClient.request("/player/get_current_username")
+    const data = await resp.json()
+    const { username } = data
+    return username
 }
 
 const Host = function (props) {
@@ -85,6 +90,13 @@ const Host = function (props) {
         props.history.push({ pathname: "/start-game", state: data })
     })
 
+    const setUsernameInSession = (username) => {
+        mySocket.emit("set-username", {username: username})
+    }
+
+    const addPlayerToGame = (username, gameId) => {
+        mySocket.emit("add-username-to-game", ({username: username, gameId: gameId}))
+    }
     //============ Hooks ============
     useEffect(() => {
 
@@ -94,20 +106,21 @@ const Host = function (props) {
          * 1. Following data will be saved in session, for the ws server to help with communication 
          * - Check if game exist, otherwise create game, gameId should be stored in session and in global state => done
          * - Take username and save in the session on server side => done
-         * - Take current client socId and save on server session
+         * - Take current client socId and save on server session => done
          *
          * 2. following are needed to start game
-         * - attach the host username and add to game store
+         * - attach the host username and add to game store => (in progress)
          * - show playerLists in current host menu
          * - join correct game on start game
          */
 
         getGameIdOtherwiseCreateAndGet().then(gameId => setGameId(gameId))
+        getPlayerUsername().then(username=>setPlayerId(username))
 
-        if (gameId) {
+        if (gameId && playerId) {
             // TODO gameId is found in session, 
-            // setPlayerUsernameInSession(playerId)
-            mySocket.emit("set-username", {username: playerId})
+            setUsernameInSession(playerId)
+            addPlayerToGame(playerId, gameId)
 
         }
 

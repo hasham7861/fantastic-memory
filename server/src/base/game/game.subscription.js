@@ -30,19 +30,54 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
         socket.on("set-username", ({username})=>{
             // set username in express app session and set socket id in session tied to username
-            socket.handshake.session.currentPlayerUsername = username
+            socket.handshake.session.username = username
             socket.handshake.session.socketId = socket.id
             socket.handshake.session.save()
             
         })
 
-        socket.on("add-username-to-game", ({username, gameId})=>{
+        socket.on("add-username-to-game", async ({username, gameId})=>{
             /** // TODO 
              * Add provided username under the game, associated with gameId
              * associate the username with the game id with a current socketId and the status of this socketId if it alive or not, 
              *  if socketId of Connected username is offline then allow another player to use same name in the same game
              */
             console.log(username, gameId)
+
+            const gameDoc = await gameSchema.fetchGame(gameId);
+
+            // Game doesn't exist in the store
+            if (!gameDoc) {
+                await gameSchema.createGame(gameId,
+                    new Game({
+                        gameId,
+                        players: {
+                            [username]: new Player(username)
+                        },
+                        status: "MENU",
+                        hostId: socket.handshake.session.socketId,
+                        playerTurnId: username
+
+                    }))
+
+                await playerToGameSchema.createPlayer(username, gameId)
+            }
+            // when game exists
+            else if (gameDoc) {
+                const currentGame = new Game(gameDoc.game);
+                if (!(gameDoc.game.players.hasOwnProperty(username))) {
+                    currentGame.AddPlayerToGame(username);
+                    // update players obj within mongo
+                    await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": currentGame.players } })
+                        .catch((err) => console.log(err))
+                }
+
+                await playerToGameSchema.createPlayer(username, gameId)
+
+                // update list of players for client
+                gameNSP.to(socket.handshake.session.socketId).emit("players-list", currentGame.players)
+
+            }
         })
         /**
          * Update host player Id upon refresh of host page 
@@ -76,6 +111,7 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
         })
         /**
+         * @deprecated ignore this method for now, as new method is created for username adding
          * Host uses this event to initiate a game 
          * */
         socket.on("join-game-lobby", async ({ gameId }) => {
