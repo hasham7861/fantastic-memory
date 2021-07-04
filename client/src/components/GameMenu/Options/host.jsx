@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import GameApiClient from '../../../services/GameApiClient';
-import {closeGame, mySocket } from '../../../services/GameWebSocketClient';
+import { closeGame, mySocket } from '../../../services/GameWebSocketClient';
 import { useCookies } from 'react-cookie';
 import styled from "styled-components"
 import { Link } from 'react-router-dom'
@@ -11,12 +11,32 @@ import { GlobalContext } from '../../../AppContext'
 
 import { isNil } from 'ramda'
 
+const getGameIdOtherwiseCreateAndGet = async () => {
+
+    const getCurrentGameId = async () => {
+        const resp = await GameApiClient.request("/game/get_current_game_id")
+        const data = await resp.json()
+        const { gameId } = data
+        return gameId
+    }
+
+    let gameId = await getCurrentGameId()
+    if (isNil(gameId)) {
+        await GameApiClient.request("/game/generate_game_id")
+        gameId = await getCurrentGameId()
+    }
+    return gameId
+}
+
+const setPlayerUsernameInSession = async (username) => {
+    return GameApiClient.request("/player/set_player_username", {username: username})
+}
+
 const Host = function (props) {
 
     // states
-    const [gameId, setGameId] = useState("");
     const [playersInLobby, setPlayersInLobby] = useState([]);
-    const { playerId, setPlayerId } = useContext(GlobalContext)
+    const { playerId, setPlayerId, gameId, setGameId } = useContext(GlobalContext)
     const [errAlertElement, setErrAlertElement] = useState(null)
 
     // config of react tools
@@ -60,23 +80,38 @@ const Host = function (props) {
         // mySocket.emit("game-started", gameId)
     }
 
-    // const getCurrentGameId = async () => {
-    //     const resp = await fetch(envUri + "/game/get_current_game_id")
-    //     const json = await resp.json()
-    //     console.log(json)
-    //     //  .then(resp=>resp.json()).then((data)=> {
-    //     //      console.log(envUri+"/game/get_current_game_id")
-    //     //    console.log("curren-session-id",data)
+    mySocket.on("start-game", (data) => {
+        //change the page to start-game with your socid to refer back to and gameId
+        props.history.push({ pathname: "/start-game", state: data })
+    })
 
-    //     // })
-    // }
     //============ Hooks ============
     useEffect(() => {
 
-        mySocket.on("start-game", (data) => {
-            //change the page to start-game with your socid to refer back to and gameId
-            props.history.push({ pathname: "/start-game", state: data })
-        })
+
+        /**
+         * TODO: Implemenet the following tasks for getting the host part running
+         * 1. Following data will be saved in session, for the ws server to help with communication 
+         * - Check if game exist, otherwise create game, gameId should be stored in session and in global state => done
+         * - Take username and save in the session on server side => done
+         * - Take current client socId and save on server session
+         *
+         * 2. following are needed to start game
+         * - attach the host username and add to game store
+         * - show playerLists in current host menu
+         * - join correct game on start game
+         */
+
+        getGameIdOtherwiseCreateAndGet().then(gameId => setGameId(gameId))
+
+        if (gameId) {
+            // TODO gameId is found in session, 
+            // setPlayerUsernameInSession(playerId)
+            mySocket.emit("set-username", {username: playerId})
+
+        }
+
+
 
         // mySocket.on("player-id", function (id) {
         //     setCookie("hostId", id, { expires: new Date(new Date().getTime() + 60000) })
@@ -89,29 +124,30 @@ const Host = function (props) {
         // --- Preparing game config before starting of game ---- 
         // Player has not hosted any game at the moment
         // if (!cookies.gameId || !cookies.hostId || cookies.gameId === "undefined") {
-            // create the game
+        // create the game
 
-            // TODO trying to generate gameId and then see if it saved in server side session
-            GameApiClient.request("/game/generate_game_id").then(resp => {
-                // setCookie("gameId", resp.data.gameId, { expires: new Date(new Date().getTime() + 8.64e+7) /**expire gameId after a day just incase*/ })
-                // mySocket.emit("add-username-to-game", ({username: playerId, gameId: cookies.gameId}))
+        // TODO trying to generate gameId and then see if it saved in server side session
+        // createNewGameId.then(() => {
+        // setCookie("gameId", resp.data.gameId, { expires: new Date(new Date().getTime() + 8.64e+7) /**expire gameId after a day just incase*/ })
+        // mySocket.emit("add-username-to-game", ({username: playerId, gameId: cookies.gameId}))
 
-                // console.log('gameId', getCurrentGameId())
-                GameApiClient.request("/game/get_current_game_id")
-                .then(res => res)
-                .catch(err => console.log(err))
+        // console.log('gameId', getCurrentGameId())
+        // getGameIdOtherwiseCreateAndGet().then(gameId=>setGameId(gameId))
+        // if(gameId){
+        //     // TODO gameId is found in session, 
+        // }
 
-                // joinGame(resp.data.gameId, 0)
+        // joinGame(resp.data.gameId, 0)
 
-                // make sure to set local host-id
-                // mySocket.emit("get-id", {})
+        // make sure to set local host-id
+        // mySocket.emit("get-id", {})
 
-                // refresh the component to refresh the player list
-                // props.history.go('0'))
-                // When player is not in any game
+        // refresh the component to refresh the player list
+        // props.history.go('0'))
+        // When player is not in any game
 
-            }) .catch(error=>console.log(error))
-    // }
+        // }) .catch(error=>console.log(error))
+        // }
         // else if (cookies.hostId) {
         //     setGameId(cookies.gameId)
         //     if (cookies.gameId) {
@@ -142,7 +178,8 @@ const Host = function (props) {
         // }
 
 
-    }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId, errAlertElement])
+
+    }, [gameId, setGameId, cookies, setCookie, removeCookie, props.history, setPlayerId, errAlertElement])
 
 
 

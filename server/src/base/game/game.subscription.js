@@ -3,15 +3,22 @@ import gameSchema from "./game.schema.js"
 import playerToGameSchema from "../player/player.schema.js"
 import Player from "../player/player.model.js"
 
-export function initializeGameNSP(webSocketIo) {
+import sharedSession from 'express-socket.io-session'
 
-    const gameNSP = webSocketIo.of('/game-nsp');
+
+export function initializeGameNSP(webSocketIo, sessionMiddleware) {
+
+    const gameNSP = webSocketIo.of('/game-nsp')
+                        // binding the namespace with express session store
+                        .use(sharedSession(sessionMiddleware,{
+                            autoSave: true
+                        }))
 
     gameNSP.on("connection", socket => {
 
         const currentConnectedSocketId = socket.id
-
         const currentPlayerId = socket.id
+        // const socketAndExpressSessionBind = socket.handshake.session
 
         //send the id back to user to know who they are
         gameNSP.to(currentConnectedSocketId).emit("player-id", currentPlayerId)
@@ -19,6 +26,14 @@ export function initializeGameNSP(webSocketIo) {
 
         socket.on("get-id", _ => {
             gameNSP.to(socket.id).emit("player-id", currentPlayerId);
+        })
+
+        socket.on("set-username", ({username})=>{
+            // set username in express app session and set socket id in session tied to username
+            socket.handshake.session.currentPlayerUsername = username
+            socket.handshake.session.socketId = socket.id
+            socket.handshake.session.save()
+            
         })
 
         socket.on("add-username-to-game", ({username, gameId})=>{

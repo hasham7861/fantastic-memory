@@ -9,18 +9,17 @@ import { initializeWebSocketNameSpaces } from './base/app/app.subscription.js'
 import conf from './config.js'
 import session from "express-session"
 import MongodbSession from 'connect-mongodb-session'
-
+import sharedSession from 'express-socket.io-session'
 class Server {
 
   /**
-   * @method _setupAndRetrieveExpressApp
-   * @description setup the express midleware
-   * @returns {ExpressApp} app
+   * @method _initServer
+   * @description setup the main http server
+   * @returns {void}
    */
-  static async _setupAndRetrieveExpressApp() {
+  static async _initServer() {
 
-    const app = express()
-
+    const app = await express()
     const corsOptions = {
       origin: conf.AllowedOrigins,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -33,26 +32,18 @@ class Server {
     app.use(express.json())
 
     const SessionStore = MongodbSession(session)
-    app.use(session({
+    const sessionMiddleware = session({
       secret: conf.SESSION_CONF.SECRET,
       saveUninitialized: false,
       resave: false,
       store: SessionStore({
         uri: conf.DbDevUri,
-        collection: 'sessions'
+        collection: 'sessions',
+        ttl: 600 // should auto expire session after 10 mins
       })
-    }))
-  
-    return app;
-  }
+    })
+    app.use(sessionMiddleware)
 
-  /**
-   * @method _initServer
-   * @description setup the main http server
-   * @returns {void}
-   */
-  static async _initServer() {
-    const app = await this._setupAndRetrieveExpressApp();
 
     const server = http.createServer(app);
 
@@ -61,7 +52,11 @@ class Server {
 
     // enabling websocket protocol
     const webSocketIo = webSocket(server);
-    initializeWebSocketNameSpaces(webSocketIo);
+    webSocketIo.use(sharedSession(sessionMiddleware,{
+      autoSave: true
+    }))
+
+    initializeWebSocketNameSpaces(webSocketIo, sessionMiddleware);
 
     //giving websocket protocol access to express app
     initAppRoutes(webSocketIo, app);

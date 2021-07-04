@@ -205,7 +205,6 @@ export default function (webSocketIo, app) {
 
     const gameNSP = webSocketIo.of("/game-nsp");
 
-    // FIXME: helper method, must delete after
     gameRouter.get("/get_current_game_id", GameController.getCurrentGameId)
 
     gameRouter.get("/generate_game_id", GameController.generateGameIdRouteHandler)

@@ -1,4 +1,5 @@
 import GameRoutes from '../game/game.route.js'
+import PlayerRoutes from '../player/player.route.js'
 
 export default function (webSocketIo, app) {
 
@@ -12,7 +13,7 @@ export default function (webSocketIo, app) {
 
   // all other apis here
   GameRoutes(webSocketIo, app)
-
+  PlayerRoutes(app)
 
   app.use((req, res) => {
     res.status(404).send({
