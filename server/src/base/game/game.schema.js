@@ -54,11 +54,11 @@ gameSchema.statics.doesGameExist = async function (gameId) {
 }
 
 gameSchema.statics.createGame = async function (gameId, game) {
-    mongoose.model('game').create({ gameId, game }, function (err) { if (err) console.log(err) });
+    return mongoose.model('game').create({ gameId, game }, function (err) { if (err) console.log(err) });
 }
 
 gameSchema.statics.fetchGame = function (gameId) {
-    return mongoose.model('game').findOne({ gameId });
+    return mongoose.model('game').findOne({ gameId }, function (err) { if (err) console.log(err) })
 }
 
 gameSchema.statics.updateGame = async function (filterQuery, updateQuery) {

@@ -32,6 +32,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "express-socket.io-session": "^1.3.5",
+    "lodash": "^4.17.21",
     "mongoose": "5.11.15",
     "ramda": "^0.27.1",
     "session.socket.io": "^0.2.1",

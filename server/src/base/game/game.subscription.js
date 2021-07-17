@@ -4,17 +4,20 @@ import playerToGameSchema from "../player/player.schema.js"
 import Player from "../player/player.model.js"
 
 import sharedSession from 'express-socket.io-session'
+import _ from "lodash"
 
 
 export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
     const gameNSP = webSocketIo.of('/game-nsp')
-                        // binding the namespace with express session store
-                        .use(sharedSession(sessionMiddleware,{
-                            autoSave: true
-                        }))
+        // binding the namespace with express session store
+        .use(sharedSession(sessionMiddleware, {
+            autoSave: true
+        }))
 
     gameNSP.on("connection", socket => {
+
+        const eventEmitterSocketId = socket.id
 
         const currentConnectedSocketId = socket.id
         const currentPlayerId = socket.id
@@ -28,56 +31,59 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
             gameNSP.to(socket.id).emit("player-id", currentPlayerId);
         })
 
-        socket.on("set-username", ({username})=>{
+        socket.on("set-username", ({ username }) => {
             // set username in express app session and set socket id in session tied to username
             socket.handshake.session.username = username
-            socket.handshake.session.socketId = socket.id
+            socket.handshake.session.previousSocketId = socket.id
             socket.handshake.session.save()
-            
+
         })
 
-        socket.on("add-username-to-game", async ({username, gameId})=>{
-            /** // TODO 
+        socket.on("add-username-to-game", async ({ username, gameId }) => {
+            /** 
              * Add provided username under the game, associated with gameId
              * associate the username with the game id with a current socketId and the status of this socketId if it alive or not, 
-             *  if socketId of Connected username is offline then allow another player to use same name in the same game
+             *  //FIXME: if socketId of Connected username is offline then allow another player to use same name in the same game
              */
-            console.log(username, gameId)
-
-            const gameDoc = await gameSchema.fetchGame(gameId);
-
-            // Game doesn't exist in the store
-            if (!gameDoc) {
-                await gameSchema.createGame(gameId,
+            async function createGameAndAttachHost() {
+                return gameSchema.createGame(gameId,
                     new Game({
                         gameId,
                         players: {
                             [username]: new Player(username)
                         },
                         status: "MENU",
-                        hostId: socket.handshake.session.socketId,
+                        hostId: eventEmitterSocketId,
                         playerTurnId: username
-
                     }))
-
-                await playerToGameSchema.createPlayer(username, gameId)
             }
-            // when game exists
-            else if (gameDoc) {
-                const currentGame = new Game(gameDoc.game);
-                if (!(gameDoc.game.players.hasOwnProperty(username))) {
-                    currentGame.AddPlayerToGame(username);
-                    // update players obj within mongo
-                    await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": currentGame.players } })
-                        .catch((err) => console.log(err))
+
+            async function getGameIfExistsElseCreate() {
+                let gameDoc = await gameSchema.fetchGame(gameId)
+                if (_.isNil(gameDoc)) {
+                    await createGameAndAttachHost()
+                    gameDoc = await gameSchema.fetchGame(gameId)
                 }
+                return gameDoc
+            }
+
+            const gameDoc = await getGameIfExistsElseCreate()
+            if (!gameDoc)
+                throw new Error("game is not created properly")
+
+            const isUserFoundInGame = _.has(gameDoc, `game.players.[${username}]`)
+
+            const currentGame = new Game(gameDoc.game)
+
+            if (!isUserFoundInGame) {
+                currentGame.AddPlayerToGame(username);
+                // update players obj within mongo
+                await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": currentGame.players } })
+                    .catch((err) => console.log(err))
 
                 await playerToGameSchema.createPlayer(username, gameId)
-
-                // update list of players for client
-                gameNSP.to(socket.handshake.session.socketId).emit("players-list", currentGame.players)
-
             }
+
         })
         /**
          * Update host player Id upon refresh of host page 
@@ -157,10 +163,36 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
 
         // return list of players within the same game
-        socket.on("find-players-list", gameId => {
-            // TODO instead of getting playerId get player usernames in game
-            const emitPlayerId = currentPlayerId;
-            emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId);
+        socket.on("find-players-list", async ({ gameId }) => {
+            
+            if(!gameId)
+                return new Error("game id is null")
+            
+            // TODO refactor so get playerslist by username
+            const gameDoc = await gameSchema.fetchGame(gameId);
+            console.log(gameDoc)
+            if (!gameDoc)
+                throw new Error("game is not created properly")
+
+            const currentGame = new Game(gameDoc.game);
+            // TODO move this logic when user closes window
+            // delete players from context of game when they closed out of game
+            // await gameSchema.removePlayersNotInGame(gameId);
+            for (const playerId in currentGame.players) {
+                if (currentGame.players.inGame == false) {
+                    delete currentGame.players[playerId];
+                }
+            }
+
+            // update list of players in store
+            await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": currentGame.players } })
+                .catch(() => console.log("unable to update player list"))
+
+
+            // update player list 
+            gameNSP.to(eventEmitterSocketId).emit("players-list", gameObj.players)
+
+
         })
 
         socket.on("load-players", async (gameId) => {
@@ -205,7 +237,7 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
             gameNSP.to(currentPlayerId).emit("load-players-list", { "players": playersList, "currentPlayerId": currentPlayerId })
         })
 
-        socket.on("stop-all-players-game", async (gameId) =>{
+        socket.on("stop-all-players-game", async (gameId) => {
             // TODO refactor to gamover screen based on usernames mapped to socketId
             const gameDoc = await gameSchema.fetchGame(gameId);
 
@@ -217,7 +249,7 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
                 }
             }
 
-            
+
         })
         // clean up everything related to game from datastore
         socket.on("close-game", gameId => {
@@ -248,38 +280,4 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
     })
 
-}
-
-async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
-    // TODO refactor so get playerslist by username
-    const gameDoc = await gameSchema.fetchGame(gameId);
-
-
-    if (gameDoc) {
-
-        const gameObj = new Game(gameDoc.game);
-
-        // if there is no player id specifiy to emit then emit to host id
-        if (!emitPlayerId) {
-            emitPlayerId = gameObj.hostId;
-        }
-
-        // TODO move this logic when user closes window
-        // delete players from context of game when they closed out of game
-        // await gameSchema.removePlayersNotInGame(gameId);
-        for (const playerId in gameObj.players) {
-            if (gameObj.players.inGame == false) {
-                delete gameObj.players[playerId];
-            }
-        }
-
-        // update list of players in store
-        await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": gameObj.players } })
-            .catch(() => console.log("unable to update player list"))
-
-
-        // update player list 
-        gameNSP.to(emitPlayerId).emit("players-list", gameObj.players)
-
-    }
 }

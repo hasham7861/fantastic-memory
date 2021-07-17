@@ -90,12 +90,19 @@ const Host = function (props) {
         props.history.push({ pathname: "/start-game", state: data })
     })
 
+    mySocket.on("players-list", (data)=>{
+        console.log(data)
+    })
     const setUsernameInSession = (username) => {
         mySocket.emit("set-username", {username: username})
     }
 
     const addPlayerToGame = (username, gameId) => {
         mySocket.emit("add-username-to-game", ({username: username, gameId: gameId}))
+    }
+
+    const getGamePlayersList = (gameId) => {
+        mySocket.emit("find-players-list", ({gameId: gameId}))
     }
     //============ Hooks ============
     useEffect(() => {
@@ -121,7 +128,7 @@ const Host = function (props) {
             // TODO gameId is found in session, 
             setUsernameInSession(playerId)
             addPlayerToGame(playerId, gameId)
-
+            getGamePlayersList(gameId)
         }
 
 

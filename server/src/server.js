@@ -49,6 +49,7 @@ class Server {
 
     // connect to mongo db
     connectToDB()
+    
 
     // enabling websocket protocol
     const webSocketIo = webSocket(server);
@@ -63,6 +64,11 @@ class Server {
 
     server.listen(conf.PORT);
 
+    // TODO : should send the errors that took place to sentry along with reason
+    // log proper error when some promise fails on server
+    process.on('unhandledRejection', (reason) => {
+      console.log('Warning Promise Rejected at:', reason.stack || reason)
+    })
   }
 
   /**
