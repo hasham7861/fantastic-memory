@@ -91,7 +91,7 @@ const Host = function (props) {
     })
 
     mySocket.on("players-list", (data)=>{
-        console.log(data)
+        setPlayersJSX(data)
     })
     const setUsernameInSession = (username) => {
         mySocket.emit("set-username", {username: username})
@@ -121,15 +121,31 @@ const Host = function (props) {
          * - join correct game on start game
          */
 
-        getGameIdOtherwiseCreateAndGet().then(gameId => setGameId(gameId))
-        getPlayerUsername().then(username=>setPlayerId(username))
+        getGameIdOtherwiseCreateAndGet()
+            .then(async (gameId)=>{
+                setGameId(gameId)
+                if(playerId){
+                    setUsernameInSession(playerId)
+                    addPlayerToGame(playerId, gameId)
+                }else{
+                    const username = await getPlayerUsername()
+                    if(playerId){
+                        setPlayerId(username)
+                    }
 
-        if (gameId && playerId) {
-            // TODO gameId is found in session, 
-            setUsernameInSession(playerId)
-            addPlayerToGame(playerId, gameId)
-            getGamePlayersList(gameId)
-        }
+                }
+                getGamePlayersList(gameId)
+                
+            })
+        // getPlayerUsername().then(username=>setPlayerId(username))
+        // console.log(gameId, playerId)
+        // if (gameId && playerId) {
+        //     // TODO gameId is found in session, 
+        //     console.log('got here bro')
+        //     setUsernameInSession(playerId)
+        //     addPlayerToGame(playerId, gameId)
+        //     getGamePlayersList(gameId)
+        // }
 
 
 
@@ -199,7 +215,7 @@ const Host = function (props) {
 
 
 
-    }, [gameId, setGameId, cookies, setCookie, removeCookie, props.history, setPlayerId, errAlertElement])
+    }, [gameId, setGameId, setPlayerId])
 
 
 
@@ -213,7 +229,7 @@ const Host = function (props) {
             <Heading>Host Game</Heading>
             <SubHeading>host game for your friends to join game</SubHeading>
             <GameId><IconKey /><span>GameId: </span> <span style={{ color: "black" }}>{gameId}</span><IconClipBoard style={{ cursor: "pointer" }} onClick={copyToClipboard} /></GameId>
-            <ErrorAlert style={{ display: errAlertElement ? "block" : "none" }}>{errAlertElement}</ErrorAlert>
+            <ErrorAlert style={{ display: errAlertElement ? "block" : "none" }}>{errAlertElement}</ErrorAlert> 
             <PLayersListWrapper>{playersInLobby}</PLayersListWrapper>
             <OptionsContainer>
                 <MainOption to="#" onClick={(event) => startGame(event)}>Start Game</MainOption>

@@ -170,7 +170,7 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
             
             // TODO refactor so get playerslist by username
             const gameDoc = await gameSchema.fetchGame(gameId);
-            console.log(gameDoc)
+
             if (!gameDoc)
                 throw new Error("game is not created properly")
 
@@ -190,7 +190,7 @@ export function initializeGameNSP(webSocketIo, sessionMiddleware) {
 
 
             // update player list 
-            gameNSP.to(eventEmitterSocketId).emit("players-list", gameObj.players)
+            gameNSP.to(eventEmitterSocketId).emit("players-list", currentGame.players)
 
 
         })
