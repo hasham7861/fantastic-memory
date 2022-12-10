@@ -1,0 +1,22 @@
+{
+  "name": "fantastic-memory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "client:dev": "cd client && npm run dev",
+    "server:dev": "cd server && npm run dev",
+    "database:dev": "docker run -d -p 27017:27017 -v ~/data:/data/db mongo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hasham7861/fantastic-memory.git"
+  },
+  "author": "hashamalam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hasham7861/fantastic-memory/issues"
+  },
+  "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
+  "dependencies": {}
+}

@@ -1,0 +1,41 @@
+{
+  "name": "fantastic-memory",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node src/server",
+    "dev": "nodemon src/server",
+    "docker-install": "docker build -t fantastic-server .",
+    "docker-start": "docker run -it -p 9000:5000 fantastic-server",
+    "eslint": "eslint",
+    "test": "mocha --recursive src/tests/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hasham7861/fantastic-memory.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hasham7861/fantastic-memory/issues"
+  },
+  "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
+  "dependencies": {
+    "connect-mongo": "^3.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "mongoose": "^5.10.1",
+    "nodemon": "^2.0.4",
+    "ramda": "^0.27.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "eslint": "^7.19.0",
+    "mocha": "^8.3.0",
+    "mongodb": "^3.6.4"
+  }
+}

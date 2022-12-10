@@ -1,0 +1,70 @@
+version: "3.8"
+services:
+  
+  client:
+    container_name: client
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    restart: 'no'
+    networks:
+      - backend
+      - frontend
+    ports: 
+      - 3000:3000
+    # react-scripts start needs to open browser
+    stdin_open: true
+
+  server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: 'no'
+    networks:
+      - backend
+      - frontend
+    ports:
+      - 5000:5000
+
+  database:
+    container_name: database
+    image: mongo:3.6.0
+    restart: 'no'
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+    networks:
+      - backend
+    ports:
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - db:/data/db
+
+  database-admin:
+    container_name: database-admin
+    image: mongo-express
+    restart: 'no'
+    env_file:
+      - .env
+    ports:
+      - 8081:8081
+    networks:
+      - backend
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: toor
+      ME_CONFIG_MONGODB_URL: mongodb://root:toor@database:27017/
+    depends_on:
+      - database
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
+
+volumes:
+  db:
