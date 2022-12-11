@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { joinGame, mySocket } from '../../../services/game-sockets';
 import { withRouter, Link } from 'react-router-dom'
@@ -134,6 +136,5 @@ const MainOption = styled(Option)`
     background-color:#3D2175;
     color:white;
 `
-
 
 export default withRouter(Guest)

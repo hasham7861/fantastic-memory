@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { getGameToken } from '../../../services/rest';
@@ -15,8 +16,8 @@ import {isNil}  from 'ramda'
 const Host = function (props) {
 
     // states
-    const [gameId, setGameId] = useState("");
-    const [playersInLobby, setPlayersInLobby] = useState([]);
+    const [gameId, setGameId] = useState("")
+    const [playersInLobby, setPlayersInLobby] = useState([])
     const { setPlayerId } = useContext(AppContext)
     const [errAlertElement, setErrAlertElement] = useState(null)
     
@@ -93,7 +94,6 @@ const Host = function (props) {
             })
             // When player is not in any game
 
-
         }
         else if (cookies.hostId) {
             setGameId(cookies.gameId)
@@ -114,14 +114,10 @@ const Host = function (props) {
                     }
                     setPlayersJSX(listOfPlayers)
                    
-
                 })
                 mySocket.emit("find-players-list", gameId);
                 
             }
-
-
-
 
         }
        
@@ -129,10 +125,7 @@ const Host = function (props) {
         return (() => {
         })
 
-
     }, [gameId, cookies, setCookie, removeCookie, props.history, setPlayerId, errAlertElement])
-
-
 
     const copyToClipboard = () => { 
         navigator.clipboard.writeText(gameId)
@@ -228,7 +221,6 @@ const OptionsContainer = styled.div`
     flex-direction: Row;
 `
 
-
 const Option = styled(Link)`
     border: 1px solid #3D2175;
     padding: 10px 30px;
@@ -242,6 +234,5 @@ const MainOption = styled(Option)`
     background-color:#3D2175;
     color:white;
 `
-
 
 export default withRouter(Host);

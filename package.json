@@ -18,5 +18,7 @@
     "url": "https://github.com/hasham7861/fantastic-memory/issues"
   },
   "homepage": "https://github.com/hasham7861/fantastic-memory#readme",
-  "dependencies": {}
+  "dependencies": {
+    "eslint": "^8.29.0"
+  }
 }

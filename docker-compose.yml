@@ -1,18 +1,18 @@
 version: "3.8"
 services:
   
-  # client:
-  #   container_name: client
-  #   build: 
-  #     context: ./client
-  #     dockerfile: Dockerfile
-  #   restart: 'no'
-  #   networks:
-  #     - mynet
-  #   ports: 
-  #     - 3000:3000
-  #   # react-scripts start needs to open browser
-  #   stdin_open: true
+  client:
+    container_name: client
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    restart: 'no'
+    networks:
+      - mynet
+    ports: 
+      - 3000:3000
+    # react-scripts start needs to open browser
+    stdin_open: true
 
   server:
     container_name: server
