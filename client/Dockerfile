@@ -1,4 +1,4 @@
-FROM node:12-slim
+FROM node:v12.21.0
 WORKDIR  .
 COPY package.json .
 RUN npm install

@@ -1,7 +1,7 @@
-FROM node:12-slim
+FROM node:14
 WORKDIR  .
 COPY package.json .
 RUN npm install
 COPY . .
-CMD ["npm", "start"]
-EXPOSE 3000 
+CMD ["npm", "run", "dev"]
+EXPOSE 5000 

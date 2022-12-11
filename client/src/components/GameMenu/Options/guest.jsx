@@ -60,7 +60,7 @@ function Guest(props) {
                     <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
                 </GameInputWrapper>
                 <OptionsContainer>
-                    <MainOption onClick={joinLobby}>Join Lobby</MainOption>
+                    <MainOption to="#" onClick={joinLobby}>Join Lobby</MainOption>
                     <Option to="/">Return Home</Option>
                 </OptionsContainer>
             </div>
