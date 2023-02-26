@@ -53,8 +53,13 @@ module.exports = class Game {
     }
 
     static async getGeneratedGameId() {
-        const gameIdBuffer = await crypto.randomBytes(4)
-        const gameId = gameIdBuffer.toString('hex')
+        let gameDoc;
+        let gameId;
+        do {
+            const gameIdBuffer = crypto.randomBytes(4)
+            gameId = gameIdBuffer.toString('hex')
+            gameDoc = await gameSchema.fetchGame(gameId)
+        } while(gameDoc)
 
         return gameId;
     }
