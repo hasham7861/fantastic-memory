@@ -1,3 +1,4 @@
+
 const express = require("express");
 const http = require('http');
 const cors = require('cors');
@@ -7,7 +8,6 @@ const { connectToDB } = require("./shared/mongoDB");
 const webSocket = require('socket.io');
 const initAppRoutes = require('./base/app/app.route');
 const { initializeWebSocketNameSpaces } = require('./base/app/app.subscription');
-
 
 class Server {
 
@@ -19,7 +19,7 @@ class Server {
   static async _setupAndRetrieveExpressApp() {
 
     const corsOptions = {
-      orgins: env.AllowedOrigins,
+      origins: env.AllowedOrigins,
       optionSuccessStatus: 200
     }
     const app = express();
@@ -66,5 +66,3 @@ class Server {
 (() => 
   Server.start()
 )()
-
-

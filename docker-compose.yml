@@ -24,6 +24,11 @@ services:
       - mynet
     ports:
       - 5000:5000
+    # node-dev watcher needs to watch for local changes to reload the app
+    volumes:
+      - ./server/src:/app/src:ro
+      - ./server/package.json:/app/package.json:ro
+      - ./server/package-lock.json:/app/package-lock.json:ro
 
   database:
     container_name: database
