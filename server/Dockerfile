@@ -1,7 +1,7 @@
 FROM node:14
-WORKDIR  .
-COPY package.json .
+WORKDIR  /app
+COPY package.json /app
 RUN npm install
-COPY . .
+COPY . /app
 CMD ["npm", "run", "dev"]
 EXPOSE 5000 
