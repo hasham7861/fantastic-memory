@@ -37,6 +37,9 @@ module.exports = function (webSocketIo, app) {
     app.post(getRelativePath("guess_word"), async (req, res) => {
 
         const { gameId, playerId } = req.body;
+        console.log('gameId', gameId)
+        console.log('playerId', playerId)
+        console.log('guessedWord', req.body.guessedWord)
 
         if (!gameId ||
             !req.body.guessedWord ||

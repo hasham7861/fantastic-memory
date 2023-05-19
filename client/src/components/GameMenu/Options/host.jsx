@@ -3,7 +3,6 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { withRouter } from 'react-router-dom';
 import { getGameToken } from '../../../services/rest';
 import { joinGame, closeGame, mySocket } from '../../../services/game-sockets';
-import { useCookies } from 'react-cookie';
 import styled from "styled-components"
 import { Link } from 'react-router-dom'
 import { Smile as IconSmile, Key as IconKey, Clipboard as IconClipBoard} from 'react-feather';
@@ -21,9 +20,6 @@ const Host = function (props) {
     const { playerId, setPlayerId, gameId, setGameId } = useContext(AppContext)
     const [errAlertElement, setErrAlertElement] = useState(null)
     
-    // config of react tools
-    const [, setCookie, removeCookie] = useCookies(["cookie-name"])
-
 
     //============ Handlers ============
     // show all the players in lobby
@@ -53,28 +49,28 @@ const Host = function (props) {
     // stop game and cleanup garbage
     const stopGame = () => {
         closeGame(gameId)
-        removeCookie("gameId")
-        removeCookie("hostId")
+        setPlayerId("")
+        setGameId("")
         props.history.push('/')
     }
 
-    const startGame = (event) => {
+    const startGame = async (event) => {
         // move to start game push
         // props.history.push({ pathname: "/start-game", state: { gameId } })
         event.preventDefault()
-        fetch(envUri + "/game/start_game",
+        await fetch(envUri + "/game/start_game",
             {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ gameId })
             })
-            .then(resp=>resp.json()).then((data)=> {
-                if(!isNil(data.error_message)){
-                    console.log(data.error_message)
-                    setErrAlertElement(data.error_message)
-                }
+           
+        // if(!isNil(data.error_message)){
+        //     console.log(data.error_message)
+        //     setErrAlertElement(data.error_message)
+        // }
             
-            })
+        
         // signal to all the other clients in the same socket that game has started
         // mySocket.emit("game-started", gameId)
     }

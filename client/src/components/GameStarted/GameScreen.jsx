@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useState, useEffect, useContext, useRef } from 'react'
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import './GameScreen.css'
 import DrawingBoard from './DrawingBoard/DrawingBoard'
@@ -13,8 +13,6 @@ import { envUri } from '../../services/environment'
 import { isNil } from 'ramda'
 import { MainOption, Option } from '../../common/components/Button'
 
-import {useCookies} from 'react-cookie'
-
 GameScreen.propTypes = {
     location: PropTypes.object
 }
@@ -25,31 +23,31 @@ function GameScreen(props) {
     const {state} = location
 
     const history = useHistory()
-    const [gameId, setGameId] = useState("")
     const dashboardRef = useRef()
-    const { playerId } = useContext(AppContext)
-    const [cookies, removeCookie] = useCookies(["cookie-name"])
+    const { playerId, gameId } = useContext(AppContext)
 
     // temporary solution for when user tries to reload screen, then it should end game
     window.onbeforeunload = function() {
         history.push("/")
-        removeCookie("gameId")
-        removeCookie("hostId")
     }
 
-    mySocket.on("navigate-to-gameover-screen", ()=>{
+    const onNavigateToGameOverScreenWebSocketEvent = useCallback(() => {
         history.push("/game-over")
-    })
+    },[history])
+
+    useEffect(() => {
+        mySocket.on("navigate-to-gameover-screen", onNavigateToGameOverScreenWebSocketEvent)
+        return  () => {
+            mySocket.off("navigate-to-gameover-screen", onNavigateToGameOverScreenWebSocketEvent)
+        }
+    },[onNavigateToGameOverScreenWebSocketEvent])
 
 
     useEffect(() => {
         if (!state) {
             history.push("/")
-        } else {
-            setGameId(cookies.gameId)
-        }
-       
-    }, [history, state, cookies.gameId])
+        } 
+    }, [history, state])
 
     return ( <div className="GameScreen">
             <PaintMenuStyle dashboardRef={dashboardRef} />
@@ -73,7 +71,6 @@ function PaintMenuStyle(props) {
 
     const history = useHistory()
 
-    const [,removeCookie] = useCookies(["cookie-name"])
     const { dashboardRef } = props
     const brushColorChange = (event) => {
         dashboardRef.current.brushColorChange(event)
@@ -90,8 +87,6 @@ function PaintMenuStyle(props) {
 
     const stopGameHandler = (e) =>{
         e.preventDefault()
-        removeCookie("gameId")
-        removeCookie("hostId")
         history.push("/")
     }
 
@@ -118,21 +113,32 @@ function DrawingDashboard() {
     const [drawingWord, setDrawingWord] = useState("")
     const [timeLeft, updateTimeLeft] = useState(0)
 
-    mySocket.on("drawing-word", word => {
+    const onDrawingWordWebSocketEvent = useCallback((word) => {
         if (word && word !== drawingWord) {
             setDrawingWord(word)
         }
-    })
+    },[drawingWord])
 
-    mySocket.on("update-time-left", newTime => {
+    useEffect(() => { 
+        mySocket.on("drawing-word", onDrawingWordWebSocketEvent)
+        return () => {
+            mySocket.off("drawing-word", onDrawingWordWebSocketEvent)
+        }
+    },[onDrawingWordWebSocketEvent])
+
+    const onUpdateTimeLeftWebSocketEvent = useCallback((newTime) => {
         updateTimeLeft(newTime)
-    })
+    },[])
+
+    useEffect(() => {
+        mySocket.on("update-time-left", onUpdateTimeLeftWebSocketEvent)
+        return () => {
+            mySocket.off("update-time-left", onUpdateTimeLeftWebSocketEvent)
+        }
+    },[onUpdateTimeLeftWebSocketEvent])
 
     checkIsMyTurn(setIsMyTurn)
 
-    useEffect(() => {
-
-    }, [])
     return (
         <div id="DrawingDashboard">
             <h3 style={{ "display": !isMyTurn ? "none" : "block" }}>Drawing word: <span style={{ color: "white" }}>{drawingWord}</span></h3>
@@ -153,6 +159,7 @@ function GuessingInput(props) {
     const [inputGuess, setInputGuess] = useState("")
     const [guessedStatus, setGuessStatus] = useState(false)
 
+    console.log('needed props for guessing word',{ gameId, playerId} )
     const verifyGuess = async (event) => {
         event.preventDefault()
         await fetch(envUri + "/game/guess_word", {
@@ -187,9 +194,16 @@ function PlayersInLobby() {
 
     const [playerListJSX, updatePlayerListJSX] = useState("")
 
-    mySocket.on("load-players-list", ({ players, currentPlayerId }) => {
+    const onLoadPlayersListWebSocketEvent = useCallback(({ players, currentPlayerId }) => {
         updatePlayerListJSX(formatPlayersToJSX(players, currentPlayerId))
-    })
+    },[])
+
+    useEffect(() => {
+        mySocket.on("load-players-list", onLoadPlayersListWebSocketEvent)
+        return () => {
+            mySocket.off("load-players-list", onLoadPlayersListWebSocketEvent)
+        }
+    },[onLoadPlayersListWebSocketEvent])
 
     const formatPlayersToJSX = (players, currentPlayerId) => {
         if (isNil(players))

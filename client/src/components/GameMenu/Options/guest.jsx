@@ -10,6 +10,7 @@ import { AppContext } from '../../../App'
 
 function Guest(props) {
 
+    const { gameId, setGameId } = useContext(AppContext)
     const [inputGameId, setInputGameId] = useState("");
     const joinGameDiv = useRef(null)
     const waitingDiv = useRef(null)
@@ -52,6 +53,11 @@ function Guest(props) {
 
     }, [props.history, setPlayerId])
 
+    const onInputGameIdHandler = (e) => {
+        setInputGameId(e.target.value)
+        setGameId(e.target.value)
+    }
+
     return (
         <GuestContainer id="guest">
             <Heading>Join Game</Heading>
@@ -59,7 +65,7 @@ function Guest(props) {
             <div ref={joinGameDiv}>
                 <GameInputWrapper>
                     <h3>GameId</h3>
-                    <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={(e) => setInputGameId(e.target.value)} />
+                    <GameInputText type="text" name="gameId" id="gameId" placeholder="gameid..." value={inputGameId} onChange={onInputGameIdHandler} />
                 </GameInputWrapper>
                 <OptionsContainer>
                     <MainOption to="#" onClick={joinLobby}>Join Lobby</MainOption>
