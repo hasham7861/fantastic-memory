@@ -13,6 +13,11 @@ services:
       - 3000:3000
     # react-scripts start needs to open browser
     stdin_open: true
+    # react-scripts watcher needs to watch for local changes to reload the app
+    volumes:
+      - ./client/src:/app/src:ro
+      - ./client/package.json:/app/package.json:ro
+      - ./client/package-lock.json:/app/package-lock.json:ro
 
   server:
     container_name: server
