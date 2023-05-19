@@ -174,12 +174,10 @@ function initializeGameNSP(webSocketIo) {
 
 async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null) {
     const gameDoc = await gameSchema.fetchGame(gameId);
-
-
     if (gameDoc) {
-
+        
         const gameObj = new Game(gameDoc.game);
-
+        
         // if there is no player id specifiy to emit then emit to host id
         if (!emitPlayerId) {
             emitPlayerId = gameObj.hostId;
@@ -193,14 +191,23 @@ async function emitUpdatedPlayersListInGame(gameNSP, gameId, emitPlayerId = null
                 delete gameObj.players[playerId];
             }
         }
-
+        
         // update list of players in store
         await gameSchema.findOneAndUpdate({ "gameId": gameId }, { "$set": { "game.players": gameObj.players } })
-            .catch(() => console.log("unable to update player list"))
-
+        .catch(() => console.log("unable to update player list"))
+        
+        console.log('attempting to send player list', emitPlayerId, gameObj.players)
 
         // update player list 
         gameNSP.to(emitPlayerId).emit("players-list", gameObj.players)
+
+    }else{
+        // The first time host request to make game the game doc is not yet created
+        gameNSP.to(emitPlayerId).emit("players-list", {
+           [emitPlayerId]: {
+
+           }}
+        )
 
     }
 }

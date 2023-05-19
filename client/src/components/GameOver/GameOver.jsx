@@ -1,19 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { mySocket } from '../../services/game-sockets'
 import { withRouter, Link, useHistory } from 'react-router-dom'
 import { isEmpty, isNil } from 'ramda'
 import styled from 'styled-components'
-import { useCookies } from 'react-cookie'
+import { AppContext } from '../../App'
 
 const GameOver = (props) => {
 
+    const {  gameId } = useContext(AppContext)
     const [playerListJSX, updatePlayerListJSX] = useState([])
-    const [cookies, removeCookie] = useCookies(["cookie-name"])
     const history = useHistory()
 
-    mySocket.on("load-players-list", ({ players, currentPlayerId }) => {
+    const onLoadPlayersListWebSocketEvent = ({ players, currentPlayerId }) => {
         updatePlayerListJSX(formatPlayersToJSX(players, currentPlayerId))
-    })
+    }
+
+    useEffect(() => {
+        mySocket.on("load-players-list", onLoadPlayersListWebSocketEvent)
+        return () => {
+            mySocket.off("load-players-list", onLoadPlayersListWebSocketEvent)
+        }
+    }, [onLoadPlayersListWebSocketEvent])
 
     const formatPlayersToJSX = (players, currentPlayerId) => {
         if (isNil(players))
@@ -35,19 +42,17 @@ const GameOver = (props) => {
 
     }
     useEffect(() => {
-        if (isNil(cookies.gameId)) {
+        if (isNil(gameId)) {
             history.push("/")
         }
         if (isEmpty(playerListJSX)) {
-            mySocket.emit("get-players-and-score", cookies.gameId)
+            mySocket.emit("get-players-and-score", gameId)
         }
-    })
+    },[gameId, playerListJSX, history])
 
 
     const goToMenu = (e) => {
         e.preventDefault()
-        removeCookie("gameId")
-        removeCookie("hostId")
         props.history.push("/")
     }
     return <GameOverContainer>
