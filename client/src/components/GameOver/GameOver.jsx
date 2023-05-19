@@ -41,7 +41,7 @@ const GameOver = (props) => {
         if (isEmpty(playerListJSX)) {
             mySocket.emit("get-players-and-score", cookies.gameId)
         }
-    })
+    },[cookies.gameId, playerListJSX, history])
 
 
     const goToMenu = (e) => {
