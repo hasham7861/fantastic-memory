@@ -165,7 +165,7 @@ const Host = function (props) {
             <SubHeading>host game for your friends to join game</SubHeading>
             <GameId><IconKey/><span>GameId: </span> <span style={{color:"black"}}>{gameId}</span><IconClipBoard style={{cursor:"pointer"}}onClick={copyToClipboard}/></GameId>
             <ErrorAlert style={{display:errAlertElement ? "block" :"none"}}>{errAlertElement}</ErrorAlert>
-            <PLayersListWrapper>{setPlayersJSX(playersInLobby)}</PLayersListWrapper>
+            <PLayersListWrapper id="players-list">{setPlayersJSX(playersInLobby)}</PLayersListWrapper>
             <OptionsContainer>
                 <MainOption to="#" onClick={(event)=>startGame(event)}>Start Game</MainOption>
                 <Option to="#" onClick={stopGame}>Stop Game</Option>

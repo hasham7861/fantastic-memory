@@ -17,8 +17,8 @@ export default function () {
             <Heading>Fantastic Memory</Heading>
             <SubHeading>draw and your friends will guess your drawing</SubHeading>
             <OptionsContainer>
-                <MainOption to="/join-game">Join Game</MainOption>
-                <Option to="/host-game">Host Game</Option>
+                <MainOption id="join-game" to="/join-game">Join Game</MainOption>
+                <Option id="host-game" to="/host-game">Host Game</Option>
                 <Option to="/instructions">Instructions</Option>
             </OptionsContainer>
         </SplashPageContainer>
